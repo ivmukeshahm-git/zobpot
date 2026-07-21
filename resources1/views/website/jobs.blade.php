@@ -1,0 +1,1379 @@
+@push('css')
+    <style>
+        @media only screen and (min-width: 768px) {
+            .banner-hero .block-banner .form-find {
+                display: flex !important;
+            }
+        }
+    </style>
+<!-- <style>
+/* Simple & Attractive Job Cards */
+.job-card-simple {
+    background: #F8FAFF;
+    border-radius: 16px;
+    padding: 15px;
+    margin: 24px 0 24px 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-color: #242a65;
+}
+
+.job-card-simple:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(36, 42, 101, 0.1);
+    border-color: #242a65;
+}
+
+.job-badge {
+    background: #f36825;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    /* font-size: 12px; */
+    font-weight: 600;
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    box-shadow: 0 2px 8px rgba(243, 104, 37, 0.3);
+}
+
+.job-main {
+    margin-bottom: 20px;
+}
+
+.job-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #242a65;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.company, .location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #666;
+    /* font-size: 14px; */
+}
+
+.company i, .location i {
+    color: #f36825;
+    width: 16px;
+}
+
+.job-details {
+    display: flex;
+    flex-direction: column;
+    /* grid-template-columns: 1fr 1fr; */
+    gap: 12px;
+    /* margin-bottom: 20px; */
+    padding: 16px;
+    background: #f8faff;
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* font-size: 13px; */
+    color: #555;
+}
+
+.detail i {
+    color: #242a65;
+    width: 16px;
+}
+
+.job-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.card-time {
+    /* font-size: 12px; */
+    color: #888;
+    font-weight: 500;
+}
+
+.view-btn {
+    background: #242a65;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    /* font-size: 13px; */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    background: #f36825;
+    transform: scale(1.05);
+}
+
+/* No Jobs State */
+.no-jobs-simple {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8faff;
+    border-radius: 16px;
+    margin: 20px 0;
+}
+
+.no-job-icon {
+    /* font-size: 64px; */
+    margin-bottom: 16px;
+}
+
+.no-jobs-simple h3 {
+    /* font-size: 22px; */
+    color: #242a65;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.no-jobs-simple p {
+    color: #666;
+    /* font-size: 15px; */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .job-details {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .job-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .view-btn {
+        align-self: stretch;
+        text-align: center;
+    }
+}
+.cb-container .checkmark:after {
+    content: "✔";   /* tik emoji */
+    position: absolute;
+    color: #fff;    /* tick color */
+    font-size: 14px;
+    /* display: flex !important; */
+    justify-content: center;
+}
+
+
+
+</style> -->
+
+<style>
+       .cb-container .checkmark:after {
+    content: "✔";
+    position: absolute;
+    color: #fff;
+    font-size: 14px;
+    display: none !important;  /* default hide */
+    justify-content: center;
+}
+.cb-container input:checked ~ .checkmark:after {
+    display: flex !important; /* show only after checked */
+}
+/* Job Cards Styling - Existing Fields Only */
+.job-card-simple {
+    background: #FFFFFF !important;
+    border-radius: 14px !important;
+    padding: 12px !important;
+    margin-bottom: 18px !important;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.07) !important;
+    border: 1px solid #242a65 !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.job-card-simple:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 12px 35px rgba(36, 42, 101, 0.15) !important;
+    border-color: #242a65 !important;
+}
+
+.job-badge {
+    background: #f36825 !important;
+    color: white !important;
+    padding: 5px 8px !important;
+    border-radius: 16px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 6px !important;
+    box-shadow: 0 2px 8px rgba(243, 104, 37, 0.3) !important;
+}
+
+.job-main {
+    margin-bottom: 14px !important;
+}
+
+.job-title {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #242a65 !important;
+    margin-bottom: 10px !important;
+    line-height: 1.3 !important;
+
+    /* 🔥 MAIN FIX */
+    padding-right: 58px !important;
+
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+
+    min-height: 46px !important;
+}
+
+
+.company, .location {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 6px !important;
+    color: #666 !important;
+    font-size: 13px !important;
+}
+.location span {
+    min-width: 0 !important;
+    flex: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+.company i, .location i {
+    color: #f36825 !important;
+    width: 16px !important;
+    flex-shrink: 0 !important;
+}
+
+.job-details {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+    padding: 12px !important;
+    background: #f8faff !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    flex: 1 !important;
+}
+
+.detail {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: #555 !important;
+}
+
+.detail i {
+    color: #242a65 !important;
+    width: 14px !important;
+    flex-shrink: 0 !important;
+}
+
+.detail span {
+    line-height: 1.25 !important;
+}
+
+.salary-detail {
+    padding: 7px 10px !important;
+    margin-top: 2px !important;
+    background: #fff4ec !important;
+    border: 1px solid #ffd9c5 !important;
+    border-radius: 8px !important;
+}
+
+.salary-detail .salary-text {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #242a65 !important;
+}
+
+.job-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: auto !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #f0f0f0 !important;
+    flex-shrink: 0 !important;
+}
+
+.card-time {
+    font-size: 11px !important;
+    color: #888 !important;
+    font-weight: 500 !important;
+}
+
+.view-btn {
+    background: #242a65 !important;
+    color: white !important;
+    border: none !important;
+    padding: 7px 14px !important;
+    border-radius: 7px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+}
+
+.view-btn:hover {
+    background: #f36825 !important;
+    transform: translateY(-2px) !important;
+}
+
+/* No Jobs State */
+.no-jobs-simple {
+    text-align: center !important;
+    padding: 60px 20px !important;
+    background: #f8faff !important;
+    border-radius: 16px !important;
+    margin: 20px 0 !important;
+}
+
+.no-job-icon {
+    font-size: 64px !important;
+    margin-bottom: 16px !important;
+    opacity: 0.7 !important;
+}
+
+.no-jobs-simple h3 {
+    font-size: 24px !important;
+    color: #242a65 !important;
+    margin-bottom: 8px !important;
+    font-weight: 700 !important;
+}
+
+.no-jobs-simple p {
+    color: #666 !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .job-card-simple {
+        padding: 11px !important;
+        margin-bottom: 14px !important;
+        height: 100% !important;
+    }
+    
+    .job-title {
+        font-size: 16px !important;
+        min-height: 42px !important;
+    }
+
+    .job-details {
+        padding: 10px !important;
+        gap: 7px !important;
+    }
+
+    .salary-detail {
+        padding: 7px 9px !important;
+    }
+    
+    .job-footer {
+        flex-direction: column !important;
+        gap: 8px !important;
+        align-items: stretch !important;
+    }
+    
+    .view-btn {
+        text-align: center !important;
+        width: 100% !important;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0 !important;
+        transform: translateY(20px) !important;
+    }
+    to {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+}
+
+.job-card-simple {
+    animation: fadeInUp 0.5s ease !important;
+}
+</style>
+@endpush
+
+
+@extends('website.layout.layout')
+@section('website-content')
+    <script>
+        page_active_id = "Job";
+    </script>
+
+    @php
+        $from = ($jobData->currentPage() - 1) * $jobData->perPage() + 1;
+        $to = $from + $jobData->count() - 1;
+        $total = $jobData->total();
+    @endphp
+
+    <main class="main">
+        <form id="search-job-filter" onsubmit="return false;" method="POST">
+            <section class="section-box-2">
+                <div class="container">
+                    <div class="banner-hero banner-single banner-single-bg">
+                        <div class="block-banner text-center">
+                            <h3 class="wow animate__animated animate__fadeInUp"><span
+                                    class="color-brand-2">{{ $total }}+
+                                    Jobs</span> Available Now</h3>
+                            <div class="font-sm color-text-paragraph-2 mt-10 wow animate__animated animate__fadeInUp"
+                                data-wow-delay=".1s">Your next opportunity is just a click away. Check out our newest <br> job listings and take the next step in your career journey.<br class="d-none d-xl-block"></div>
+                            <div class="form-find text-start mt-40 wow animate__animated animate__fadeInUp"
+                                data-wow-delay=".2s">
+
+                                <div class="box-industry">
+                                    <select class="form-input mr-10 select-active input-industry" id="job_category"
+                                        name="job_category">
+                                        <option value="" selected>Industry</option>
+                                        @foreach ($CategoryData as $row)
+                                            <option value="{{ $row->category_id }}">{{ $row->category_nm }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <select class="form-input mr-10 select-active" id="job_location" name="job_location">
+                                    <option value="">Location</option>
+                                    @foreach ($locations as $citys)
+                                        <option value="{{ $citys->city_id }}">{{ $citys->location }}</option>
+                                    @endforeach
+                                </select>
+
+                                <input class="form-input input-keysearch mr-10" type="text"
+                                    placeholder="Your keyword... " id="job_title" name="job_title">
+                                <button class="btn btn-default btn-find font-sm" type="button"
+                                    onclick="FilterJob()">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="section-box mt-30">
+                <div class="container">
+                    <form id="job-filter-all" onsubmit="return false;">
+                        <input type="hidden" id="_method" name="_method" value="POST">
+                        <div class="row flex-row-reverse">
+                            <div class="col-lg-9 col-md-12 col-sm-12 col-12 float-right">
+                                <div class="content-page">
+                                    <!-- <div class="row" id="job-list">
+                                        @forelse  ($jobData as $row)
+                                            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mt-4">
+                                                <div class="job-card-simple" onclick="window.location.href='{{ route('job-detail', ['job_id' => $row->job_id]) }}'">
+                                                    <div class="job-badge">{{ $row->work_type_name }}</div>
+                                                    
+                                                    <div class="job-main">
+                                                        <h3 class="job-title">{{ $row->job_title }}</h3>
+                                                        
+                                                        <div class="company">
+                                                            <i class="fa fa-building"></i>
+                                                            <span>{{ $row->user_name }}</span>
+                                                        </div>
+                                                        
+                                                        <div class="location">
+                                                            <i class="fa fa-map-marker"></i>
+                                                            @if ($Setting->ShowCompanyDetails == 1 && $user && !is_null($user->active_plan_id) && $user->active_plan_id != 0)
+                                                                <span>{{ $row->company_address }}</span>
+                                                            @else
+                                                                <span>{{ $row->area_nm }}, {{ $row->city_nm }}, {{ $row->state_name }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="job-details">
+                                                        <div class="detail">
+                                                            <i class="fa fa-briefcase"></i>
+                                                            <span>{{ $row->job_type_name }}</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-users"></i>
+                                                            <span>{{ $row->number_of_openings }} Openings</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-money"></i>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="job-footer">
+                                                        <span class="card-time">{{ \Carbon\Carbon::parse($row->datetime)->diffForHumans() }}</span>
+                                                        <button class="view-btn">View Job</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                                <div class="no-jobs-simple">
+                                                    <div class="no-job-icon">💼</div>
+                                                    <h3>No jobs found</h3>
+                                                    <p>We couldn't find any jobs matching your criteria</p>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div> -->
+                                    <div class="row" id="job-list">
+                                        @forelse  ($jobData as $row)
+                                            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mt-4">
+                                                <div class="job-card-simple" onclick="window.location.href='{{ route('job-detail', ['job_id' => $row->job_id]) }}'">
+                                                    <div class="job-badge">{{ $row->work_type_name }}</div>
+                                                    
+                                                    <div class="job-main">
+                                                        <h3 class="job-title">{{ $row->job_title }}</h3>
+                                                        
+                                                        <div class="company">
+                                                            <i class="fa fa-building"></i>
+                                                            <span>{{ $row->user_name }}</span>
+                                                        </div>
+                                                        
+                                                        <div class="location">
+                                                            <i class="fa fa-map-marker"></i>
+                                                            @if ($Setting->ShowCompanyDetails == 1 && $user && !is_null($user->active_plan_id) && $user->active_plan_id != 0)
+                                                                <span>{{ $row->company_address }}</span>
+                                                            @else
+                                                                <span>{{ $row->area_nm }}, {{ $row->city_nm }}, {{ $row->state_name }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="job-details">
+                                                        <div class="detail">
+                                                            <i class="fa fa-briefcase"></i>
+                                                            <span>{{ $row->job_type_name }}</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-users"></i>
+                                                            <span>{{ $row->number_of_openings }}  Vacancy</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-money"></i>
+                                                            <span>{{$row->salary_budget}}</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-graduation-cap"></i>
+                                                            <span>{{ $row->qualification_nm }}</span>
+                                                        </div>
+                                                        <div class="detail">
+                                                            <i class="fa fa-venus-mars"></i>
+                                                            <span>{{ $row->gender }}</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="job-footer">
+                                                        <span class="card-time">{{ \Carbon\Carbon::parse($row->datetime)->diffForHumans() }}</span>
+                                                        <button class="view-btn">View Job</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                                <div class="no-jobs-simple">
+                                                    <div class="no-job-icon">💼</div>
+                                                    <h3>No jobs found</h3>
+                                                    <p>We couldn't find any jobs matching your criteria</p>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                <div class="paginations mt-30">
+                                    <ul class="pager" id="pagination-links">
+                                        {{-- Previous Page Link --}}
+                                        <li>
+                                            <a class="pager-prev {{ $jobData->onFirstPage() ? 'disabled' : '' }}"
+                                                href="{{ $jobData->previousPageUrl() ?? '#' }}">
+                                            </a>
+                                        </li>
+
+                                        {{-- Page Numbers --}}
+                                        @php
+                                            $lastPage = $jobData->lastPage();
+                                            $currentPage = $jobData->currentPage();
+                                            $visiblePages = range(1, min(5, $lastPage));
+
+                                            if ($currentPage > 5 && $currentPage < $lastPage) {
+                                                $visiblePages[] = $currentPage;
+                                            }
+
+                                            if ($lastPage > 5) {
+                                                $visiblePages[] = $lastPage;
+                                            }
+
+                                            $visiblePages = array_values(array_unique($visiblePages));
+                                            sort($visiblePages);
+                                            $prevPage = null;
+                                        @endphp
+
+                                        @foreach ($visiblePages as $page)
+                                            @if (!is_null($prevPage) && $page - $prevPage > 1)
+                                                <li><span class="pager-number disabled">...</span></li>
+                                            @endif
+                                            <li>
+                                                <a class="pager-number {{ $currentPage == $page ? 'active' : '' }}"
+                                                    href="{{ $jobData->url($page) }}">{{ $page }}</a>
+                                            </li>
+                                            @php $prevPage = $page; @endphp
+                                        @endforeach
+
+                                        {{-- Next Page Link --}}
+                                        <li>
+                                            <a class="pager-next {{ !$jobData->hasMorePages() ? 'disabled' : '' }}"
+                                                href="{{ $jobData->nextPageUrl() ?? '#' }}">
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-3 col-md-12 col-sm-12 col-12">
+                                <div class="sidebar-shadow none-shadow mb-30">
+                                    <div class="sidebar-filters">
+                                        <div class="filter-block head-border mb-30">
+                                            <h5>Advance Filter <a class="link-reset" href="javascript:void(0);"
+                                                    onclick="location.reload();">Reset</a></h5>
+                                        </div>
+
+                                        <div class="filter-block mb-20">
+                                            <h5 class="medium-heading mb-15">Preference Type</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox" id="select-all-preference-type"
+                                                                class="preference-type-checkbox">
+                                                            <span class="text-small">All</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span
+                                                            class="number-item">{{ $jobpreferencetypeCounts->total_jobs }}</span>
+                                                    </li>
+
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox" name="preference_type[]"
+                                                                value="1"
+                                                                class="preference-type-checkbox single-preference-type">
+                                                            <span class="text-small">Skilled</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span
+                                                            class="number-item">{{ $jobpreferencetypeCounts->skilled_jobs }}</span>
+                                                    </li>
+
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox" name="preference_type[]"
+                                                                value="2"
+                                                                class="preference-type-checkbox single-preference-type">
+                                                            <span class="text-small">UnSkilled</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span
+                                                            class="number-item">{{ $jobpreferencetypeCounts->non_skilled_jobs }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="filter-block mb-20">
+                                            <h5 class="medium-heading mb-15">Industry</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    @php
+                                                        $TotalCategoryJob = $JobCategoryCount->sum('TotalJob');
+                                                    @endphp
+
+                                                    <!-- All Category Option -->
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox" id="select-all-categories"
+                                                                class="category-checkbox">
+                                                            <span class="text-small">All</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span class="number-item">{{ $TotalCategoryJob }}</span>
+                                                    </li>
+
+                                                    <!-- Categories -->
+                                                    @foreach ($JobCategoryCount as $row)
+                                                        <li>
+                                                            <label class="cb-container">
+                                                                <input type="checkbox" name="category_id[]"
+                                                                    value="{{ $row->category_id }}"
+                                                                    class="category-checkbox single-category">
+                                                                <span class="text-small">{{ $row->category_nm }}</span>
+                                                                <span class="checkmark"></span>
+                                                            </label>
+                                                            <span class="number-item">{{ $row->TotalJob }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="filter-block mb-30">
+                                            <h5 class="medium-heading mb-10">Job Type</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    @foreach ($jobTypeCounts as $row)
+                                                        <li>
+                                                            <label class="cb-container">
+                                                                <input type="checkbox" class="job-type-checkbox"
+                                                                    name="job_type_id[]"
+                                                                    value="{{ $row->job_type_id }}"><span
+                                                                    class="text-small">{{ $row->type_name }}</span><span
+                                                                    class="checkmark"></span>
+                                                            </label><span
+                                                                class="number-item">{{ $row->total_jobs }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="filter-block mb-30">
+                                            <h5 class="medium-heading mb-10">Job Level</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    @foreach ($jobLevelCounts as $row)
+                                                        <li>
+                                                            <label class="cb-container">
+                                                                <input type="checkbox" class="job-level-checkbox"
+                                                                    name="job_level_id[]"
+                                                                    value="{{ $row->job_level_id }}"><span
+                                                                    class="text-small">{{ $row->job_level_name }}</span><span
+                                                                    class="checkmark"></span>
+                                                            </label><span
+                                                                class="number-item">{{ $row->total_jobs }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="filter-block mb-30">
+                                            <h5 class="medium-heading mb-10">Work Type</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    @foreach ($workTypeCounts as $row)
+                                                        <li>
+                                                            <label class="cb-container">
+                                                                <input type="checkbox" class="work-type-checkbox"
+                                                                    name="work_type_id[]"
+                                                                    value="{{ $row->work_type_id }}"><span
+                                                                    class="text-small">{{ $row->work_type_name }}</span><span
+                                                                    class="checkmark"></span>
+                                                            </label><span
+                                                                class="number-item">{{ $row->total_jobs }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="filter-block mb-30">
+                                            <h5 class="medium-heading mb-10">Experience Level</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    @foreach ($experienceCounts as $row)
+                                                        <li>
+                                                            <label class="cb-container">
+                                                                <input type="checkbox" class="experience-level-checkbox"
+                                                                    name="experience_req_id[]"
+                                                                    value="{{ $row->experience_req_id }}"><span
+                                                                    class="text-small">{{ $row->experience_name }}</span><span
+                                                                    class="checkmark"></span>
+                                                            </label><span
+                                                                class="number-item">{{ $row->total_jobs }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="filter-block mb-30">
+                                            <h5 class="medium-heading mb-10">Job Posted</h5>
+                                            <div class="form-group">
+                                                <ul class="list-checkbox">
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox" id="select-all-job-posted"
+                                                                class="job-posted-checkbox"><span
+                                                                class="text-small">All</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span class="number-item">{{ $allJobCount }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox"
+                                                                class="single-job-post job-posted-checkbox"
+                                                                name="job_posted_day[]" value="1"><span
+                                                                class="text-small">1 day</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span class="number-item">{{ $oneDayCount }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox"
+                                                                class="single-job-post job-posted-checkbox"
+                                                                name="job_posted_day[]" value="7"><span
+                                                                class="text-small">7 days</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span class="number-item">{{ $sevenDaysCount }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <label class="cb-container">
+                                                            <input type="checkbox"
+                                                                class="single-job-post job-posted-checkbox"
+                                                                name="job_posted_day[]" value="30"><span
+                                                                class="text-small">30 days</span>
+                                                            <span class="checkmark"></span>
+                                                        </label>
+                                                        <span class="number-item">{{ $thirtyDaysCount }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </section>
+            @if (!$Blog->isEmpty())
+                <!--<section class="section-box mt-50 mb-50">-->
+                <!--    <div class="container">-->
+                <!--        <div class="text-start">-->
+                <!--            <h2 class="section-title mb-10 wow animate__animated animate__fadeInUp">News and Blog</h2>-->
+                <!--            <p class="font-lg color-text-paragraph-2 wow animate__animated animate__fadeInUp">Get the-->
+                <!--                latest-->
+                <!--                news,-->
+                <!--                updates and tips</p>-->
+                <!--        </div>-->
+                <!--    </div>-->
+
+                <!--    <div class="container">-->
+                <!--        <div class="mt-50">-->
+                <!--            <div class="box-swiper style-nav-top">-->
+                <!--                <div class="swiper-container swiper-group-3 swiper">-->
+                <!--                    <div class="swiper-wrapper pb-70 pt-5">-->
+                <!--                        @foreach ($Blog as $row)-->
+                <!--                            <div class="swiper-slide">-->
+                <!--                                <div class="card-grid-3 hover-up wow animate__animated animate__fadeIn">-->
+                <!--                                    <div class="text-center card-grid-3-image"><a href="{{ route('blog-detail', $row->id) }}">-->
+                <!--                                            <figure><img alt="jobBox"-->
+                <!--                                                    src="{{ asset('uploads/blog_img/' . $row->image) }}">-->
+                <!--                                            </figure>-->
+                <!--                                        </a>-->
+                <!--                                    </div>-->
+                <!--                                    <div class="card-block-info">-->
+                <!--                                        <div class="tags mb-15"><a class="btn btn-tag"-->
+                <!--                                                href="{{ route('blog-detail', $row->id) }}">Blog</a>-->
+                <!--                                        </div>-->
+                <!--                                        <h5>-->
+                <!--                                            <a href="{{ route('blog-detail', $row->id) }}">{{ $row->title }}</a>-->
+                <!--                                        </h5>-->
+                <!--                                        <div class="card-2-bottom mt-20">-->
+                <!--                                            <div class="row">-->
+                <!--                                                <div class="col-lg-6 col-6">-->
+                <!--                                                    <div class="d-flex"><img class="img-rounded" src="{{ asset('assets/imgs/profile.png') }}">-->
+                <!--                                                        <div class="info-right-img"><span-->
+                <!--                                                                class="font-sm font-bold color-brand-1 op-70">Zobpot</span><br><span-->
+                <!--                                                                class="font-xs color-text-paragraph-2">-->
+                <!--                                                                {{ \Carbon\Carbon::parse($row->datetime)->format('d F') }}-->
+                <!--                                                                {{ \Carbon\Carbon::parse($row->datetime)->format('Y') }}-->
+                <!--                                                            </span></div>-->
+                <!--                                                    </div>-->
+                <!--                                                </div>-->
+                <!--                                            </div>-->
+                <!--                                        </div>-->
+                <!--                                    </div>-->
+                <!--                                </div>-->
+                <!--                            </div>-->
+                <!--                        @endforeach-->
+                <!--                    </div>-->
+                <!--                </div>-->
+                <!--                <div class="swiper-button-next"></div>-->
+                <!--                <div class="swiper-button-prev"></div>-->
+                <!--            </div>-->
+
+                <!--        </div>-->
+                <!--    </div>-->
+                <!--</section>-->
+            @endif
+
+
+        </form>
+    </main>
+@endsection
+
+@push('script')
+    <script>
+        document.getElementById('select-all-preference-type').addEventListener('change', function() {
+            const allChecked = this.checked;
+            document.querySelectorAll('.single-preference-type').forEach(cb => {
+                cb.checked = allChecked;
+            });
+        });
+
+        document.getElementById('select-all-categories').addEventListener('change', function() {
+            const allChecked = this.checked;
+            document.querySelectorAll('.single-category').forEach(cb => {
+                cb.checked = allChecked;
+            });
+        });
+
+        // Uncheck "All" if any single category is manually unchecked
+        document.querySelectorAll('.single-category').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allCategories = document.querySelectorAll('.single-category');
+                const allChecked = [...allCategories].every(cb => cb.checked);
+                document.getElementById('select-all-categories').checked = allChecked;
+            });
+        });
+
+
+
+        document.getElementById('select-all-job-posted').addEventListener('change', function() {
+            const allChecked = this.checked;
+            document.querySelectorAll('.single-job-post').forEach(cb => {
+                cb.checked = allChecked;
+            });
+        });
+
+        // Uncheck "All" if any single category is manually unchecked
+        document.querySelectorAll('.single-job-post').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allCategories = document.querySelectorAll('.single-job-post');
+                const allChecked = [...allCategories].every(cb => cb.checked);
+                document.getElementById('select-all-job-posted').checked = allChecked;
+            });
+        });
+    </script>
+    <script>
+        function FilterJob(page = 1) {
+                console.log("FilterJob called");
+
+            sessionStorage.setItem('job_category', '');
+            sessionStorage.setItem('job_location', '');
+            sessionStorage.setItem('job_title', '');
+
+            // ✅ FIX: Serialize both forms together
+            let searchFormData = $("#search-job-filter").serialize();
+            let filterFormData = $("#job-filter-all").serialize();
+            let formData = searchFormData + '&' + filterFormData + '&page=' + page;
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            LoaderShow();
+
+            $.ajax({
+                type: "POST",
+                method: "POST",
+                url: "{{ route('filter-job') }}",
+                data: formData,
+                success: function(response) {
+                    LoaderHide();
+                    if (response.status == 1) {
+                        var data = response.data;
+                        var setting = response.setting;
+                        var user = response.user;
+
+                        const jobData = response.job_info;
+                        const from = jobData.from;
+                        const to = jobData.to;
+                        const total = jobData.total;
+
+                        let showingText = '';
+
+                        if (jobData && jobData.total > 0 && jobData.from && jobData.to) {
+                            showingText = `
+        <span class='text-small text-showing'>
+            Showing <strong>${jobData.from}-${jobData.to}</strong> of <strong>${jobData.total}</strong> jobs
+        </span>`;
+                        } else {
+                            showingText = `
+        <span class='text-small text-showing'>
+            No jobs found
+        </span>`;
+                        }
+
+                        // ✅ Check if element exists before updating
+                        const jobCountElement = document.getElementById("job-count-text");
+                        if (jobCountElement) {
+                            jobCountElement.innerHTML = showingText;
+                        }
+
+                        renderJobs(data, setting, user);
+                        renderPagination(data)
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    LoaderHide();
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        $(document).on('click', '.preference-type-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.category-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.job-type-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.job-level-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.work-type-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.experience-level-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.job-posted-checkbox', function() {
+            FilterJob();
+        });
+
+        $(document).on('click', '.dropdown-page-count', function(e) {
+            e.preventDefault();
+
+            let perPage = $(this).data('value'); // get selected value
+
+            $('#per_page').val(perPage); // set it in hidden input
+            $('#per-page-value').text(perPage); // update button text
+
+            FilterJob(); // call your filter function
+        });
+
+        $(document).on('click', '.dropdown-order-by', function(e) {
+            e.preventDefault();
+
+            let perPage = $(this).data('value'); // get selected value
+
+            $('#order_by').val(perPage); // set it in hidden input
+
+            FilterJob(); // call your filter function
+        });
+
+
+        function renderJobs(data, setting, user) {
+            const jobList = document.getElementById('job-list');
+            jobList.innerHTML = '';
+
+            const jobDetailBaseUrl = "{{ url('/job-detail') }}";
+
+            if (data.data && data.data.length !== 0) {
+                data.data.forEach(job => {
+                    var jobDetailUrl = `${jobDetailBaseUrl}/${job.job_id}`;
+                    
+                    // ✅ FIX: Build location text directly without nested HTML
+                    const locationText = setting.ShowCompanyDetails == 1 &&
+                        user &&
+                        user.active_plan_id !== null &&
+                        user.active_plan_id !== 0
+                        ? job.city_nm
+                        : `${job.area_nm}, ${job.city_nm}, ${job.state_name}`;
+
+                    // ✅ FIX: Handle salary display
+                    const salaryDisplay = job.salary_budget && job.salary_budget != '' && job.salary_budget != '0'
+                        ?  Number(job.salary_budget).toLocaleString()
+                        : 'Not specified';
+
+                jobList.innerHTML += `
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mt-4">
+                        <div class="job-card-simple" onclick="window.location.href='${jobDetailUrl}'">
+
+                            <div class="job-badge">${job.work_type_name}</div>
+                            
+                            <div class="job-main">
+                                <h3 class="job-title">${job.job_title}</h3>
+
+                                <div class="company">
+                                    <i class="fa fa-building"></i>
+                                    <span>${job.user_name}</span>
+                                </div>
+
+                                <div class="location">
+                                    <i class="fa fa-map-marker"></i>
+                                    <span>${locationText}</span>
+                                </div>
+                            </div>
+
+                            <div class="job-details">
+                                <div class="detail">
+                                    <i class="fa fa-briefcase"></i>
+                                    <span>${job.job_type_name}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fa fa-users"></i>
+                                    <span>${job.number_of_openings} Vacancy</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fa fa-money"></i>
+                                    <span>${salaryDisplay}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fa fa-graduation-cap"></i>
+                                    <span>${job.qualification_nm}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fa fa-venus-mars"></i>   
+                                    <span>${job.gender}</span>  
+                                </div>
+                            </div>
+
+                            <div class="job-footer">
+                                <span class="card-time">${timeAgo(job.datetime)}</span>
+                                <button class="view-btn">View Job</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    `;
+
+                });
+            } else {
+                jobList.innerHTML += `<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div class="no-jobs-simple">
+                        <div class="no-job-icon">💼</div>
+                        <h3>No jobs found</h3>
+                        <p>We couldn't find any jobs matching your criteria</p>
+                    </div>
+                </div>`;
+            }
+
+        }
+
+        function renderPagination(data) {
+            const pagination = document.getElementById('pagination-links');
+            pagination.innerHTML = '';
+
+            // No data → no pagination
+            if (!data.total || data.total === 0) return;
+
+            // PREVIOUS BUTTON
+            pagination.innerHTML += `
+                <li>
+                    <a class="pager-prev ${data.current_page === 1 ? 'disabled' : ''}"
+                    data-page="${data.current_page - 1}"
+                    style="cursor:pointer;">«</a>
+                </li>
+            `;
+
+            const lastPage = data.last_page;
+            const currentPage = data.current_page;
+            const visiblePages = [];
+
+            for (let i = 1; i <= Math.min(5, lastPage); i++) {
+                visiblePages.push(i);
+            }
+
+            if (currentPage > 5 && currentPage < lastPage) {
+                visiblePages.push(currentPage);
+            }
+
+            if (lastPage > 5) {
+                visiblePages.push(lastPage);
+            }
+
+            const uniqueSortedPages = [...new Set(visiblePages)].sort((a, b) => a - b);
+            let prevPage = null;
+
+            // PAGE NUMBERS
+            for (const page of uniqueSortedPages) {
+                if (prevPage !== null && page - prevPage > 1) {
+                    pagination.innerHTML += `
+                    <li><span class="pager-number disabled">...</span></li>
+                `;
+                }
+
+                pagination.innerHTML += `
+                    <li>
+                        <a class="pager-number ${currentPage === page ? 'active' : ''}"
+                        data-page="${page}"
+                        style="cursor:pointer;">${page}</a>
+                    </li>
+                `;
+
+                prevPage = page;
+            }
+
+            // NEXT BUTTON
+            pagination.innerHTML += `
+                <li>
+                    <a class="pager-next ${!data.next_page_url ? 'disabled' : ''}"
+                    data-page="${data.current_page + 1}"
+                    style="cursor:pointer;">»</a>
+                </li>
+            `;
+        }
+
+
+
+
+
+        function timeAgo(datetime) {
+            // Convert "2025-07-28 05:07:29" to "2025-07-28T05:07:29"
+            const isoDate = datetime.replace(' ', 'T');
+            const time = new Date(isoDate);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - time) / 1000);
+
+            const units = [{
+                    name: "year",
+                    seconds: 31536000
+                },
+                {
+                    name: "month",
+                    seconds: 2592000
+                },
+                {
+                    name: "week",
+                    seconds: 604800
+                },
+                {
+                    name: "day",
+                    seconds: 86400
+                },
+                {
+                    name: "hour",
+                    seconds: 3600
+                },
+                {
+                    name: "minute",
+                    seconds: 60
+                },
+                {
+                    name: "second",
+                    seconds: 1
+                },
+            ];
+
+            for (let unit of units) {
+                const interval = Math.floor(diffInSeconds / unit.seconds);
+                if (interval >= 1) {
+                    return `${interval} ${unit.name}${interval > 1 ? 's' : ''} ago`;
+                }
+            }
+
+            return "Just now";
+        }
+
+
+
+        // Handle pagination clicks (delegate event)
+        document.addEventListener("click", function(e) {
+            const link = e.target.closest('#pagination-links a');
+
+            if (!link) return;
+            if (link.classList.contains('disabled')) return;
+
+            const page = link.getAttribute('data-page');
+            if (!page) return;
+
+            e.preventDefault();   // 🔥 browser GET stop
+            FilterJob(page);      // ✅ AJAX pagination
+        });
+
+
+
+
+        if (sessionStorage.getItem('job_category') || sessionStorage.getItem('job_location') || sessionStorage.getItem(
+                'job_title')) {
+            $("#job_category").val(sessionStorage.getItem('job_category')).trigger('change');
+            $("#job_location").val(sessionStorage.getItem('job_location')).trigger('change');
+            $("#job_title").val(sessionStorage.getItem('job_title'));
+
+            setTimeout(() => {
+                FilterJob()
+            }, 500);
+        }
+
+
+        if (sessionStorage.getItem('job_category_id')) {
+            let selectedCategoryId = sessionStorage.getItem('job_category_id');
+            // ✅ Set the checkbox with matching value as checked
+            // $(".category-checkbox").each(function() {
+            //     if ($(this).val() == selectedCategoryId) {
+            //         $(this).prop("checked", true);
+            //     }
+            // });
+
+            $("#job_category").val(selectedCategoryId).trigger('change');
+
+            // ✅ Optionally trigger filter logic after checkbox set
+            setTimeout(() => {
+                FilterJob();
+            }, 500);
+        }
+    </script>
+@endpush

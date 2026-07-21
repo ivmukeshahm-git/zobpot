@@ -1,0 +1,1547 @@
+@push('css')
+    <style>
+        .view-all-btn {
+            background-color: #fff;
+            color: #242a62;
+            font-weight: 600;
+        }
+
+        .view-all-btn:hover {
+            background-color: #fff !important;
+            color: #242a62 !important;
+        }
+
+        /* New Internship Requests Section */
+        .internship-requests-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 2px solid #f26e2c;
+        }
+
+        .section-header-requests {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f26e2c;
+        }
+
+        .section-title-requests {
+            font-size: 22px;
+            font-weight: 700;
+            color: #242a62;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .badge-count-requests {
+            background: #f26e2c;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-action-request {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-accept-request {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+
+        .btn-accept-request:hover {
+            background: #218838;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-reject-request {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-reject-request:hover {
+            background: #c82333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .modal-header-custom-request {
+            background: linear-gradient(135deg, #242a62 0%, #f26e2c 100%);
+            color: white;
+            border-radius: 0;
+            padding: 20px 30px;
+        }
+
+        .modal-header-custom-request h5 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-header-custom-request .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .detail-section-request {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-section-request h6 {
+            color: #242a62;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f26e2c;
+        }
+
+        .detail-row-request {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #dee2e6;
+        }
+
+        .detail-row-request:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label-request {
+            font-weight: 600;
+            color: #495057;
+            font-size: 13px;
+        }
+
+        .detail-value-request {
+            color: #212529;
+            font-size: 13px;
+        }
+
+        .form-section-request {
+            background: white;
+            border: 2px solid #e7e7ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .form-section-request h6 {
+            color: #242a62;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f26e2c;
+        }
+
+        .form-label-required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .internship-requests-card .table-hover tbody tr:hover {
+            background-color: #fff5f0;
+        }
+    </style>
+@endpush
+
+@extends('admin.layout.layout')
+@section('content')
+    @php
+        use Illuminate\Support\Facades\Auth;
+        $user = Auth::user();
+    @endphp
+
+
+    <script>
+        page_active_id = "Home";
+    </script>
+
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="row mb-6 g-6">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card"
+                    style="background: #e7e7ff;border: 2px solid #3f447866;border-radius: 12px;overflow: hidden;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="content-left">
+                                <h5 class="mb-1" style="font-size: 25px;font-weight: 700;">
+                                    {{ $Count ? $Count->TotalCompany : 0 }}</h5>
+                                <small style="font-size: 16px;font-weight: 600;">Total Company</small>
+                            </div>
+                            <span class="badge bg-label-primary rounded-circle p-2">
+                                <i class="bx bx bx-building bx-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card"
+                    style="background: #e8fadf;border: 2px solid #75de3d7d;border-radius: 12px;overflow: hidden;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="content-left">
+                                <h5 class="mb-1" style="font-size: 25px;font-weight: 700;">
+                                    {{ $Count ? $Count->TotalCandidate : 0 }}</h5>
+                                <small style="font-size: 16px;font-weight: 600;">Total Candidates</small>
+                            </div>
+                            <span class="badge bg-label-success rounded-circle p-2">
+                                <i class="bx bx-user-pin bx-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card"
+                    style="background: #ffe0db;border: 2px solid #ff3e1d4a;border-radius: 12px;overflow: hidden;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="content-left">
+                                <h5 class="mb-1" style="font-size: 25px;font-weight: 700;">
+                                    {{ $Count ? $Count->TotalPaidUser : 0 }}</h5>
+                                <small style="font-size: 16px;font-weight: 600;">Paid Users</small>
+                            </div>
+                            <span class="badge bg-label-danger rounded-circle p-2">
+                                <i class="bx bx-user-check bx-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card"
+                    style="background: #d7f5fc;border: 2px solid #11c6ed73;border-radius: 12px;overflow: hidden;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="content-left">
+                                <h5 class="mb-1" style="font-size: 25px;font-weight: 700;">
+                                    {{ $Count ? $Count->TotalFreeUser : 0 }}</h5>
+                                <small style="font-size: 16px;font-weight: 600;">Free Users</small>
+                            </div>
+                            <span class="badge bg-label-info rounded-circle p-2">
+                                <i class="bx bx-user-minus bx-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+
+             <div class="col-md-12 col-lg-12 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">New Internship Requests</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.internship') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive pt-4"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="NewInternshipRequestsTable" class="table table-sm table-striped table-hover">
+                            <thead class="border-top">
+                                <tr>
+                                    <th>Sr. No.</th>
+                                    <th>Internship Name</th>
+                                    <th>Company</th>
+                                    <th>Duration (Months)</th>
+                                    <th>Applied Date</th>
+                                    <th>Student Name</th>
+                                    <th>Student Email</th>
+                                    <th>University</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data Row 1 -->
+                                <tr>
+                                    <td>1</td>
+                                    <td>Full-Stack Web Development</td>
+                                    <td>CodeCraft Solutions</td>
+                                    <td>3</td>
+                                    <td>Jan 28, 2026</td>
+                                    <td>Rahul Sharma</td>
+                                    <td>rahul@example.com</td>
+                                    <td>Gujarat University</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-action-request btn-accept-request btn-sm me-1" onclick="openAcceptModalIndex(1)">
+                                            <i class="bx bx-check"></i> Accept
+                                        </button>
+                                        <button class="btn btn-action-request btn-reject-request btn-sm" onclick="rejectInternshipIndex(1)">
+                                            <i class="bx bx-x"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Sample Data Row 2 -->
+                                <tr>
+                                    <td>2</td>
+                                    <td>Digital Marketing Internship</td>
+                                    <td>Tech Solutions Pvt Ltd</td>
+                                    <td>2</td>
+                                    <td>Jan 29, 2026</td>
+                                    <td>Priya Patel</td>
+                                    <td>priya@example.com</td>
+                                    <td>Ahmedabad University</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-action-request btn-accept-request btn-sm me-1" onclick="openAcceptModalIndex(2)">
+                                            <i class="bx bx-check"></i> Accept
+                                        </button>
+                                        <button class="btn btn-action-request btn-reject-request btn-sm" onclick="rejectInternshipIndex(2)">
+                                            <i class="bx bx-x"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Internship Register List</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.internship') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive pt-4"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayinternshipRegisterListDataTable" class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Name</th>
+                                        <th>Contact No</th>
+                                        <th>Degree/Cource</th>
+                                        <th>City</th>
+                                        <!-- <th>Action</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Skillothon Register List</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.skillthon') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive pt-4"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayHackathonsRegisterListDataTable" class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Name</th>
+                                        <th>Contact No</th>
+                                        <th>Degree/Cource</th>
+                                        <th>City</th>
+                                        <!-- <th>Action</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            @can('Dashboard-today_candidates_register_list')
+                <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Candidates Register List</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.candidates-register-list.index') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive pt-4"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayCandidatesRegisterListDataTable" class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Name</th>
+                                        <th>Contact No</th>
+                                        <th>Plan</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('Dashboard-today_company_register_list')
+                <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Company Register List</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.company-register-list.index') }}">View All</a>
+
+                            </div>
+                        </div>
+                        <div class="card-body p-4 table-responsive" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayCompanyRegisterListDataTable" class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Company Name</th>
+                                        <th>Contact No</th>
+                                        <th>Plan</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('Dashboard-today_candidates_register_list')
+                <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Candidates Approve RegisterList</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.candidates-register-list.index') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive pt-4"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayApproveCandidatesRegisterListDataTable"
+                                class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Name</th>
+                                        <th>Contact No</th>
+                                        <th>Plan</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('Dashboard-today_company_register_list')
+                <div class="col-md-6 col-lg-6 order-2 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex align-items-center justify-content-between"
+                            style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Today Company Approve Register List</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.company-register-list.index') }}">View All</a>
+
+                            </div>
+                        </div>
+                        <div class="card-body p-4 table-responsive"
+                            style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <table id="TodayApproveCompanyRegisterListDataTable"
+                                class="table table-sm table-striped table-hover">
+                                <thead class="border-top">
+                                    <tr>
+                                        <th>Sr. NO.</th>
+                                        <th>Company Name</th>
+                                        <th>Contact No</th>
+                                        <th>Plan</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            @endcan
+        </div>
+
+        <div class="row">
+            <!-- Order Statistics -->
+            @can('Dashboard-paid_company')
+                <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex justify-content-between" style="background: #242a62;">
+                            <div class="card-title mb-0">
+                                <h5 class="mb-1 me-2" style="color: #fff;">Paid Company</h5>
+                            </div>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.paid-company.index') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body p-4 h-100" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <ul class="p-0 m-0">
+                                {{-- loop through each user --}}
+                                @forelse ($PaidCompanyData as $user)
+                                    <li class="d-flex align-items-center mb-5">
+                                        <div class="avatar flex-shrink-0 me-3">
+                                            <span class="avatar-initial rounded bg-label-primary">
+                                                <i class="bx bx-building"></i>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">{{ $user->name }}</h6>
+                                                <small>{{ $user->plan_name }}
+                                                    &nbsp; <i class="bx bx-cart" style="font-size: 15px;"></i>
+                                                    Buy Date -
+                                                    {{ \Carbon\Carbon::parse($user->purchase_date)->format('d-m-Y') }}
+                                                </small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <h6 class="mb-0">₹
+                                                    {{ $user->plan_price }}/{{ $user->plan_time . $user->plan_duration }}
+                                                </h6>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <div class="text-center mb-5 mt-5">
+                                        <i class="bx bx-info-circle"></i> No Company Found.
+                                    </div>
+                                @endforelse
+
+                                @if (!$PaidCompanyData->isEmpty())
+                                    <li class="d-flex justify-content-center mb-5">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination pagination-sm">
+
+                                                {{-- Previous Page --}}
+                                                <li class="page-item {{ $PaidCompanyData->onFirstPage() ? 'disabled' : '' }}">
+                                                    <a class="page-link"
+                                                        href="{{ $PaidCompanyData->previousPageUrl() ?? '#' }}"
+                                                        tabindex="-1">
+                                                        <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                    </a>
+                                                </li>
+
+                                                {{-- Dynamic Page Numbers --}}
+                                                @for ($i = 1; $i <= $PaidCompanyData->lastPage(); $i++)
+                                                    <li
+                                                        class="page-item {{ $PaidCompanyData->currentPage() == $i ? 'active' : '' }}">
+                                                        <a class="page-link"
+                                                            href="{{ $PaidCompanyData->url($i) }}">{{ $i }}</a>
+                                                    </li>
+                                                @endfor
+
+                                                {{-- Next Page --}}
+                                                <li
+                                                    class="page-item {{ !$PaidCompanyData->hasMorePages() ? 'disabled' : '' }}">
+                                                    <a class="page-link" href="{{ $PaidCompanyData->nextPageUrl() ?? '#' }}">
+                                                        <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                        </nav>
+                                    </li>
+                                @endif
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+
+            @can('Dashboard-paid_candidates')
+                <!-- Transactions -->
+                <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex justify-content-between" style="background: #242a62;">
+                            <div class="card-title mb-0">
+                                <h5 class="mb-1 me-2" style="color: #fff;">Paid Candidates</h5>
+                            </div>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn"
+                                    href="{{ route('admin.paid-candidate.index') }}">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body p-4" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <ul class="p-0 m-0">
+
+                                @forelse ($PaidCandidateData as $user)
+                                    <li class="d-flex align-items-center mb-5">
+                                        <div class="avatar flex-shrink-0 me-3">
+                                            <span class="avatar-initial rounded bg-label-success"><i
+                                                    class="bx bx-user-pin"></i></span>
+                                        </div>
+                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">{{ $user->name }}</h6>
+                                                <small>{{ $user->plan_name }} &nbsp; <i class="bx bx-cart"
+                                                        style="font-size: 15px;"></i> Buy Date -
+                                                    {{ \Carbon\Carbon::parse($user->purchase_date)->format('d-m-Y') }}</small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <h6 class="mb-0">₹
+                                                    {{ $user->plan_price }}/{{ $user->plan_time . $user->plan_duration }}</h6>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <div class="text-center mb-5 mt-5">
+                                        <i class="bx bx-info-circle"></i> No Candidate Found.
+                                    </div>
+                                @endforelse
+
+                                @if (!$PaidCandidateData->isEmpty())
+                                    <li class="d-flex justify-content-center mb-5">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination pagination-sm">
+
+                                                {{-- Previous Page --}}
+                                                <li
+                                                    class="page-item {{ $PaidCandidateData->onFirstPage() ? 'disabled' : '' }}">
+                                                    <a class="page-link"
+                                                        href="{{ $PaidCandidateData->previousPageUrl() ?? '#' }}"
+                                                        tabindex="-1">
+                                                        <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                    </a>
+                                                </li>
+
+                                                {{-- Dynamic Page Numbers --}}
+                                                {{-- @for ($i = 1; $i <= $PaidCandidateData->lastPage(); $i++)
+                                                    <li
+                                                        class="page-item d-none {{ $PaidCandidateData->currentPage() == $i ? 'active' : '' }}">
+                                                        <a class="page-link"
+                                                            href="{{ $PaidCandidateData->url($i) }}">{{ $i }}</a>
+                                                    </li>
+                                                @endfor --}}
+
+                                                {{-- Next Page --}}
+                                                <li
+                                                    class="page-item {{ !$PaidCandidateData->hasMorePages() ? 'disabled' : '' }}">
+                                                    <a class="page-link"
+                                                        href="{{ $PaidCandidateData->nextPageUrl() ?? '#' }}">
+                                                        <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                        </nav>
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!--/ Transactions -->
+            @endcan
+
+<style> 
+    .pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pagination .page-link {
+    border-radius: 50%;
+    min-width: 34px;
+    text-align: center;
+}
+
+</style>
+            @can('Dashboard-free_company_Candidates')
+                <!-- Expense Overview -->
+                <div class="col-md-6 col-lg-4 order-3 mb-6">
+                    <div class="card text-center h-100">
+                        <div class="card-header nav-align-top p-3" style="background: #242a62;">
+                            <div class="card-title  mb-0 d-flex justify-content-between " style="text-align: left;">
+                                <h5 class="mb-1 me-2" style="color: #fff;">Free Company & Candidates</h5>
+                                <div class="dropdown">
+                                    <a class="btn btn-sm btn-secondary view-all-btn" href="free-company.php">View All</a>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="h-100" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                            <div class="container">
+                                <ul class="nav nav-pills my-5" role="tablist">
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                            data-bs-target="#navs-pills-Company" aria-controls="navs-pills-Company"
+                                            aria-selected="true">
+                                            Company
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                            data-bs-target="#navs-pills-Candidates" aria-controls="navs-pills-Candidates"
+                                            aria-selected="false">
+                                            Candidates
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-content pt-0 pb-4">
+                                <div class="tab-pane fade show active" id="navs-pills-Company" role="tabpanel">
+                                    <ul class="p-0 m-0">
+                                        @forelse ($FreeCompanyData as $row)
+                                            <li class="d-flex align-items-center mb-5">
+                                                <div class="avatar flex-shrink-0 me-3">
+                                                    <span class="avatar-initial rounded bg-label-warning"><i
+                                                            class="bx bx-building"></i></span>
+                                                </div>
+                                                <div
+                                                    class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                                    <div class="me-2" style="text-align: left;">
+                                                        <h6 class="mb-0">{{ $row->name }}</h6>
+                                                        <small>{{ $row->designation }}</small>
+                                                    </div>
+                                                    <div class="user-progress">
+                                                        <h6 class="mb-0">Free</h6>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <div class="text-center mb-5 mt-5">
+                                                <i class="bx bx-info-circle"></i> No Company Found.
+                                            </div>
+                                        @endforelse
+
+
+                                        @if (!$FreeCompanyData->isEmpty())
+                                            <li class="d-flex justify-content-center mb-5">
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-sm">
+
+                                                        {{-- Previous Page --}}
+                                                        <li
+                                                            class="page-item {{ $FreeCompanyData->onFirstPage() ? 'disabled' : '' }}">
+                                                            <a class="page-link"
+                                                                href="{{ $FreeCompanyData->previousPageUrl() ?? '#' }}"
+                                                                tabindex="-1">
+                                                                <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                            </a>
+                                                        </li>
+
+                                                        {{-- Dynamic Page Numbers --}}
+                                                        @for ($i = 1; $i <= $FreeCompanyData->lastPage(); $i++)
+                                                            <li
+                                                                class="page-item {{ $FreeCompanyData->currentPage() == $i ? 'active' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $FreeCompanyData->url($i) }}">{{ $i }}</a>
+                                                            </li>
+                                                        @endfor
+
+                                                        {{-- Next Page --}}
+                                                        <li
+                                                            class="page-item {{ !$FreeCompanyData->hasMorePages() ? 'disabled' : '' }}">
+                                                            <a class="page-link"
+                                                                href="{{ $FreeCompanyData->nextPageUrl() ?? '#' }}">
+                                                                <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                            </a>
+                                                        </li>
+
+                                                    </ul>
+                                                </nav>
+                                            </li>
+                                        @endif
+
+
+
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="navs-pills-Candidates" role="tabpanel">
+                                    <ul class="p-0 m-0">
+                                        @forelse ($FreeCandidateData as $row)
+                                            <li class="d-flex align-items-center mb-5">
+                                                <div class="avatar flex-shrink-0 me-3">
+                                                    <span class="avatar-initial rounded bg-label-warning">
+                                                        <i class="bx bx-user-pin"></i>
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                                    <div class="me-2" style="text-align: left;">
+                                                        <h6 class="mb-0">{{ $row->name }}</h6>
+                                                        <small>{{ $row->designation }}</small>
+                                                    </div>
+                                                    <div class="user-progress">
+                                                        <h6 class="mb-0">Free</h6>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        @empty
+                                            <div class="text-center mb-5">
+                                                <i class="bx bx-info-circle"></i> No candidates found.
+                                            </div>
+                                        @endforelse
+
+                                        @if (!$FreeCandidateData->isEmpty())
+                                            <li class="d-flex justify-content-center mb-5">
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-sm">
+
+                                                        {{-- Previous Page --}}
+                                                        <li
+                                                            class="page-item {{ $FreeCandidateData->onFirstPage() ? 'disabled' : '' }}">
+                                                            <a class="page-link"
+                                                                href="{{ $FreeCandidateData->previousPageUrl() ?? '#' }}"
+                                                                tabindex="-1">
+                                                                <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                            </a>
+                                                        </li>
+
+                                                        {{-- Dynamic Page Numbers --}}
+                                                        @for ($i = 1; $i <= $FreeCandidateData->lastPage(); $i++)
+                                                            <li
+                                                                class="page-item {{ $FreeCandidateData->currentPage() == $i ? 'active' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $FreeCandidateData->url($i) }}">{{ $i }}</a>
+                                                            </li>
+                                                        @endfor
+
+                                                        {{-- Next Page --}}
+                                                        <li
+                                                            class="page-item {{ !$FreeCandidateData->hasMorePages() ? 'disabled' : '' }}">
+                                                            <a class="page-link"
+                                                                href="{{ $FreeCandidateData->nextPageUrl() ?? '#' }}">
+                                                                <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                            </a>
+                                                        </li>
+
+                                                    </ul>
+                                                </nav>
+                                            </li>
+                                        @endif
+
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!--/ Expense Overview -->
+            @endcan
+
+
+            @can('Dashboard-staff_activity_history')
+                <!-- Activity Timeline -->
+                <div class="col-md-12 col-lg-6 order-4 order-lg-3">
+                    <div class="card h-100">
+                        <div class="card-header p-3 d-flex justify-content-between" style="background: #242a62;">
+                            <h5 class="card-title m-0 me-2" style="color: #fff;">Staff Activity History</h5>
+                            <div class="dropdown">
+                                <a class="btn btn-sm btn-secondary view-all-btn" href="{{ route('admin.staff-activity-history') }}">View
+                                    All</a>
+
+                            </div>
+                        </div>
+                        <div class="card-body pt-2" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;height: 450px;overflow: auto;">
+                            <ul class="timeline mb-0 mt-3">
+                                @forelse ($activities as $row)
+                                    <li class="timeline-item timeline-item-transparent">
+                                        <span class="timeline-point timeline-point-primary"></span>
+                                        <div class="timeline-event">
+                                            <div class="timeline-header mb-3">
+                                                <h6 class="mb-0">{{ $row->user_name }}</h6>
+                                                <small class="text-muted">{{ $row->datetime }}</small>
+                                            </div>
+                                            <p class="mb-2">{{ $row->msg }}</p>
+                                            <span class="badge bg-label-secondary">{{ $row->role_name }}</span>
+                                        </div>
+                                    </li>
+                                @empty
+                                   <h5 class="mb-0" style="font-weight: 600;text-align: center;padding: 20px;">Data Not Found!</h5>
+                                @endforelse
+
+
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!--/ Activity Timeline -->
+                @endif
+
+
+                @can('Dashboard-expired_plan_month')
+                    <div class="col-md-6 order-3 order-lg-4 mb-6 mb-lg-0">
+                        <div class="card text-center h-100">
+                            <div class="card-header nav-align-top p-3" style="background: #242a62;">
+                                <div class="card-title mb-0 d-flex justify-content-between" style="text-align: left;">
+                                    <h5 class="mb-1 me-2" style="color: #fff;">Expired Plan on this month</h5>
+                                    <div class="dropdown">
+                                        <a class="btn btn-sm btn-secondary view-all-btn"
+                                            href="{{ route('admin.expire-company-plan') }}">View
+                                            All</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="h-100" style="border: 2px solid #242a62;border-radius: 0px 0px 12px 12px;">
+                                <div class="container">
+                                    <ul class="nav nav-pills mt-3" role="tablist">
+                                        <li class="nav-item">
+                                            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                                data-bs-target="#navs-pills-expired-company"
+                                                aria-controls="navs-pills-expired-company" aria-selected="true">
+                                                Company
+                                            </button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                                data-bs-target="#navs-pills-expired-candidates"
+                                                aria-controls="navs-pills-expired-candidates" aria-selected="false">
+                                                Candidates
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="tab-content pt-0 pb-4 p-4">
+                                    <div class="tab-pane fade show active" id="navs-pills-expired-company" role="tabpanel">
+                                        <div class="table-responsive text-start text-nowrap">
+                                            <table class="table table-borderless">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Company Name</th>
+                                                        <th>Expired Date</th>
+                                                        <th>Contact No.</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @forelse ($ExpiredPlanCompanyData as $row)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>
+                                                                <b>{{ $row->name }}</b>
+                                                            </td>
+                                                            <td class="text-heading">{{ $row->expire_date }}</td>
+                                                            <td class="text-heading">{{ $row->contact_no }}</td>
+                                                            <td>
+                                                                <a href="{{ route('admin.company-profile', $row->id) }}"
+                                                                    class="btn btn-warning rounded-pill btn-sm p-2"><i
+                                                                        class="fa fa-eye"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="5" style="text-align: center">No Company Found.</td>
+                                                        </tr>
+                                                    @endforelse
+
+                                                </tbody>
+                                            </table>
+
+                                            @if (!$ExpiredPlanCompanyData->isEmpty())
+                                                <li class="d-flex justify-content-center mt-4">
+                                                    <nav aria-label="Page navigation">
+                                                        <ul class="pagination pagination-sm">
+
+                                                            {{-- Previous Page --}}
+                                                            <li
+                                                                class="page-item {{ $ExpiredPlanCompanyData->onFirstPage() ? 'disabled' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $ExpiredPlanCompanyData->previousPageUrl() ?? '#' }}"
+                                                                    tabindex="-1">
+                                                                    <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                                </a>
+                                                            </li>
+
+                                                            {{-- Dynamic Page Numbers --}}
+                                                            @for ($i = 1; $i <= $ExpiredPlanCompanyData->lastPage(); $i++)
+                                                                <li
+                                                                    class="page-item {{ $ExpiredPlanCompanyData->currentPage() == $i ? 'active' : '' }}">
+                                                                    <a class="page-link"
+                                                                        href="{{ $ExpiredPlanCompanyData->url($i) }}">{{ $i }}</a>
+                                                                </li>
+                                                            @endfor
+
+                                                            {{-- Next Page --}}
+                                                            <li
+                                                                class="page-item {{ !$ExpiredPlanCompanyData->hasMorePages() ? 'disabled' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $ExpiredPlanCompanyData->nextPageUrl() ?? '#' }}">
+                                                                    <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </nav>
+                                                </li>
+                                            @endif
+
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="navs-pills-expired-candidates" role="tabpanel">
+                                        <div class="table-responsive text-start text-nowrap">
+                                            <table class="table table-borderless">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Candidate Name</th>
+                                                        <th>Expired Date</th>
+                                                        <th>Contact No.</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @forelse ($ExpiredPlanCandidateData as $row)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>
+                                                                <b>{{ $row->name }}</b>
+                                                            </td>
+                                                            <td class="text-heading">{{ $row->expire_date }}</td>
+                                                            <td class="text-heading">{{ $row->contact_no }}</td>
+                                                            <td>
+                                                                <a href="{{ route('admin.candidate-profile', $row->id) }}"
+                                                                    class="btn btn-warning rounded-pill btn-sm p-2"><i
+                                                                        class="fa fa-eye"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="5" style="text-align: center">No Company Found.</td>
+                                                        </tr>
+                                                    @endforelse
+
+
+
+                                                </tbody>
+                                            </table>
+
+                                            @if (!$ExpiredPlanCandidateData->isEmpty())
+                                                <li class="d-flex justify-content-center mt-4">
+                                                    <nav aria-label="Page navigation">
+                                                        <ul class="pagination pagination-sm">
+
+                                                            {{-- Previous Page --}}
+                                                            <li
+                                                                class="page-item {{ $ExpiredPlanCandidateData->onFirstPage() ? 'disabled' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $ExpiredPlanCandidateData->previousPageUrl() ?? '#' }}"
+                                                                    tabindex="-1">
+                                                                    <i class="tf-icon bx bx-chevrons-left bx-xs"></i>
+                                                                </a>
+                                                            </li>
+
+                                                            {{-- Dynamic Page Numbers --}}
+                                                            @for ($i = 1; $i <= $ExpiredPlanCandidateData->lastPage(); $i++)
+                                                                <li
+                                                                    class="page-item {{ $ExpiredPlanCandidateData->currentPage() == $i ? 'active' : '' }}">
+                                                                    <a class="page-link"
+                                                                        href="{{ $ExpiredPlanCandidateData->url($i) }}">{{ $i }}</a>
+                                                                </li>
+                                                            @endfor
+
+                                                            {{-- Next Page --}}
+                                                            <li
+                                                                class="page-item {{ !$ExpiredPlanCandidateData->hasMorePages() ? 'disabled' : '' }}">
+                                                                <a class="page-link"
+                                                                    href="{{ $ExpiredPlanCandidateData->nextPageUrl() ?? '#' }}">
+                                                                    <i class="tf-icon bx bx-chevrons-right bx-xs"></i>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </nav>
+                                                </li>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endcan
+            </div>
+        </div>
+
+<!-- Accept Internship Modal -->
+<div class="modal fade" id="acceptInternshipModalIndex" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header modal-header-custom-request">
+                <div>
+                    <h5 class="modal-title" style="color:#fff;">
+                        <i class="bx bx-check-circle"></i> Accept Internship Application
+                    </h5>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Review and configure details</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <div class="detail-section-request">
+                    <h6><i class="bx bx-user"></i> Student Information</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Student Name:</span>
+                                <span class="detail-value-request">Rahul Sharma</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Email:</span>
+                                <span class="detail-value-request">rahul@example.com</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Phone:</span>
+                                <span class="detail-value-request">+91 98765 43210</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">University:</span>
+                                <span class="detail-value-request">Gujarat University</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">College:</span>
+                                <span class="detail-value-request">L.D. College of Engineering</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Degree:</span>
+                                <span class="detail-value-request">B.Tech Computer Science</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section-request">
+                    <h6><i class="bx bx-briefcase"></i> Internship Details</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Internship Title:</span>
+                                <span class="detail-value-request">Full-Stack Web Development</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Company:</span>
+                                <span class="detail-value-request">CodeCraft Solutions</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Mode:</span>
+                                <span class="detail-value-request">Hybrid</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Duration:</span>
+                                <span class="detail-value-request">3 Months</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Stipend:</span>
+                                <span class="detail-value-request">₹8,000/month</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Location:</span>
+                                <span class="detail-value-request">Ahmedabad</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Batch Days:</span>
+                                <span class="detail-value-request">Mon, Wed, Fri</span>
+                            </div>
+                            <div class="detail-row-request">
+                                <span class="detail-label-request">Time Slots:</span>
+                                <span class="detail-value-request">10 AM - 1 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section-request">
+                    <h6><i class="bx bx-cog"></i> Acceptance Configuration</h6>
+                    <form id="internshipConfigFormIndex">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label form-label-required">Registration Fees</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="registrationFeesIndex" value="2000" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label form-label-required">Last Registration Date</label>
+                                <input type="date" class="form-control" id="lastRegisterDateIndex" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label form-label-required">Start Date</label>
+                                <input type="date" class="form-control" id="configStartDateIndex" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label form-label-required">End Date</label>
+                                <input type="date" class="form-control" id="configEndDateIndex" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Assigned Mentor</label>
+                                <input type="text" class="form-control" id="mentorNameIndex" placeholder="Enter mentor name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Special Notes</label>
+                                <textarea class="form-control" id="specialNotesIndex" rows="3" placeholder="Any special instructions"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sendWelcomeEmailIndex" checked>
+                                    <label class="form-check-label">Send welcome email</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="notifyCompanyIndex" checked>
+                                    <label class="form-check-label">Notify company</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #f8f9fa; padding: 20px 30px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bx bx-x"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success" onclick="confirmAcceptInternshipIndex()">
+                    <i class="bx bx-check"></i> Accept & Configure
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    @endsection
+
+
+    @push('script')
+        <script>
+            $(document).ready(function() {
+
+                var Company = $('#TodayinternshipRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.internship.list') }}",
+                        type: "GET",
+                        data: function (d) {
+                            d._token = '{{ csrf_token() }}';
+                        }
+                    },
+                    columns: [
+                        {
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'phone_no',
+                            name: 'phone_no'
+                        },
+                        {
+                            data: 'degree',
+                            name: 'degree'
+                        },
+                        {
+                            data: 'city',
+                            name: 'city'
+                        },
+                        // {
+                        //     data: 'action',
+                        //     name: 'action',
+                        //     orderable: false,
+                        //     searchable: false
+                        // }
+                    ]
+                });
+
+                var Company = $('#TodayHackathonsRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.hackathon.list') }}",
+                        type: "GET",
+                        data: function (d) {
+                            d._token = '{{ csrf_token() }}';
+                        }
+                    },
+                    columns: [
+                        {
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'phone_no',
+                            name: 'phone_no'
+                        },
+                        {
+                            data: 'degree',
+                            name: 'degree'
+                        },
+                        {
+                            data: 'city',
+                            name: 'city'
+                        },
+                        // {
+                        //     data: 'action',
+                        //     name: 'action',
+                        //     orderable: false,
+                        //     searchable: false
+                        // }
+                    ]
+                });
+
+
+                var candidate = $('#TodayCandidatesRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.gettodaycandidatesregistertabledata') }}",
+                        type: "POST",
+                        data: function(d) {
+                            d._token = '{{ csrf_token() }}'; // Required for POST in Laravel
+                        }
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'contact_no',
+                            name: 'contact_no'
+                        },
+
+                        {
+                            data: 'plan',
+                            name: 'plan'
+                        },
+                        {
+                            data: 'preference_type_name',
+                            name: 'preference_type_name'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+
+                    ]
+                });
+
+
+                var candidateApprove = $('#TodayApproveCandidatesRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.gettodayapprovecandidatesregistertabledata') }}",
+                        type: "POST",
+                        data: function(d) {
+                            d._token = '{{ csrf_token() }}'; // Required for POST in Laravel
+                        }
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'contact_no',
+                            name: 'contact_no'
+                        },
+
+                        {
+                            data: 'plan',
+                            name: 'plan'
+                        },
+                        {
+                            data: 'preference_type_name',
+                            name: 'preference_type_name'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+
+                    ]
+                });
+
+
+                var Company = $('#TodayCompanyRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.gettodaycompanyregistertabledata') }}",
+                        type: "POST",
+                        data: function(d) {
+                            d._token = '{{ csrf_token() }}'; // Required for POST in Laravel
+                        }
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'contact_no',
+                            name: 'contact_no'
+                        },
+
+                        {
+                            data: 'plan',
+                            name: 'plan'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+
+                    ]
+                });
+
+
+                var CompanyApprove = $('#TodayApproveCompanyRegisterListDataTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('admin.dashboard.gettodayapprovecompanyregistertabledata') }}",
+                        type: "POST",
+                        data: function(d) {
+                            d._token = '{{ csrf_token() }}'; // Required for POST in Laravel
+                        }
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'contact_no',
+                            name: 'contact_no'
+                        },
+
+                        {
+                            data: 'plan',
+                            name: 'plan'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+
+                    ]
+                });
+            });
+        </script>
+    @endpush

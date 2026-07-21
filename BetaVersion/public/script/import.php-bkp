@@ -1,0 +1,102 @@
+<?php
+// Database connection
+$host = "localhost";
+$user = "u890356114_zobpot_ad";
+$pass = "i*5ZD*]/b|H";
+$dbname = "u890356114_zobpot_db";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// CSV file path
+// $csvFile = "import.csv"; // put your CSV file name here
+$csvFile = "last4.csv";
+
+// $csvFile = "import-rajkot.csv"; // put your CSV file name here
+
+
+if (!file_exists($csvFile)) {
+    die("CSV file not found!");
+}
+
+// Open the file
+$file = fopen($csvFile, "r");
+
+// Skip header row if it exists
+fgetcsv($file);
+
+while (($row = fgetcsv($file)) !== FALSE) {
+
+    $stateName = trim($row[0]);
+    $cityName = trim($row[1]);
+    $areaName = trim($row[2]);
+    $zipcode = trim($row[3]);
+
+    // ====== 1. Insert or get State ======
+    $stateQuery = $conn->prepare("SELECT state_id FROM tbl_state WHERE state_name = ?");
+    $stateQuery->bind_param("s", $stateName);
+    $stateQuery->execute();
+    $stateResult = $stateQuery->get_result();
+
+    if ($stateResult->num_rows > 0) {
+        $state = $stateResult->fetch_assoc();
+        $state_id = $state['state_id'];
+    } else {
+        $insertState = $conn->prepare("INSERT INTO tbl_state (state_name, country_id, created_at) VALUES (?, 1, NOW())");
+        $insertState->bind_param("s", $stateName);
+        $insertState->execute();
+        $state_id = $insertState->insert_id;
+    }
+
+    // ====== 2. Insert or get City ======
+    $cityQuery = $conn->prepare("SELECT city_id FROM tbl_city WHERE city_nm = ? AND state_id = ?");
+    $cityQuery->bind_param("si", $cityName, $state_id);
+    $cityQuery->execute();
+    $cityResult = $cityQuery->get_result();
+
+    if ($cityResult->num_rows > 0) {
+        $city = $cityResult->fetch_assoc();
+        $city_id = $city['city_id'];
+    } else {
+        $insertCity = $conn->prepare("INSERT INTO tbl_city (city_nm, state_id, created_at) VALUES (?, ?, NOW())");
+        $insertCity->bind_param("si", $cityName, $state_id);
+        $insertCity->execute();
+        $city_id = $insertCity->insert_id;
+    }
+
+    // ====== 3. Insert or get Area ======
+    $areaQuery = $conn->prepare("SELECT area_id FROM tbl_area WHERE area_nm = ? AND city_id = ? AND state_id = ?");
+    $areaQuery->bind_param("sii", $areaName, $city_id, $state_id);
+    $areaQuery->execute();
+    $areaResult = $areaQuery->get_result();
+
+    if ($areaResult->num_rows > 0) {
+        $area = $areaResult->fetch_assoc();
+        $area_id = $area['area_id'];
+    } else {
+        $insertArea = $conn->prepare("INSERT INTO tbl_area (area_nm, state_id, city_id, created_at) VALUES (?, ?, ?, NOW())");
+        $insertArea->bind_param("sii", $areaName, $state_id, $city_id);
+        $insertArea->execute();
+        $area_id = $insertArea->insert_id;
+    }
+
+    // ====== 4. Insert Zipcode ======
+    $zipQuery = $conn->prepare("SELECT zipcode_id FROM tbl_zipcode WHERE zipcode = ? AND area_id = ?");
+    $zipQuery->bind_param("si", $zipcode, $area_id);
+    $zipQuery->execute();
+    $zipResult = $zipQuery->get_result();
+
+    if ($zipResult->num_rows == 0) {
+        $insertZip = $conn->prepare("INSERT INTO tbl_zipcode (state_id, city_id, area_id, zipcode, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $insertZip->bind_param("iiis", $state_id, $city_id, $area_id, $zipcode);
+        $insertZip->execute();
+    }
+}
+
+fclose($file);
+
+echo "✅ Import completed successfully!";
+$conn->close();
+?>
