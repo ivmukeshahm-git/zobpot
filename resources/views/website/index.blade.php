@@ -423,7 +423,7 @@
             <div class="section-box wow animate__animated animate__fadeIn">
                 <div class="container">
                     <div class="text-center">
-                        <h2 class="section-title mb-10 wow animate__animated animate__fadeInUp">Search by categorys</h2>
+                        <h2 class="section-title mb-10 wow animate__animated animate__fadeInUp">Search by category</h2>
                         <p class="font-lg color-text-paragraph-2 wow animate__animated animate__fadeInUp">Find the job
                             that&rsquo;s perfect for you. about 800+ new jobs everyday</p>
 
