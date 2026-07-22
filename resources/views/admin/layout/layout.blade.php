@@ -1352,6 +1352,11 @@
                     
                     // Store internship ID for accept action
                     $('#acceptInternshipModal').data('internship-id', internshipId);
+
+                    // Default: Associate with College + Enable Task Management
+                    $('#internshipType').val('1');
+                    $('#manageTaskStatus').prop('checked', true);
+                    $('#registrationFees').val($('#registrationFees').val() || '1000');
                     
                     // Show modal
                     $('#acceptInternshipModal').modal('show');
@@ -1420,7 +1425,16 @@
         const startDate = $('#modalStartDate').val();
         const endDate = $('#modalEndDate').val();
         const registrationFees = $('#registrationFees').val();
-        const internshipType = $('#internshipType').val();
+        const internshipType = parseInt($('#internshipType').val(), 10);
+        
+        if (![1, 2].includes(internshipType)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation Error',
+                text: 'Please select internship type'
+            });
+            return;
+        }
         
         // Additional validation: Check if end date is after start date
         if (new Date(endDate) <= new Date(startDate)) {
@@ -1946,6 +1960,8 @@
               // Reset form
               $('#internshipConfigForm')[0].reset();
               $('#registrationFees').val('1000');
+              $('#internshipType').val('1');
+              $('#manageTaskStatus').prop('checked', true);
               calculateGST();
           });
       });
@@ -2093,7 +2109,7 @@
                                     </label>
                                     <select class="form-control" id="internshipType" name="internship_type" required>
                                         <option value="">Select Internship Type</option>
-                                        <option value="1">Associate with College</option>
+                                        <option value="1" selected>Associate with College</option>
                                         <option value="2">Internship With Industry</option>
                                     </select>
                               </div>
@@ -2128,7 +2144,7 @@
                               <div class="col-md-6 mb-3">
                                   <label class="form-label" style="font-weight: 600;">Enable Task Management?</label>
                                   <div class="form-check form-switch">
-                                      <input class="form-check-input" type="checkbox" id="manageTaskStatus" name="manage_task_status" value="1">
+                                      <input class="form-check-input" type="checkbox" id="manageTaskStatus" name="manage_task_status" value="1" checked>
                                       <label class="form-check-label" for="manageTaskStatus">Enable task management for this internship</label>
                                   </div>
                                   <small class="text-muted">If enabled, internship tasks feature will be active for this internship.</small>

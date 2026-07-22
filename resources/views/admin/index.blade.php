@@ -1457,6 +1457,10 @@
                             
                             // Store internship ID for accept action
                             $('#acceptInternshipModal').data('internship-id', internshipId);
+
+                            // Default: Associate with College + Enable Task Management
+                            $('#internshipType').val('1');
+                            $('#manageTaskStatus').prop('checked', true);
                             
                             // Show modal
                             $('#acceptInternshipModal').modal('show');
@@ -1575,6 +1579,16 @@
                     form.reportValidity();
                     return;
                 }
+
+                const internshipType = parseInt($('#internshipType').val(), 10);
+                if (![1, 2].includes(internshipType)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validation Error',
+                        text: 'Please select internship type'
+                    });
+                    return;
+                }
                 
                 Swal.fire({
                     title: 'Are you sure?',
@@ -1592,9 +1606,11 @@
                             start_date: $('#modalStartDate').val(),
                             end_date: $('#modalEndDate').val(),
                             registration_fees: $('#registrationFees').val(),
-                            gst_percentage: $('#gstPercentage').val(),
+                            gst_percentage: 18,
                             gst_amount: $('#gstAmount').val(),
-                            final_amount: $('#finalAmount').val()
+                            final_amount: $('#finalAmount').val(),
+                            internship_type: internshipType,
+                            manage_task_status: $('#manageTaskStatus').is(':checked') ? 1 : 0
                         };
 
                         $.ajax({

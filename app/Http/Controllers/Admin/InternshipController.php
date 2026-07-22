@@ -678,34 +678,32 @@ class InternshipController extends Controller
                 'gst_amount' => 'nullable|numeric|min:0',
                 'final_amount' => 'nullable|numeric|min:0',
                 'manage_task_status' => 'nullable|boolean',
-                'internship_type' => 'nullable|integer|in:1,2',
+                'internship_type' => 'required|integer|in:1,2',
             ]);
 
             if ($validator->fails()) {
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Validation failed',
-                        'errors' => $validator->errors()
-                    ], 422);
-                }
-
-                return redirect()->back()->withErrors($validator)->withInput();
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first() ?: 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
             }
 
             $internship = Internship::findOrFail($id);
             
-            // Prepare update data
+            // Prepare update data — always persist type/status so they cannot stay at 0
             $updateData = [
                 'approve_status' => 1,
-                'rejection_reason' => null
+                'rejection_reason' => null,
+                'internship_type' => (int) $request->input('internship_type'),
+                'manage_task_status' => $request->boolean('manage_task_status') ? 1 : 0,
             ];
 
             // Add optional fields if provided
-            if ($request->has('start_date')) {
+            if ($request->filled('start_date')) {
                 $updateData['start_date'] = $request->start_date;
             }
-            if ($request->has('end_date')) {
+            if ($request->filled('end_date')) {
                 $updateData['end_date'] = $request->end_date;
             }
             if ($request->has('registration_fees')) {
@@ -719,13 +717,6 @@ class InternshipController extends Controller
             }
             if ($request->has('final_amount')) {
                 $updateData['final_amount'] = $request->final_amount;
-            }
-            if ($request->has('internship_type')) {
-                $updateData['internship_type'] = $request->internship_type;
-            }
-            if ($request->has('manage_task_status')) {
-                // Normalize to 0/1
-                $updateData['manage_task_status'] = $request->manage_task_status ? 1 : 0;
             }
             
             // Update internship
