@@ -178,8 +178,8 @@ class InternshipController extends Controller
             $originalSlug = $slug;
             $counter = 1;
             
-            // Check if slug exists and make it unique
-            while (Internship::where('slug', $slug)->exists()) {
+            // Include soft-deleted rows — unique index still applies to them
+            while (Internship::withTrashed()->where('slug', $slug)->exists()) {
                 $slug = $originalSlug . '-' . $counter;
                 $counter++;
             }
@@ -941,8 +941,8 @@ class InternshipController extends Controller
                 $originalSlug = $slug;
                 $counter = 1;
                 
-                // Check if slug exists (excluding current internship)
-                while (Internship::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                // Include soft-deleted rows — unique index still applies to them
+                while (Internship::withTrashed()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
                     $slug = $originalSlug . '-' . $counter;
                     $counter++;
                 }

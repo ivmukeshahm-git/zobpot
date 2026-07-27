@@ -1539,7 +1539,8 @@ class WebsiteController extends Controller
             $originalSlug = $slug;
             $counter = 1;
             
-            while (Internship::where('slug', $slug)->exists()) {
+            // Include soft-deleted rows — unique index still applies to them
+            while (Internship::withTrashed()->where('slug', $slug)->exists()) {
                 $slug = $originalSlug . '-' . $counter;
                 $counter++;
             }
@@ -1668,7 +1669,7 @@ class WebsiteController extends Controller
                 $originalSlug = $slug;
                 $counter = 1;
                 
-                while (Internship::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                while (Internship::withTrashed()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
                     $slug = $originalSlug . '-' . $counter;
                     $counter++;
                 }
