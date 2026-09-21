@@ -649,7 +649,7 @@
                                     
                                 <li><a class="btn btn-border mb-20"
                                     href="#tab-my-internship" data-bs-toggle="tab"
-                                    role="tab" aria-controls="tab-my-internship"
+                                    role="tab" aria-controls="tab-my-Internship"
                                     aria-selected="false">My Internship</a></li>
 
                                 <li><a class="btn btn-border mb-20"
@@ -1889,25 +1889,54 @@
                                                         <th scope="col">Amount</th>
                                                         <th scope="col">Buy On</th>
                                                         <th scope="col">Expire On</th>
-                                                        <th scope="col">Current Active Plan</th>
-                                                        {{-- <th scope="col">Action</th> --}}
+                                                        <th scope="col">Job Limit</th>
+                                                        <th scope="col">Opportunity Limit</th>
+                                                        <th scope="col">Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($PlanHistoryData as $row)
+                                                    @forelse ($PlanHistoryData as $row)
                                                         <tr>
                                                             <th>{{ $loop->iteration }}</th>
                                                             <td>{{ $row->plan_name }}</td>
                                                             <td>₹ {{ $row->plan_price . '/' . $row->duration }}</td>
                                                             <td>{{ $row->purchase_date }}</td>
                                                             <td>{{ $row->expire_date }}</td>
-                                                            <td><span
-                                                                    class="badge bg-{{ $row->status == 'Active' ? 'success' : 'danger' }}">{{ $row->status }}</span>
+                                                            <td>
+                                                                @if($row->display_job_limit !== null)
+                                                                    @if($row->display_status === 'Active' && $row->display_job_used !== null)
+                                                                        {{ (int) $row->display_job_used }} / {{ (int) $row->display_job_limit }}
+                                                                    @else
+                                                                        {{ (int) $row->display_job_limit }}
+                                                                    @endif
+                                                                @else
+                                                                    Unlimited
+                                                                @endif
                                                             </td>
-                                                            {{-- <td> <a class="btn  btn-apply btn-apply-big p-2"
-                                                                    href=""><i class="fa fa-list-alt"></i></a></td> --}}
+                                                            <td>
+                                                                @if($row->display_opportunity_limit !== null)
+                                                                    @if($row->display_status === 'Active' && $row->display_opportunity_used !== null)
+                                                                        {{ (int) $row->display_opportunity_used }} / {{ (int) $row->display_opportunity_limit }}
+                                                                    @else
+                                                                        {{ (int) $row->display_opportunity_limit }}
+                                                                    @endif
+                                                                @else
+                                                                    Unlimited
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if($row->display_status === 'Active')
+                                                                    <span class="badge bg-success">Active</span>
+                                                                @else
+                                                                    <span class="badge bg-danger">Expired</span>
+                                                                @endif
+                                                            </td>
                                                         </tr>
-                                                    @endforeach
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="8" class="text-center text-muted py-4">No membership history found.</td>
+                                                        </tr>
+                                                    @endforelse
                                                 </tbody>
                                             </table>
                                         </div>
@@ -1916,13 +1945,13 @@
                                 
                                   <!-- My Internship Tab -->
                                 <div class="tab-pane fade" id="tab-my-internship" role="tabpanel"
-                                    aria-labelledby="tab-my-internship">
-                                    <h3 class="mt-0 color-brand-1 mb-50">My Internships</h3>
+                                    aria-labelledby="tab-my-Internship">
+                                    <h3 class="mt-0 color-brand-1 mb-50">My Internship</h3>
 
                                     <!-- Filter Buttons -->
                                     <div class="mb-4 d-flex flex-wrap gap-2">
                                         <button class="btn internship-filter-btn active" data-filter="all" style="background: #242a62; color: white; border: 2px solid #242a62; border-radius: 8px; padding: 8px 20px; font-weight: 600; font-size: 13px; transition: all 0.3s ease;">
-                                            All Internships
+                                            All Internship
                                         </button>
                                         <button class="btn internship-filter-btn" data-filter="pending" style="background: white; color: #242a62; border: 2px solid #242a62; border-radius: 8px; padding: 8px 20px; font-weight: 600; font-size: 13px; transition: all 0.3s ease;">
                                             Pending (Upcoming + Active)
@@ -2023,7 +2052,7 @@
                                             @endforeach
                                         @else
                                             <div class="col-12">
-                                                <p class="text-muted">You have not applied to any internships yet.</p>
+                                                <p class="text-muted">You have not applied to any Internship yet.</p>
                                             </div>
                                         @endif
                                     </div>

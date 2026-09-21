@@ -483,7 +483,7 @@
                 <h3 style="color: #242a62; font-weight: 700; margin-bottom: 5px;">
                     <i class="bx bx-building"></i> College Profile
                 </h3>
-                <p style="color: #6c757d; margin: 0;">Manage college information, students, and internships</p>
+                <p style="color: #6c757d; margin: 0;">Manage college information, students, and opportunities</p>
             </div>
         </div>
         <div class="col-md-4">
@@ -518,12 +518,12 @@
         <div class="summary-card active">
             <div class="summary-card-icon"><i class="bx bx-time-five"></i></div>
             <div class="summary-card-number">{{ $activeInternships }}</div>
-            <div class="summary-card-label">Active Internships</div>
+            <div class="summary-card-label">Active Opportunities</div>
         </div>
         <div class="summary-card completed">
             <div class="summary-card-icon"><i class="bx bx-check-circle"></i></div>
             <div class="summary-card-number">{{ $completedInternships }}</div>
-            <div class="summary-card-label">Completed Internships</div>
+            <div class="summary-card-label">Completed Programs</div>
         </div>
         <div class="summary-card applications">
             <div class="summary-card-icon"><i class="bx bx-file"></i></div>
@@ -547,7 +547,7 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="internship-tab" data-bs-toggle="tab" data-bs-target="#internship" type="button" role="tab">
-                    <i class="bx bx-briefcase"></i> Internship
+                    <i class="bx bx-briefcase"></i> Opportunity
                 </button>
             </li>
         </ul>
@@ -630,7 +630,7 @@
         <!-- Students Tab -->
         <div class="tab-pane fade" id="students" role="tabpanel">
             <div class="tab-content-wrapper">
-                <!-- (Note: internship state buttons moved to Internship tab) -->
+                <!-- (Note: opportunity state buttons moved to Opportunity tab) -->
 
                 <!-- Filter Section -->
                 <div class="filter-section">
@@ -689,12 +689,12 @@
             </div>
         </div>
 
-        <!-- Internship Tab -->
+        <!-- Opportunity Tab -->
         <div class="tab-pane fade" id="internship" role="tabpanel">
             <div class="tab-content-wrapper">
-                <!-- Internship State Tabs -->
+                <!-- Opportunity State Tabs -->
                 <div class="mb-3">
-                    <div class="btn-group" role="group" aria-label="Internship states">
+                    <div class="btn-group" role="group" aria-label="Opportunity states">
                         <button type="button" class="btn btn-outline-secondary internship-state-btn" data-state="upcoming">Upcoming</button>
                         <button type="button" class="btn btn-outline-secondary internship-state-btn active" data-state="active">Processing</button>
                         <button type="button" class="btn btn-outline-secondary internship-state-btn" data-state="completed">Complete</button>
@@ -703,12 +703,12 @@
                 <!-- Filter Section -->
                 <div class="filter-section">
                     <h5 style="margin-bottom: 15px; font-weight: 700; color: #242a62;">
-                        <i class="bx bx-filter"></i> Filter Internships
+                        <i class="bx bx-filter"></i> Filter Opportunities
                     </h5>
                     <div class="filter-row" id="internshipFilters">
                         <div class="filter-field">
-                            <label>Internship Name</label>
-                            <input type="text" class="form-control" id="filter_internship_name" placeholder="Enter internship name">
+                            <label>Opportunity Name</label>
+                            <input type="text" class="form-control" id="filter_internship_name" placeholder="Enter opportunity name">
                         </div>
                         <div class="filter-field">
                             <label>Company Name</label>
@@ -744,13 +744,13 @@
                     </div>
                 </div>
 
-                <!-- Internship Table -->
+                <!-- Opportunity Table -->
                 <div style="margin-top: 20px;">
                     <table id="internshipTable" class="table table-striped table-bordered" style="width:100%">
                         <thead>
                             <tr>
                                 <th>SR. NO.</th>
-                                <th>Internship Title</th>
+                                <th>Opportunity Title</th>
                                 <th>Company</th>
                                 <th>Applied Students</th>
                                 <th>Start Date</th>
@@ -843,7 +843,7 @@
 
 @push('script')
 <script>
-let studentsTable, internshipTable;
+let studentsTable, opportunityTable;
 const collegeId = {{ $college->id }};
 
 $(document).ready(function() {
@@ -879,8 +879,8 @@ $(document).ready(function() {
         pageLength: 25
     });
 
-    // Initialize Internship DataTable
-    internshipTable = $('#internshipTable').DataTable({
+    // Initialize Opportunity DataTable
+    opportunityTable = $('#internshipTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
@@ -891,16 +891,16 @@ $(document).ready(function() {
                 d.college_id = collegeId;
                 d.internship_name = $('#filter_internship_name').val();
                 d.company_name = $('#filter_company_name').val();
-                // status comes from selected state button inside internship tab or status select
-                var state = $('#internship .internship-state-btn.active').data('state');
+                // status comes from selected state button inside opportunity tab or status select
+                var state = $('#internship .opportunity-state-btn.active').data('state');
                 d.status = state || $('#filter_status').val();
                 d.start_date = $('#filter_start_date').val();
                 d.end_date = $('#filter_end_date').val();
                 // debug
-                try { console.log('internship ajax params', d); } catch(e) {}
+                try { console.log('opportunity ajax params', d); } catch(e) {}
             },
             error: function(xhr, textStatus, errorThrown) {
-                console.error('Internship DataTable AJAX error', textStatus, errorThrown, xhr);
+                console.error('Opportunity DataTable AJAX error', textStatus, errorThrown, xhr);
             }
         },
         columns: [
@@ -917,14 +917,14 @@ $(document).ready(function() {
         pageLength: 25
     });
 
-    // Internship state button click (scoped to internship tab)
-    if ($('#internship .internship-state-btn.active').length === 0) {
-        $('#internship .internship-state-btn[data-state="active"]').addClass('active');
+    // Opportunity state button click (scoped to opportunity tab)
+    if ($('#internship .opportunity-state-btn.active').length === 0) {
+        $('#internship .opportunity-state-btn[data-state="active"]').addClass('active');
     }
-    $(document).on('click', '#internship .internship-state-btn', function() {
-        $('#internship .internship-state-btn').removeClass('active');
+    $(document).on('click', '#internship .opportunity-state-btn', function() {
+        $('#internship .opportunity-state-btn').removeClass('active');
         $(this).addClass('active');
-        if (typeof internshipTable !== 'undefined') internshipTable.ajax.reload();
+        if (typeof opportunityTable !== 'undefined') opportunityTable.ajax.reload();
     });
 
     // Load degrees and majors for filters
@@ -996,7 +996,7 @@ function resetStudentFilters() {
 }
 
 function applyInternshipFilters() {
-    internshipTable.ajax.reload();
+    opportunityTable.ajax.reload();
 }
 
 function resetInternshipFilters() {
@@ -1005,7 +1005,7 @@ function resetInternshipFilters() {
     $('#filter_status').val('');
     $('#filter_start_date').val('');
     $('#filter_end_date').val('');
-    internshipTable.ajax.reload();
+    opportunityTable.ajax.reload();
 }
 
 function loadDegreesForFilter() {

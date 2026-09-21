@@ -26,6 +26,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'active_plan_id',
+        'plan_service',
+        'plan_job_used',
+        'plan_internship_used',
+        'plan_job_limit',
+        'plan_opportunity_limit',
         'email',
         'password',
         'contact_no',
@@ -66,6 +71,7 @@ class User extends Authenticatable
         'company_signature',
         'certificate_logo',
         'gender',
+         'last_update',
     ];
 
     /**
@@ -105,5 +111,39 @@ class User extends Authenticatable
     public function college()
     {
         return $this->belongsTo(College::class, 'college_id', 'id');
+    }
+       public function lastUpdatedBy()
+    {
+        return $this->belongsTo(User::class, 'last_update');
+    }
+
+    public function createdInterviewTips()
+    {
+        return $this->hasMany(InterviewTip::class, 'created_by', 'id');
+    }
+
+    public function updatedInterviewTips()
+    {
+        return $this->hasMany(InterviewTip::class, 'updated_by', 'id');
+    }
+
+    public function deletedInterviewTips()
+    {
+        return $this->hasMany(InterviewTip::class, 'deleted_by', 'id');
+    }
+
+    public function createdInterviewTipPoints()
+    {
+        return $this->hasMany(InterviewTipPoint::class, 'created_by', 'id');
+    }
+
+    public function updatedInterviewTipPoints()
+    {
+        return $this->hasMany(InterviewTipPoint::class, 'updated_by', 'id');
+    }
+
+    public function deletedInterviewTipPoints()
+    {
+        return $this->hasMany(InterviewTipPoint::class, 'deleted_by', 'id');
     }
 }

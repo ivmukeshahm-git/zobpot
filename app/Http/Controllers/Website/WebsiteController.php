@@ -9,6 +9,7 @@ use App\Models\Blog;
 use App\Models\City;
 use Illuminate\Http\Request;
 use App\Helpers\WhatsappHelper; // or CandidateProfile if it's a separate model
+use App\Helpers\PaymentHelper;
 use Yajra\DataTables\Facades\DataTables;
 
 
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PlanPricing;
 use App\Models\JobCategory;
 use App\Models\Jobsubcategory;
+use App\Models\CategorySubcategoryRequest;
 use App\Models\Jobtype;
 use App\Models\WorkExperience;
 use App\Models\Worktype;
@@ -126,15 +128,21 @@ class WebsiteController extends Controller
         // Get filter parameters
         $search = $request->input('search');
         $category = $request->input('category');
+        $subCategory = $request->input('sub_category');
         $mode = $request->input('mode');
         $location = $request->input('location');
         $sortBy = $request->input('sort_by', 'latest'); // default: latest
+        $education = $request->input('education');
 
-        // Base query - only approved internships with available openings
+        // Base query - only approved, open internships with available openings
         $query = Internship::with(['company', 'jobCategory'])
             ->where('approve_status', 1)
             ->where('complete_status', 0)
             ->whereNull('rejection_reason')
+            ->where(function ($q) {
+                $q->whereNull('application_deadline')
+                  ->orWhere('application_deadline', '>=', now()->toDateString());
+            })
             ->withAvailableOpenings();
 
         // Search filter
@@ -151,6 +159,14 @@ class WebsiteController extends Controller
             $query->where('category', $category);
         }
 
+        // Subcategory filter (JSON array column)
+        if ($subCategory) {
+            $query->where(function ($q) use ($subCategory) {
+                $q->whereJsonContains('sub_categories', (int) $subCategory)
+                  ->orWhereJsonContains('sub_categories', (string) $subCategory);
+            });
+        }
+
         // Mode filter (Online/Offline/Hybrid)
         if ($mode) {
             $query->where('mode', $mode);
@@ -159,6 +175,33 @@ class WebsiteController extends Controller
         // Location filter
         if ($location) {
             $query->where('location', 'LIKE', "%{$location}%");
+        }
+
+        // Education / Eligibility filter
+        if ($education) {
+            $educationKey = $this->eligibilityUniqueKey($education);
+            $matchingIds = [];
+
+            Internship::where('approve_status', 1)
+                ->where('complete_status', 0)
+                ->whereNull('rejection_reason')
+                ->where(function ($q) {
+                    $q->whereNull('application_deadline')
+                        ->orWhere('application_deadline', '>=', now()->toDateString());
+                })
+                ->withAvailableOpenings()
+                ->whereNotNull('eligibility_criteria')
+                ->get(['id', 'eligibility_criteria'])
+                ->each(function ($row) use (&$matchingIds, $educationKey) {
+                    foreach ($this->parseEligibilityItems($row->eligibility_criteria) as $item) {
+                        if ($this->eligibilityUniqueKey($item) === $educationKey) {
+                            $matchingIds[] = $row->id;
+                            break;
+                        }
+                    }
+                });
+
+            $query->whereIn('id', $matchingIds ?: [0]);
         }
 
         // Sorting
@@ -193,20 +236,76 @@ class WebsiteController extends Controller
                 ->toArray();
         }
 
-        // Get featured internships (latest 6 with available openings)
+        // Get featured internships (latest 6 with available openings, not closed)
         $featuredInternships = Internship::with(['company', 'jobCategory'])
             ->where('approve_status', 1)
             ->where('complete_status', 0)
             ->whereNull('rejection_reason')
+            ->where(function ($q) {
+                $q->whereNull('application_deadline')
+                  ->orWhere('application_deadline', '>=', now()->toDateString());
+            })
             ->withAvailableOpenings()
             ->orderBy('created_at', 'desc')
             ->limit(6)
             ->get();
 
-        // Get categories for filter dropdown
+        // Only categories that have at least one available internship
+        $availableCategoryIds = Internship::where('approve_status', 1)
+            ->where('complete_status', 0)
+            ->whereNull('rejection_reason')
+            ->where(function ($q) {
+                $q->whereNull('application_deadline')
+                  ->orWhere('application_deadline', '>=', now()->toDateString());
+            })
+            ->withAvailableOpenings()
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values()
+            ->all();
+
         $categories = JobCategory::select('category_id', 'category_nm', 'image')
+            ->whereIn('category_id', $availableCategoryIds ?: [0])
             ->orderBy('category_nm', 'asc')
             ->get();
+
+        // Subcategories that have at least one available internship in selected category
+        $subCategories = collect();
+        if ($category) {
+            $usedSubCategoryIds = [];
+            Internship::where('approve_status', 1)
+                ->where('complete_status', 0)
+                ->whereNull('rejection_reason')
+                ->withAvailableOpenings()
+                ->where('category', $category)
+                ->get(['sub_categories'])
+                ->each(function ($item) use (&$usedSubCategoryIds) {
+                    $ids = $item->sub_categories;
+                    if (is_string($ids)) {
+                        $ids = json_decode($ids, true);
+                    }
+                    if (!is_array($ids)) {
+                        return;
+                    }
+                    foreach ($ids as $id) {
+                        if ($id !== null && $id !== '') {
+                            $usedSubCategoryIds[] = (int) $id;
+                        }
+                    }
+                });
+
+            $usedSubCategoryIds = array_values(array_unique(array_filter($usedSubCategoryIds)));
+
+            if (!empty($usedSubCategoryIds)) {
+                $subCategories = Jobsubcategory::whereIn('sub_category_id', $usedSubCategoryIds)
+                    ->orderBy('sub_category_nm', 'asc')
+                    ->get();
+            }
+        }
+
+        $eligibilityOptions = $this->availableInternshipEligibilityOptions();
 
         // Get statistics
         $stats = [
@@ -216,7 +315,145 @@ class WebsiteController extends Controller
             'hybrid' => Internship::where('approve_status', 1)->where('complete_status', 0)->where('mode', 'Hybrid')->count(),
         ];
 
-        return view('website.internship', compact('internships', 'categories', 'stats', 'wishlistIds', 'featuredInternships'));
+        // Approved internship reviews for website slider
+        $internshipReviews = \App\Models\InternshipReview::with(['student', 'internship'])
+            ->where('active_status', 1)
+            ->whereNotNull('star')
+            ->orderByDesc('write_on')
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get();
+
+        return view('website.internship', compact(
+            'internships',
+            'categories',
+            'subCategories',
+            'stats',
+            'wishlistIds',
+            'featuredInternships',
+            'internshipReviews',
+            'eligibilityOptions'
+        ));
+    }
+
+    private function availableInternshipEligibilityOptions()
+    {
+        $rows = Internship::where('approve_status', 1)
+            ->where('complete_status', 0)
+            ->whereNull('rejection_reason')
+            ->where(function ($q) {
+                $q->whereNull('application_deadline')
+                    ->orWhere('application_deadline', '>=', now()->toDateString());
+            })
+            ->withAvailableOpenings()
+            ->whereNotNull('eligibility_criteria')
+            ->where('eligibility_criteria', '!=', '')
+            ->pluck('eligibility_criteria');
+
+        $options = [];
+        foreach ($rows as $value) {
+            foreach ($this->parseEligibilityItems($value) as $name) {
+                $uniqueKey = $this->eligibilityUniqueKey($name);
+                if ($uniqueKey === '') {
+                    continue;
+                }
+
+                $options[$uniqueKey] = $this->preferredEligibilityLabel($options[$uniqueKey] ?? null, $name);
+            }
+        }
+
+        $options = array_values($options);
+        natcasesort($options);
+
+        return array_values($options);
+    }
+
+    private function parseEligibilityItems($value)
+    {
+        if (is_array($value)) {
+            $items = $value;
+        } else {
+            $decoded = json_decode((string) $value, true);
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
+            }
+            $items = is_array($decoded) ? $decoded : preg_split('/[,|]/', (string) $value);
+        }
+
+        $parsed = [];
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                $item = implode(' ', $item);
+            }
+
+            $name = preg_replace('/\s+/u', ' ', trim(strip_tags((string) $item)));
+            $name = trim($name, " \t\n\r\0\x0B\"'[]");
+            if ($name !== '') {
+                $parsed[] = $name;
+            }
+        }
+
+        return $parsed;
+    }
+
+    private function eligibilityUniqueKey($name)
+    {
+        $key = mb_strtolower(trim((string) $name));
+        $key = preg_replace('/[^a-z0-9]+/u', '', $key);
+
+        return $key ?: '';
+    }
+
+    private function preferredEligibilityLabel($current, $candidate)
+    {
+        $knownLabels = [
+            'ba' => 'B.A',
+            'bsc' => 'B.Sc',
+            'bcom' => 'B.Com',
+            'bba' => 'BBA',
+            'bca' => 'BCA',
+            'be' => 'B.E',
+            'btech' => 'B.Tech',
+            'ma' => 'M.A',
+            'msc' => 'M.Sc',
+            'mcom' => 'M.Com',
+            'mba' => 'MBA',
+            'mca' => 'MCA',
+            'mtech' => 'M.Tech',
+            'phd' => 'Ph.D',
+            'llb' => 'LLB',
+            'llm' => 'LLM',
+        ];
+
+        $key = $this->eligibilityUniqueKey($candidate);
+        if (isset($knownLabels[$key])) {
+            return $knownLabels[$key];
+        }
+
+        if ($current === null || $current === '') {
+            return $candidate;
+        }
+
+        $score = function ($label) {
+            $score = 0;
+            if (preg_match('/[A-Z]/', $label)) {
+                $score += 2;
+            }
+            if (strpos($label, '.') !== false) {
+                $score += 3;
+            }
+            if (preg_match('/^[A-Z]/', $label)) {
+                $score += 1;
+            }
+            if ($label === mb_strtolower($label)) {
+                $score -= 2;
+            }
+            $score -= substr_count($label, ' ');
+
+            return $score;
+        };
+
+        return $score($candidate) > $score($current) ? $candidate : $current;
     }
 
     public function internshipDetail($slugOrId){
@@ -261,22 +498,49 @@ class WebsiteController extends Controller
                 ->exists();
         }
 
-        // Fetch recent internships (excluding current one, only with openings)
+        // Fetch related internships — published, active, and still accepting applications
         $recentInternships = Internship::with(['company', 'jobCategory'])
             ->where('approve_status', 1)
             ->where('complete_status', 0)
+            ->whereNull('rejection_reason')
+            ->where(function ($q) {
+                $q->whereNull('application_deadline')
+                    ->orWhere('application_deadline', '>=', now()->toDateString());
+            })
             ->where('id', '!=', $internship->id)
             ->withAvailableOpenings()
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        // Calculate days left for application
+        // Calculate days left for applications (calendar days, inclusive of deadline day)
+        // Prefer the later of application_deadline and last_registration_date so late-fee window stays open.
         $daysLeft = null;
+        $applyUntilDate = null;
         if ($internship->application_deadline) {
-            $deadline = \Carbon\Carbon::parse($internship->application_deadline);
-            $now = \Carbon\Carbon::now();
-            $daysLeft = $now->diffInDays($deadline, false);
+            $applyUntilDate = \Carbon\Carbon::parse($internship->application_deadline)->startOfDay();
+        }
+        if ($internship->last_registration_date) {
+            $lastRegDate = \Carbon\Carbon::parse($internship->last_registration_date)->startOfDay();
+            $applyUntilDate = $applyUntilDate
+                ? $applyUntilDate->copy()->max($lastRegDate)
+                : $lastRegDate;
+        }
+        // Fallback: allow apply until internship start date (inclusive)
+        if (!$applyUntilDate && $internship->start_date) {
+            $applyUntilDate = \Carbon\Carbon::parse($internship->start_date)->startOfDay();
+        }
+
+        if ($applyUntilDate) {
+            $daysLeft = (int) \Carbon\Carbon::today()->diffInDays($applyUntilDate, false);
+        }
+
+        // Hard close once internship start date has passed
+        if ($internship->start_date) {
+            $startDay = \Carbon\Carbon::parse($internship->start_date)->startOfDay();
+            if (\Carbon\Carbon::today()->gt($startDay)) {
+                $daysLeft = -1;
+            }
         }
 
         // Parse batch days if JSON
@@ -308,7 +572,25 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.internship-detail', compact('internship', 'daysLeft', 'batchDays', 'inWishlist', 'recentInternships', 'alreadyApplied', 'openingsFull'));
+        $paymentCalc = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
+
+        $canApplyInternship = PlanPricing::employeeCanApply(Auth::user(), 'internship');
+        $internshipApplyLimitCheck = Auth::check()
+            ? PlanPricing::checkServiceLimit(Auth::user(), 'internship', 'apply')
+            : ['allowed' => false, 'limit' => 0, 'used' => 0, 'remaining' => 0, 'message' => null];
+
+        return view('website.internship-detail', compact(
+            'internship',
+            'daysLeft',
+            'batchDays',
+            'inWishlist',
+            'recentInternships',
+            'alreadyApplied',
+            'openingsFull',
+            'paymentCalc',
+            'canApplyInternship',
+            'internshipApplyLimitCheck'
+        ));
     }
     
     
@@ -379,19 +661,30 @@ class WebsiteController extends Controller
 
         $internship = \App\Models\Internship::select(
             'id', 'internship_title', 'duration', 'registration_fees',
+            'late_registration_fee', 'last_registration_date',
             'gst_percentage', 'gst_amount', 'final_amount'
         )->findOrFail($request->internship_id);
+
+        $payment = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
 
         return response()->json([
             'success' => true,
             'data' => [
                 'internship_title' => $internship->internship_title,
                 'duration' => $internship->duration,
-                'registration_fees' => number_format($internship->registration_fees, 2),
-                'gst_percentage' => $internship->gst_percentage,
-                'gst_amount' => number_format($internship->gst_amount, 2),
-                'final_amount' => number_format($internship->final_amount, 2),
-                'final_amount_raw' => $internship->final_amount
+                'registration_fee' => number_format($payment['registration_fee'], 2),
+                'late_registration_fee' => number_format($payment['late_registration_fee'], 2),
+                'configured_late_registration_fee' => number_format($payment['configured_late_registration_fee'], 2),
+                'last_registration_date' => $payment['last_registration_date'],
+                'subtotal' => number_format($payment['subtotal'], 2),
+                'gst_percentage' => $payment['gst_percentage'],
+                'gst_amount' => number_format($payment['gst_amount'], 2),
+                'total_amount' => number_format($payment['total_amount'], 2),
+                'final_amount_raw' => $payment['total_amount'],
+                'is_late_registration' => $payment['is_late_registration'],
+                // Backward-compatible keys
+                'registration_fees' => number_format($payment['registration_fee'], 2),
+                'final_amount' => number_format($payment['total_amount'], 2),
             ]
         ]);
     }
@@ -499,6 +792,8 @@ class WebsiteController extends Controller
     
        public function createInternshipApplication(Request $request)
     {
+        /*
+        // Mukeshbhai old code - internship apply payment bypass (no Razorpay, payment_status=1 direct)
         $request->validate([
             'internship_id' => 'required|integer|exists:tbl_internship,id'
         ]);
@@ -522,22 +817,17 @@ class WebsiteController extends Controller
             return response()->json(['success' => false, 'message' => 'internship_closed'], 409);
         }
 
-        // Avoid duplicate application rows for same user+internship
-        $existing = \App\Models\InternshipApplication::where('user_id', $userId)
-            ->where('internship_id', $internship->id)
-            ->first();
-
-        if ($existing) {
-            // User already applied — do not create another application or payment
-            return response()->json(['success' => false, 'message' => 'already_applied'], 409);
-        }
-
-        $appliedCount = \App\Models\InternshipApplication::where('internship_id', $internship->id)->count();
-        if ($internship->openings > 0 && $appliedCount >= (int) $internship->openings) {
-            return response()->json(['success' => false, 'message' => 'no_openings'], 409);
-        }
-
         $user = User::findOrFail($userId);
+
+        if (!PlanPricing::employeeCanApply($user, 'internship')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'plan_service_required',
+                'error' => 'Your current plan does not include Internship service. Please upgrade your plan to apply.',
+                'upgrade_url' => route('pricing', ['user_id' => $user->id]),
+                'contact_url' => route('contact'),
+            ], 403);
+        }
 
         if (!$user->college_id || !$user->degree_id) {
             return response()->json([
@@ -546,56 +836,419 @@ class WebsiteController extends Controller
             ], 422);
         }
 
-        $application = \App\Models\InternshipApplication::create([
-            'user_id' => $userId,
-            'internship_id' => $internship->id,
-            'company_id' => $internship->company_id ?? null,
-            'college_id' => $user->college_id,
-            'degree_id' => $user->degree_id,
-            'complete_status' => 0,
-            'applied_on' => now(),
-            'company_feedback' => null,
-            'college_feedback' => null,
-        ]);
+        $existing = \App\Models\InternshipApplication::where('user_id', $userId)
+            ->where('internship_id', $internship->id)
+            ->first();
 
-        // Create a payment record linked to this application
+        if ($existing) {
+            $existingPayment = \App\Models\InternshipPayment::where(function ($q) use ($existing, $userId, $internship) {
+                $q->where('application_id', $existing->id)
+                    ->orWhere(function ($q2) use ($userId, $internship) {
+                        $q2->where('user_id', $userId)
+                            ->where('internship_id', $internship->id);
+                    });
+            })->first();
+
+            if ($existingPayment) {
+                return response()->json(['success' => false, 'message' => 'already_applied'], 409);
+            }
+
+            try {
+                DB::beginTransaction();
+
+                $txn = $this->generatePaymentTransactionId();
+                $paymentCalc = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
+
+                $payment = \App\Models\InternshipPayment::createFromCalculation([
+                    'application_id' => $existing->id,
+                    'user_id' => $userId,
+                    'internship_id' => $internship->id,
+                    'payment_mode' => 'online',
+                    'payment_status' => 1,
+                    'paid_on' => now(),
+                ], $paymentCalc, $txn);
+
+                try {
+                    $this->duplicateTasksForStudent($internship->id, $userId);
+                } catch (\Throwable $e) {
+                    \Log::error('Failed to duplicate tasks for student: ' . $e->getMessage());
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'created',
+                    'application_id' => $existing->id,
+                    'payment_id' => $payment->id,
+                    'transaction_id' => $txn,
+                ]);
+            } catch (\Throwable $e) {
+                DB::rollBack();
+                \Log::error('Failed to create internship payment (retry): ' . $e->getMessage(), [
+                    'user_id' => $userId,
+                    'internship_id' => $internship->id,
+                    'application_id' => $existing->id,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'payment_create_failed',
+                    'error' => 'Unable to create payment. Please try again.',
+                    'debug' => $e->getMessage(),
+                ], 500);
+            }
+        }
+
+        $appliedCount = \App\Models\InternshipApplication::where('internship_id', $internship->id)->count();
+        if ($internship->openings > 0 && $appliedCount >= (int) $internship->openings) {
+            return response()->json(['success' => false, 'message' => 'no_openings'], 409);
+        }
+
         try {
-            $txn = $this->generatePaymentTransactionId();
+            DB::beginTransaction();
 
-            $payment = \App\Models\InternshipPayment::create([
+            $application = \App\Models\InternshipApplication::create([
+                'user_id' => $userId,
+                'internship_id' => $internship->id,
+                'company_id' => $internship->company_id ?? null,
+                'college_id' => $user->college_id,
+                'degree_id' => $user->degree_id,
+                'complete_status' => 0,
+                'applied_on' => now(),
+                'company_feedback' => null,
+                'college_feedback' => null,
+            ]);
+
+            $txn = $this->generatePaymentTransactionId();
+            $paymentCalc = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
+
+            $payment = \App\Models\InternshipPayment::createFromCalculation([
                 'application_id' => $application->id,
                 'user_id' => $userId,
                 'internship_id' => $internship->id,
-                'gst_percentage' => $internship->gst_percentage ?? 0,
-                'gst_amount' => $internship->gst_amount ?? 0,
-                'total_amount' => $internship->final_amount ?? 0,
                 'payment_mode' => 'online',
-                'transaction_id' => $txn,
                 'payment_status' => 1,
                 'paid_on' => now(),
-                'payment_response_data' => null,
-                'payment_transaction_id' => null,
-            ]);
-            // Duplicate master tasks for this internship as per-student tasks
+            ], $paymentCalc, $txn);
+
             try {
                 $this->duplicateTasksForStudent($internship->id, $userId);
-            } catch (\Exception $e) {
-                // Log but don't fail the whole request
+            } catch (\Throwable $e) {
                 \Log::error('Failed to duplicate tasks for student: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            // If payment record creation fails, log and continue — return partial success
-            \Log::error('Failed to create internship payment: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'payment_create_failed']);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'created',
+                'application_id' => $application->id,
+                'payment_id' => $payment->id ?? null,
+                'transaction_id' => $txn ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Failed to create internship payment: ' . $e->getMessage(), [
+                'user_id' => $userId,
+                'internship_id' => $internship->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'payment_create_failed',
+                'error' => 'Unable to create payment. Please try again.',
+                'debug' => $e->getMessage(),
+            ], 500);
+        }
+        */
+
+        return response()->json([
+            'success' => false,
+            'message' => 'payment_required',
+            'error' => 'Please complete Razorpay payment to apply.',
+        ], 400);
+    }
+
+    // Raj new code - dynamic Razorpay order + signature verify then apply
+    public function createInternshipRazorpayOrder(Request $request)
+    {
+        $request->validate([
+            'internship_id' => 'required|integer|exists:tbl_internship,id',
+            'amount' => 'nullable|numeric',
+        ]);
+
+        $gate = $this->internshipApplyEligibility($request->internship_id);
+        if ($gate instanceof \Illuminate\Http\JsonResponse) {
+            return $gate;
+        }
+
+        $internship = $gate['internship'];
+        $user = $gate['user'];
+        $paymentCalc = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
+        $serverAmount = (float) $paymentCalc['total_amount'];
+
+        if ($serverAmount <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'invalid_amount',
+                'error' => 'Invalid payment amount.',
+            ], 422);
+        }
+
+        if ($request->filled('amount')) {
+            $clientAmount = round((float) $request->amount, 2);
+            if (abs($clientAmount - $serverAmount) > 0.01) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'amount_mismatch',
+                    'error' => 'Payment amount does not match. Please refresh and try again.',
+                ], 422);
+            }
+        }
+
+        $receipt = 'INT-' . $internship->id . '-' . $user->id . '-' . time();
+        $order = PaymentHelper::createOrder($serverAmount, $receipt, 'INR', 'live');
+
+        if (is_array($order) && isset($order['error'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'order_create_failed',
+                'error' => $order['error'],
+            ], 500);
+        }
+
+        $orderId = is_array($order) ? ($order['id'] ?? null) : $order['id'];
+        $orderAmount = is_array($order) ? ($order['amount'] ?? (int) round($serverAmount * 100)) : $order['amount'];
+
+        if (!$orderId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'order_create_failed',
+                'error' => 'Unable to create Razorpay order.',
+            ], 500);
+        }
+
+        $userName = trim((string) ($user->name ?? ''));
+        if ($userName === '') {
+            $userName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+        }
+
+        $contact = (string) ($user->mobile ?? $user->phone ?? $user->contact ?? $user->contact_no ?? '');
+        $contact = preg_replace('/\D+/', '', $contact);
+        if (strlen($contact) > 10) {
+            $contact = substr($contact, -10);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'created',
-            'application_id' => $application->id,
-            'payment_id' => $payment->id ?? null,
-            'transaction_id' => $txn ?? null,
+            'key' => PaymentHelper::getKeyId('live'),
+            'order_id' => $orderId,
+            'amount' => (int) $orderAmount,
+            'currency' => 'INR',
+            'name' => 'ZobPot',
+            'description' => $internship->internship_title,
+            'theme' => [
+                'color' => '#242a62',
+            ],
+            'prefill' => [
+                'name' => $userName,
+                'email' => $user->email ?? '',
+                'contact' => $contact,
+            ],
+            'payment' => [
+                'total_amount' => $serverAmount,
+                'registration_fee' => $paymentCalc['registration_fee'],
+                'late_registration_fee' => $paymentCalc['late_registration_fee'],
+                'gst_amount' => $paymentCalc['gst_amount'],
+            ],
         ]);
+    }
+
+    // Raj new code - dynamic Razorpay order + signature verify then apply
+    public function verifyInternshipRazorpayPayment(Request $request)
+    {
+        $request->validate([
+            'internship_id' => 'required|integer|exists:tbl_internship,id',
+            'razorpay_payment_id' => 'required|string',
+            'razorpay_order_id' => 'required|string',
+            'razorpay_signature' => 'required|string',
+        ]);
+
+        $verified = PaymentHelper::verifyPayment([
+            'razorpay_order_id' => $request->razorpay_order_id,
+            'razorpay_payment_id' => $request->razorpay_payment_id,
+            'razorpay_signature' => $request->razorpay_signature,
+        ], 'live');
+
+        if (!$verified) {
+            return response()->json([
+                'success' => false,
+                'message' => 'payment_verify_failed',
+                'error' => 'Payment verification failed.',
+            ], 400);
+        }
+
+        $gate = $this->internshipApplyEligibility($request->internship_id);
+        if ($gate instanceof \Illuminate\Http\JsonResponse) {
+            return $gate;
+        }
+
+        return $this->persistInternshipApplicationAfterPayment(
+            $gate['user'],
+            $gate['internship'],
+            $gate['existing'],
+            $request->razorpay_payment_id
+        );
+    }
+
+    private function internshipApplyEligibility($internshipId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'login_required'], 401);
+        }
+
+        $userId = Auth::id();
+        $internship = \App\Models\Internship::find($internshipId);
+
+        if (!$internship) {
+            return response()->json(['success' => false, 'message' => 'invalid_internship'], 404);
+        }
+
+        if ((int) $internship->approve_status !== 1) {
+            return response()->json(['success' => false, 'message' => 'internship_not_available'], 403);
+        }
+
+        if ((int) $internship->complete_status === 1) {
+            return response()->json(['success' => false, 'message' => 'internship_closed'], 409);
+        }
+
+        $user = User::findOrFail($userId);
+
+        if (!PlanPricing::employeeCanApply($user, 'internship')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'plan_service_required',
+                'error' => 'Your current plan does not include Internship service. Please upgrade your plan to apply.',
+                'upgrade_url' => route('pricing', ['user_id' => $user->id]),
+                'contact_url' => route('contact'),
+            ], 403);
+        }
+
+        if (!$user->college_id || !$user->degree_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'college_info_required',
+            ], 422);
+        }
+
+        $existing = \App\Models\InternshipApplication::where('user_id', $userId)
+            ->where('internship_id', $internship->id)
+            ->first();
+
+        if ($existing) {
+            $existingPayment = \App\Models\InternshipPayment::where(function ($q) use ($existing, $userId, $internship) {
+                $q->where('application_id', $existing->id)
+                    ->orWhere(function ($q2) use ($userId, $internship) {
+                        $q2->where('user_id', $userId)
+                            ->where('internship_id', $internship->id);
+                    });
+            })->first();
+
+            if ($existingPayment) {
+                return response()->json(['success' => false, 'message' => 'already_applied'], 409);
+            }
+        } else {
+            $limitCheck = PlanPricing::checkServiceLimit($user, 'internship', 'apply');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'plan_service_limit_reached',
+                    'error' => $limitCheck['message'],
+                    'upgrade_url' => route('pricing', ['user_id' => $user->id]),
+                    'contact_url' => route('contact'),
+                    'limit' => $limitCheck['limit'],
+                    'used' => $limitCheck['used'],
+                ], 403);
+            }
+
+            $appliedCount = \App\Models\InternshipApplication::where('internship_id', $internship->id)->count();
+            if ($internship->openings > 0 && $appliedCount >= (int) $internship->openings) {
+                return response()->json(['success' => false, 'message' => 'no_openings'], 409);
+            }
+        }
+
+        return [
+            'user' => $user,
+            'internship' => $internship,
+            'existing' => $existing,
+        ];
+    }
+
+    private function persistInternshipApplicationAfterPayment($user, $internship, $existing, $transactionId)
+    {
+        $userId = $user->id;
+        $paymentCalc = app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship);
+        $txn = $transactionId ?: $this->generatePaymentTransactionId();
+
+        try {
+            DB::beginTransaction();
+
+            if ($existing) {
+                $application = $existing;
+            } else {
+                $application = \App\Models\InternshipApplication::create([
+                    'user_id' => $userId,
+                    'internship_id' => $internship->id,
+                    'company_id' => $internship->company_id ?? null,
+                    'college_id' => $user->college_id,
+                    'degree_id' => $user->degree_id,
+                    'complete_status' => 0,
+                    'applied_on' => now(),
+                    'company_feedback' => null,
+                    'college_feedback' => null,
+                ]);
+                PlanPricing::incrementServiceUsage($user, 'internship');
+            }
+
+            $payment = \App\Models\InternshipPayment::createFromCalculation([
+                'application_id' => $application->id,
+                'user_id' => $userId,
+                'internship_id' => $internship->id,
+                'payment_mode' => 'online',
+                'payment_status' => 1,
+                'paid_on' => now(),
+            ], $paymentCalc, $txn);
+
+            try {
+                $this->duplicateTasksForStudent($internship->id, $userId);
+            } catch (\Throwable $e) {
+                \Log::error('Failed to duplicate tasks for student: ' . $e->getMessage());
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'created',
+                'application_id' => $application->id,
+                'payment_id' => $payment->id ?? null,
+                'transaction_id' => $txn,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Failed to create internship payment: ' . $e->getMessage(), [
+                'user_id' => $userId,
+                'internship_id' => $internship->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'payment_create_failed',
+                'error' => 'Unable to create payment. Please try again.',
+                'debug' => $e->getMessage(),
+            ], 500);
+        }
     }
     
     
@@ -844,6 +1497,50 @@ class WebsiteController extends Controller
         return $application;
     }
 
+    /**
+     * Company: download certificate for a student enrolled in their internship.
+     */
+    public function downloadCompanyStudentCertificate($applicationId, $type)
+    {
+        $this->ensureCompanyOwnsCertificateApplication((int) $applicationId);
+
+        return app(\App\Http\Controllers\Admin\InternshipController::class)
+            ->downloadStudentCertificate($applicationId, $type);
+    }
+
+    /**
+     * Company: preview certificate for a student enrolled in their internship.
+     */
+    public function previewCompanyStudentCertificate($applicationId, $type)
+    {
+        $this->ensureCompanyOwnsCertificateApplication((int) $applicationId);
+
+        return app(\App\Http\Controllers\Admin\InternshipController::class)
+            ->previewStudentCertificate($applicationId, $type);
+    }
+
+    /**
+     * Ensure the logged-in company owns the internship linked to this application.
+     */
+    private function ensureCompanyOwnsCertificateApplication(int $applicationId): InternshipApplication
+    {
+        $user = Auth::user();
+        if (!$user || ($user->profile_type ?? '') !== 'Company') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $application = InternshipApplication::with('internship')->find($applicationId);
+        if (!$application || !$application->internship) {
+            abort(404, 'Application not found.');
+        }
+
+        if ((int) $application->internship->company_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to access this certificate.');
+        }
+
+        return $application;
+    }
+
 
   public function submitTask(Request $request)
     {
@@ -1000,10 +1697,9 @@ class WebsiteController extends Controller
             ->get()
             ->groupBy('student_id');
 
-        // Pre-load feedback from applications
-        $feedbackColumn = $internship->internship_type == 2 ? 'college_feedback' : 'company_feedback';
+        // Pre-load company-side feedback (same column for type 1 and type 2)
         $savedFeedbacks = InternshipApplication::where('internship_id', $internship->id)
-            ->pluck($feedbackColumn, 'user_id');
+            ->pluck('company_feedback', 'user_id');
 
         // ===== Marks History Tab Data (visible when college or company has submitted) =====
         $marksStudents = [];
@@ -1418,41 +2114,69 @@ class WebsiteController extends Controller
      */
     public function saveInternshipReview(Request $request)
     {
-        $request->validate([
-            'internship_id' => 'required|integer',
-            'student_id' => 'required|integer',
-            'star' => 'required|integer|min:1|max:5',
-            'review' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'internship_id' => 'required|integer|exists:tbl_internship,id',
+                'student_id' => 'required|integer',
+                'star' => 'required|integer|min:1|max:5',
+                'review' => 'nullable|string|max:5000',
+                'active_status' => 'nullable|integer|in:0,1',
+            ]);
 
-        $user = Auth::user();
-        if (!$user || $user->id != $request->input('student_id')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            $user = Auth::user();
+            if (!$user || (int) $user->id !== (int) $validated['student_id']) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            // Student must have applied to this internship
+            $hasApplication = InternshipApplication::where('internship_id', $validated['internship_id'])
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if (!$hasApplication) {
+                return response()->json(['success' => false, 'message' => 'You have not applied to this internship.'], 403);
+            }
+
+            $now = now();
+            $data = [
+                'internship_id' => (int) $validated['internship_id'],
+                'student_id' => (int) $validated['student_id'],
+                'star' => (int) $validated['star'],
+                'review' => $validated['review'] ?? null,
+                'active_status' => (int) ($validated['active_status'] ?? 0),
+                'write_on' => $now->toDateTimeString(),
+                'updated_at' => $now->toDateTimeString(),
+            ];
+
+            $exists = DB::table('tbl_internship_review')
+                ->where('internship_id', $data['internship_id'])
+                ->where('student_id', $data['student_id'])
+                ->first();
+
+            if ($exists) {
+                DB::table('tbl_internship_review')->where('id', $exists->id)->update($data);
+            } else {
+                $data['created_at'] = $now->toDateTimeString();
+                DB::table('tbl_internship_review')->insert($data);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Review saved successfully.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first() ?: 'Validation failed.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            \Log::error('Internship review save failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to submit review. Please try again.',
+            ], 500);
         }
-
-        $data = [
-            'internship_id' => $request->input('internship_id'),
-            'student_id' => $request->input('student_id'),
-            'star' => $request->input('star'),
-            'review' => $request->input('review'),
-            'active_status' => $request->input('active_status', 1),
-            'write_on' => $request->input('write_on') ? Carbon::parse($request->input('write_on')) : now(),
-            'updated_at' => now(),
-        ];
-
-        $exists = DB::table('tbl_internship_review')
-            ->where('internship_id', $data['internship_id'])
-            ->where('student_id', $data['student_id'])
-            ->first();
-
-        if ($exists) {
-            DB::table('tbl_internship_review')->where('id', $exists->id)->update($data);
-        } else {
-            $data['created_at'] = now();
-            DB::table('tbl_internship_review')->insert($data);
-        }
-
-        return response()->json(['success' => true, 'message' => 'Review saved successfully.']);
     }
 
     /**
@@ -1478,22 +2202,84 @@ class WebsiteController extends Controller
     {
         $request->validate([
             'instructions' => 'nullable|string',
+            'general_instructions' => 'nullable|string',
         ]);
 
+        $user = Auth::user();
         $internship = Internship::find($id);
         if (!$internship) {
             return response()->json(['success' => false, 'message' => 'Internship not found.'], 404);
         }
 
-        $internship->general_instructions = $request->input('instructions');
+        // Company owner only (website side)
+        if ($user && (int) $internship->company_id !== (int) $user->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $content = $request->input('general_instructions', $request->input('instructions'));
+        $internship->general_instructions = $content;
         $internship->save();
 
-        return response()->json(['success' => true, 'message' => 'Instructions saved successfully.', 'instructions' => $internship->general_instructions]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Instructions saved successfully.',
+            'instructions' => $internship->general_instructions
+        ]);
     }
 
     
     
      // ==================== COMPANY INTERNSHIP MANAGEMENT ====================
+
+    /**
+     * Submit a custom category or subcategory request from company internship form.
+     */
+    public function submitCategorySubcategoryRequest(Request $request)
+    {
+        $request->validate([
+            'request_type' => 'required|in:category,subcategory',
+            'requested_name' => 'required|string|max:255',
+            'category_id' => 'nullable|integer|exists:tbl_job_category,category_id',
+        ]);
+
+        if ($request->request_type === 'subcategory' && !$request->category_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a category before requesting a new subcategory.',
+            ], 422);
+        }
+
+        $existing = CategorySubcategoryRequest::where('user_id', Auth::id())
+            ->where('request_type', $request->request_type)
+            ->where('requested_name', trim($request->requested_name))
+            ->where('status', CategorySubcategoryRequest::STATUS_PENDING)
+            ->when($request->request_type === 'subcategory', function ($query) use ($request) {
+                $query->where('category_id', $request->category_id);
+            })
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Your request is already submitted and pending admin approval.',
+                'request_id' => $existing->id,
+            ]);
+        }
+
+        $record = CategorySubcategoryRequest::create([
+            'request_type' => $request->request_type,
+            'requested_name' => trim($request->requested_name),
+            'category_id' => $request->request_type === 'subcategory' ? $request->category_id : null,
+            'user_id' => Auth::id(),
+            'status' => CategorySubcategoryRequest::STATUS_PENDING,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Request submitted successfully. Admin will review it shortly.',
+            'request_id' => $record->id,
+        ]);
+    }
     
     /**
      * Store new internship from company profile
@@ -1505,18 +2291,23 @@ class WebsiteController extends Controller
             $request->merge(['batch_days' => json_decode($request->batch_days, true)]);
         }
 
+        $useOtherCategory = $this->isOtherCategoryRequest($request);
+        $useOtherSubcategory = $this->isOtherSubcategoryRequest($request);
+
         $request->validate([
             'internship_title' => 'required|string|max:255',
-            'category_id' => 'required|integer',
+            'category_id' => $useOtherCategory ? 'nullable|integer' : 'required|integer',
+            'other_category_name' => $useOtherCategory ? 'required|string|max:255' : 'nullable|string|max:255',
+            'other_subcategory_name' => $useOtherSubcategory ? 'required|string|max:255' : 'nullable|string|max:255',
             'company_website' => 'nullable|url|max:255',
-            'internship_mode' => 'required|in:Online,Offline,Hybrid',
+            'internship_mode' => 'required|in:Online,Offline,Hybrid,Weekly,Part Time,Full Time',
             'location' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
             'weeks' => 'required|integer|min:1',
             'hours' => 'required|integer|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'application_deadline' => 'required|date',
+            'application_deadline' => 'required|date|after_or_equal:today|before_or_equal:start_date',
             'stipend' => 'nullable|numeric|min:0',
             'openings' => 'required|integer|min:1',
             'required_skills' => 'nullable|string',
@@ -1526,32 +2317,83 @@ class WebsiteController extends Controller
             'internship_objective' => 'required|string',
             'internship_outcome' => 'required|string',
             'internship_fee' => 'nullable|numeric|min:0',
+            'last_registration_date' => 'nullable|date|after_or_equal:application_deadline|before_or_equal:start_date',
+            'late_register_last_date' => 'nullable|date|after_or_equal:application_deadline|before_or_equal:start_date',
+            'late_registration_fee' => 'nullable|numeric|min:0',
             'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'gst_amount' => 'nullable|numeric|min:0',
             'total_fee' => 'nullable|numeric|min:0',
+            'sub_category_id' => $useOtherSubcategory ? 'nullable|array' : 'required|array|min:1',
+            'sub_category_id.*' => 'integer|exists:tbl_sub_category,sub_category_id',
         ]);
+
+        if ($useOtherSubcategory && !$useOtherCategory && !$request->category_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a category when requesting a new subcategory.',
+            ], 422);
+        }
 
         try {
             $user = Auth::user();
-            
-            // Generate unique slug
-            $slug = Str::slug($request->internship_title);
-            $originalSlug = $slug;
-            $counter = 1;
-            
-            // Include soft-deleted rows — unique index still applies to them
-            while (Internship::withTrashed()->where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
-                $counter++;
+
+            if (!PlanPricing::companyCanPost($user, 'internship')) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 0,
+                    'message' => 'Your current plan does not include Internship service. Please upgrade your plan to post internships.',
+                    'upgrade_url' => route('pricing', ['user_id' => $user->id]),
+                    'contact_url' => route('contact'),
+                ], 403);
             }
+
+            $limitCheck = PlanPricing::checkServiceLimit($user, 'internship', 'create');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 0,
+                    'message' => $limitCheck['message'],
+                    'upgrade_url' => route('pricing', ['user_id' => $user->id]),
+                    'contact_url' => route('contact'),
+                    'limit' => $limitCheck['limit'],
+                    'used' => $limitCheck['used'],
+                ], 403);
+            }
+
+            $recentDuplicate = Internship::where('company_id', $user->id)
+                ->where('internship_title', $request->internship_title)
+                ->where('created_at', '>=', now()->subSeconds(20))
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($recentDuplicate) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Internship created successfully! It will be visible after admin approval.',
+                    'internship_id' => $recentDuplicate->id
+                ]);
+            }
+            
+            // Generate unique slug (check all rows, including soft-deleted — unique index still applies)
+            $slug = $this->generateUniqueInternshipSlug($request->internship_title);
             
             // Prepare batch days
             $batchDays = $request->batch_days ?? [];
             
             // Prepare perks (handle array from select2)
             $perks = $request->perks ?? [];
+            $subCategories = $useOtherSubcategory
+                ? []
+                : array_values(array_filter(array_map('intval', (array) $request->input('sub_category_id', []))));
+
+            $categoryId = $useOtherCategory ? 0 : (int) $request->category_id;
 
             $registrationFees = (float) ($request->internship_fee ?? 0);
+            $lateRegistrationFee = $request->filled('late_registration_fee')
+                ? (float) $request->late_registration_fee
+                : 0;
+            $lastRegistrationDate = $request->input('last_registration_date')
+                ?: $request->input('late_register_last_date');
             $gstPercentage = (float) ($request->gst_percentage ?? 0);
             $gstAmount = $request->filled('gst_amount')
                 ? (float) $request->gst_amount
@@ -1564,7 +2406,8 @@ class WebsiteController extends Controller
             $internship = Internship::create([
                 'internship_title' => $request->internship_title,
                 'slug' => $slug,
-                'category' => $request->category_id,
+                'category' => $categoryId,
+                'sub_categories' => $subCategories,
                 'company_id' => $user->id,
                 'company_website' => $request->company_website,
                 'mode' => $request->internship_mode,
@@ -1577,6 +2420,7 @@ class WebsiteController extends Controller
                 'stipend' => $request->stipend ?? 0,
                 'openings' => $request->openings,
                 'application_deadline' => $request->application_deadline,
+                'last_registration_date' => $lastRegistrationDate,
                 'batch_days' => $batchDays,
                 'skills' => $request->required_skills,
                 'eligibility_criteria' => $request->required_eligibility_criteria,
@@ -1586,6 +2430,7 @@ class WebsiteController extends Controller
                 'internship_objective' => $request->internship_objective,
                 'internship_outcome' => $request->internship_outcome,
                 'registration_fees' => $registrationFees,
+                'late_registration_fee' => $lateRegistrationFee,
                 'gst_percentage' => $gstPercentage,
                 'gst_amount' => $gstAmount,
                 'final_amount' => $finalAmount,
@@ -1593,19 +2438,40 @@ class WebsiteController extends Controller
                 'approve_status' => 0, // Pending approval
             ]);
 
+            $this->saveOtherCategorySubcategoryRequests($request, $user->id, $internship->id, $useOtherCategory, $useOtherSubcategory);
+
+            $message = 'Internship created successfully! It will be visible after admin approval.';
+            if ($useOtherCategory || $useOtherSubcategory) {
+                $message .= ' Your custom category/subcategory request has been sent to admin for approval.';
+            }
+
+            PlanPricing::incrementServiceUsage($user, 'internship');
+
             return response()->json([
                 'success' => true,
-                'message' => 'Internship created successfully! It will be visible after admin approval.',
+                'message' => $message,
                 'internship_id' => $internship->id
             ]);
                 
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Internship Store Error: ' . $e->getMessage());
+
+            $message = 'Failed to create internship. Please try again.';
+            if (str_contains($e->getMessage(), 'tbl_internship_slug_unique') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                $message = 'An internship with this title already exists. Please use a slightly different title and try again.';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ], 500);
         } catch (\Exception $e) {
             \Log::error('Internship Store Error: ' . $e->getMessage());
             \Log::error('Stack Trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create internship: ' . $e->getMessage()
+                'message' => 'Failed to create internship. Please try again.'
             ], 500);
         }
     }
@@ -1629,18 +2495,23 @@ class WebsiteController extends Controller
             $request->merge(['perks' => json_decode($request->perks, true)]);
         }
         
+        $useOtherCategory = $this->isOtherCategoryRequest($request);
+        $useOtherSubcategory = $this->isOtherSubcategoryRequest($request);
+
         $request->validate([
             'internship_title' => 'required|string|max:255',
-            'category_id' => 'required|integer',
+            'category_id' => $useOtherCategory ? 'nullable|integer' : 'required|integer',
+            'other_category_name' => $useOtherCategory ? 'required|string|max:255' : 'nullable|string|max:255',
+            'other_subcategory_name' => $useOtherSubcategory ? 'required|string|max:255' : 'nullable|string|max:255',
             'company_website' => 'nullable|url|max:255',
-            'internship_mode' => 'required|in:Online,Offline,Hybrid',
+            'internship_mode' => 'required|in:Online,Offline,Hybrid,Weekly,Part Time,Full Time',
             'location' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
             'weeks' => 'required|integer|min:1',
             'hours' => 'required|integer|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'application_deadline' => 'required|date',
+            'application_deadline' => 'required|date|before_or_equal:start_date',
             'batch_days' => 'nullable|array',
             'stipend' => 'nullable|numeric|min:0',
             'openings' => 'required|integer|min:1',
@@ -1652,9 +2523,14 @@ class WebsiteController extends Controller
             'internship_outcome' => 'required|string',
             'perks' => 'nullable|array',
             'internship_fee' => 'nullable|numeric|min:0',
+            'last_registration_date' => 'nullable|date|after_or_equal:application_deadline|before_or_equal:start_date',
+            'late_register_last_date' => 'nullable|date|after_or_equal:application_deadline|before_or_equal:start_date',
+            'late_registration_fee' => 'nullable|numeric|min:0',
             'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'gst_amount' => 'nullable|numeric|min:0',
             'total_fee' => 'nullable|numeric|min:0',
+            'sub_category_id' => $useOtherSubcategory ? 'nullable|array' : 'required|array|min:1',
+            'sub_category_id.*' => 'integer|exists:tbl_sub_category,sub_category_id',
         ]);
 
         try {
@@ -1678,6 +2554,12 @@ class WebsiteController extends Controller
             }
 
             $registrationFees = (float) ($request->internship_fee ?? $internship->registration_fees ?? 0);
+            $lateRegistrationFee = $request->has('late_registration_fee')
+                ? (float) ($request->late_registration_fee ?: 0)
+                : (float) ($internship->late_registration_fee ?? 0);
+            $lastRegistrationDate = $request->has('last_registration_date') || $request->has('late_register_last_date')
+                ? ($request->input('last_registration_date') ?: $request->input('late_register_last_date'))
+                : $internship->last_registration_date;
             $gstPercentage = (float) ($request->gst_percentage ?? $internship->gst_percentage ?? 0);
             $gstAmount = $request->filled('gst_amount')
                 ? (float) $request->gst_amount
@@ -1685,12 +2567,16 @@ class WebsiteController extends Controller
             $finalAmount = $request->filled('total_fee')
                 ? (float) $request->total_fee
                 : round($registrationFees + $gstAmount, 2);
+            $subCategories = $useOtherSubcategory
+                ? (is_array($internship->sub_categories) ? $internship->sub_categories : [])
+                : array_values(array_filter(array_map('intval', (array) $request->input('sub_category_id', []))));
             
             // Update internship
             $internship->update([
                 'internship_title' => $request->internship_title,
                 'slug' => $slug,
-                'category' => $request->category_id,
+                'category' => $useOtherCategory ? 0 : $request->category_id,
+                'sub_categories' => $subCategories,
                 'company_website' => $request->company_website,
                 'mode' => $request->internship_mode,
                 'location' => $request->location,
@@ -1702,6 +2588,7 @@ class WebsiteController extends Controller
                 'stipend' => $request->stipend ?? 0,
                 'openings' => $request->openings,
                 'application_deadline' => $request->application_deadline,
+                'last_registration_date' => $lastRegistrationDate,
                 'batch_days' => $request->batch_days ?? [],
                 'skills' => $request->required_skills,
                 'eligibility_criteria' => $request->required_eligibility_criteria,
@@ -1711,14 +2598,22 @@ class WebsiteController extends Controller
                 'internship_objective' => $request->internship_objective,
                 'internship_outcome' => $request->internship_outcome,
                 'registration_fees' => $registrationFees,
+                'late_registration_fee' => $lateRegistrationFee,
                 'gst_percentage' => $gstPercentage,
                 'gst_amount' => $gstAmount,
                 'final_amount' => $finalAmount,
             ]);
 
+            $this->saveOtherCategorySubcategoryRequests($request, $user->id, $internship->id, $useOtherCategory, $useOtherSubcategory);
+
+            $message = 'Internship updated successfully!';
+            if ($useOtherCategory || $useOtherSubcategory) {
+                $message .= ' Your custom category/subcategory request has been sent to admin for approval.';
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Internship updated successfully!'
+                'message' => $message
             ]);
                 
         } catch (\Exception $e) {
@@ -1726,6 +2621,88 @@ class WebsiteController extends Controller
                 'success' => false,
                 'message' => 'Failed to update internship: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    private function generateUniqueInternshipSlug($title, $ignoreId = null)
+    {
+        $baseSlug = Str::slug((string) $title);
+        if ($baseSlug === '') {
+            $baseSlug = 'internship';
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $query = DB::table('tbl_internship')->where('slug', $slug);
+            if ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            }
+
+            if (!$query->exists()) {
+                return $slug;
+            }
+
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+
+            if ($counter > 50) {
+                return $baseSlug . '-' . uniqid();
+            }
+        }
+    }
+
+    private function isOtherCategoryRequest(Request $request)
+    {
+        return $this->isOtherFlag($request->input('use_other_category'))
+            || trim((string) $request->input('other_category_name')) !== '';
+    }
+
+    private function isOtherSubcategoryRequest(Request $request)
+    {
+        return $this->isOtherFlag($request->input('use_other_subcategory'))
+            || trim((string) $request->input('other_subcategory_name')) !== '';
+    }
+
+    private function isOtherFlag($value)
+    {
+        return in_array($value, [1, '1', true, 'true', 'on', 'yes'], true);
+    }
+
+    private function saveOtherCategorySubcategoryRequests(Request $request, $userId, $internshipId, $useOtherCategory, $useOtherSubcategory)
+    {
+        if ($useOtherCategory) {
+            $categoryName = trim((string) $request->input('other_category_name'));
+            if ($categoryName !== '') {
+                CategorySubcategoryRequest::create([
+                    'request_type' => 'category',
+                    'requested_name' => $categoryName,
+                    'user_id' => $userId,
+                    'internship_id' => $internshipId,
+                    'status' => CategorySubcategoryRequest::STATUS_PENDING,
+                ]);
+            }
+        }
+
+        if ($useOtherSubcategory) {
+            $subcategoryName = trim((string) $request->input('other_subcategory_name'));
+            if ($subcategoryName !== '') {
+                $parentCategoryId = $useOtherCategory ? null : $request->input('category_id');
+                $parentCategoryName = $useOtherCategory
+                    ? trim((string) $request->input('other_category_name'))
+                    : optional(JobCategory::find($parentCategoryId))->category_nm;
+
+                CategorySubcategoryRequest::create([
+                    'request_type' => 'subcategory',
+                    'requested_name' => $subcategoryName,
+                    'category_id' => $parentCategoryId ?: null,
+                    'parent_category_name' => $parentCategoryName ?: null,
+                    'user_id' => $userId,
+                    'internship_id' => $internshipId,
+                    'status' => CategorySubcategoryRequest::STATUS_PENDING,
+                ]);
+            }
         }
     }
 
@@ -1776,6 +2753,29 @@ class WebsiteController extends Controller
             if ($internship->application_deadline) {
                 $internshipData['application_deadline'] = $internship->application_deadline->format('Y-m-d');
             }
+            if ($internship->last_registration_date) {
+                $internshipData['last_registration_date'] = $internship->last_registration_date->format('Y-m-d');
+                $internshipData['late_register_last_date'] = $internship->last_registration_date->format('Y-m-d');
+            }
+
+            // If category = 0 (Other was used), fetch requested category/subcategory names from requests table
+            $categoryRequest = null;
+            $subcategoryRequests = null;
+            if ($internship->category == 0 || empty($internship->sub_categories)) {
+                $categoryRequest = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                    ->where('request_type', 'category')
+                    ->orderByDesc('id')
+                    ->first();
+                $subcategoryRequests = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                    ->where('request_type', 'subcategory')
+                    ->orderByDesc('id')
+                    ->get();
+            }
+
+            $internshipData['requested_category_name'] = $categoryRequest ? $categoryRequest->requested_name : null;
+            $internshipData['requested_subcategory_names'] = $subcategoryRequests ? $subcategoryRequests->pluck('requested_name')->toArray() : [];
+            $internshipData['use_other_category'] = ($internship->category == 0 && $categoryRequest) ? 1 : 0;
+            $internshipData['use_other_subcategory'] = (!empty($subcategoryRequests)) ? 1 : 0;
 
             return response()->json([
                 'success' => true,
@@ -1841,58 +2841,16 @@ class WebsiteController extends Controller
     public function internshipCompletePage($id)
     {
         $user = Auth::user();
-        $internship = Internship::with(['company', 'jobCategory'])->findOrFail($id);
+        $internship = Internship::findOrFail($id);
 
         // Only the company owner can access
         if ($internship->company_id != $user->id) {
             return redirect()->route('company-profile')->with('error', 'Unauthorized access');
         }
 
-        $students = InternshipApplication::with(['user.college', 'user.degree'])
-            ->where('internship_id', $id)
-            ->get();
-
-        // Build per-student "Industry Marks" criteria keyed by student_id, cached by college_id:degree_id
-        $criteriaCache      = [];
-        $studentCriteriaMap = [];
-
-        foreach ($students as $app) {
-            $student = $app->user;
-            if (!$student) continue;
-
-            $cKey = "{$student->college_id}:{$student->degree_id}";
-            if (!array_key_exists($cKey, $criteriaCache)) {
-                $grade = Grade::where('college_id', $student->college_id)
-                    ->when($student->degree_id, fn($q) => $q->where('course_id', $student->degree_id))
-                    ->first();
-
-                $industryCrit = collect();
-                if ($grade) {
-                    $industrySectionIds = GradeSection::where('grade_id', $grade->id)
-                        ->where('title', 'Industry Marks')->pluck('id');
-                    $industryCrit = GradeCriterion::whereIn('section_id', $industrySectionIds)
-                        ->whereNull('deleted_at')->get();
-                }
-                $criteriaCache[$cKey] = $industryCrit;
-            }
-            $studentCriteriaMap[$student->id] = $criteriaCache[$cKey];
-        }
-
-        // Flag: any student has industry criteria (drives column header visibility)
-        $hasIndustryCriteria = collect($studentCriteriaMap)->flatten(1)->isNotEmpty();
-
-        $savedMarks = InternshipMark::where('internship_id', $id)
-            ->get()
-            ->groupBy('student_id');
-
-        // Pre-load feedback from applications
-        $feedbackColumn = $internship->internship_type == 2 ? 'college_feedback' : 'company_feedback';
-        $savedFeedbacks = InternshipApplication::where('internship_id', $id)
-            ->pluck($feedbackColumn, 'user_id');
-
-        return view('website.internship-complete', compact(
-            'internship', 'students', 'studentCriteriaMap', 'hasIndustryCriteria', 'savedMarks', 'savedFeedbacks'
-        ));
+        // Use the existing applications UI (Complete Program tab) — dedicated view is unused
+        $slug = $internship->slug ?: $internship->id;
+        return redirect()->route('internship.application.history', $slug);
     }
 
     /**
@@ -1967,11 +2925,9 @@ class WebsiteController extends Controller
             return response()->json(['success' => false, 'message' => 'Feedback cannot be modified after submission.'], 422);
         }
 
-        $feedbackColumn = $internship->internship_type == 2 ? 'college_feedback' : 'company_feedback';
-
         InternshipApplication::where('internship_id', $request->internship_id)
             ->where('user_id', $request->student_id)
-            ->update([$feedbackColumn => $request->feedback]);
+            ->update(['company_feedback' => $request->feedback]);
 
         return response()->json(['success' => true, 'message' => 'Feedback saved']);
     }
@@ -1983,10 +2939,9 @@ class WebsiteController extends Controller
     public function fetchInternshipMarks($internshipId)
     {
         $internship = Internship::findOrFail($internshipId);
-        $feedbackColumn = $internship->internship_type == 2 ? 'college_feedback' : 'company_feedback';
 
         $applications = InternshipApplication::where('internship_id', $internshipId)
-            ->pluck($feedbackColumn, 'user_id');
+            ->pluck('company_feedback', 'user_id');
 
         $marks = InternshipMark::where('internship_id', $internshipId)
             ->get()
@@ -2050,6 +3005,9 @@ class WebsiteController extends Controller
             }
 
             // Default behaviour for Industry+College internships: only company side submitted
+            InternshipMark::where('internship_id', $internship->id)
+                ->update(['status' => 1]);
+
             $internship->update([
                 'company_complete_sts' => 1,
                 'college_complete_sts' => 0,
@@ -2187,16 +3145,36 @@ class WebsiteController extends Controller
             ->whereDate('expire_date', '<', $today)
             ->update(['status' => 0]);
 
-        // 2) If user's active_plan_id has expired, clear it and redirect to pricing
-        if (!empty($user->active_plan_id)) {
-            $expired = DB::table('tbl_plan_history')
+        // Heal: active history exists but user.active_plan_id was cleared incorrectly
+        if (empty($user->active_plan_id) || (int) $user->active_plan_id === 0) {
+            $orphanActive = DB::table('tbl_plan_history')
+                ->where('user_id', $user->id)
+                ->where('status', 1)
+                ->whereDate('expire_date', '>=', $today)
+                ->orderByDesc('id')
+                ->first();
+
+            if ($orphanActive) {
+                DB::table('users')->where('id', $user->id)->update([
+                    'active_plan_id' => $orphanActive->plan_id,
+                    'updated_at' => now(),
+                ]);
+                $user->active_plan_id = $orphanActive->plan_id;
+            }
+        }
+
+        // 2) If user's CURRENT active history row is past expire, clear plan
+        if (!empty($user->active_plan_id) && (int) $user->active_plan_id > 0) {
+            $activeHistory = DB::table('tbl_plan_history')
                 ->where('user_id', $user->id)
                 ->where('plan_id', $user->active_plan_id)
-                ->whereDate('expire_date', '<', $today)
-                ->exists();
+                ->where('status', 1)
+                ->orderByDesc('id')
+                ->first();
 
-            if ($expired) {
-                User::where('id', $user->id)->update(['active_plan_id' => 0]);
+            if ($activeHistory && Carbon::parse($activeHistory->expire_date)->lt(Carbon::today())) {
+                DB::table('tbl_plan_history')->where('id', $activeHistory->id)->update(['status' => 0]);
+                PlanPricing::clearPlanForUser($user);
                 return redirect()->route('pricing', $user->id);
             }
         }
@@ -2219,20 +3197,21 @@ class WebsiteController extends Controller
             ->first();
 
         if (!$planData) {
-            User::where('id', $user->id)->update(['active_plan_id' => 0]);
+            PlanPricing::clearPlanForUser($user);
             return redirect()->route('pricing', $user->id);
         }
 
         // Double-check expire date
-        $expireDate = Carbon::parse($planData->expire_date);
+        $expireDate = Carbon::parse($planData->expire_date)->endOfDay();
         if (Carbon::now()->gt($expireDate)) {
-            // ensure the history is marked expired and active plan cleared
             DB::table('tbl_plan_history')
                 ->where('user_id', $user->id)
+                ->where('plan_id', $user->active_plan_id)
+                ->where('status', 1)
                 ->whereDate('expire_date', '<', $today)
                 ->update(['status' => 0]);
 
-            User::where('id', $user->id)->update(['active_plan_id' => 0]);
+            PlanPricing::clearPlanForUser($user);
             return redirect()->route('pricing', $user->id);
         }
 
@@ -2412,53 +3391,122 @@ class WebsiteController extends Controller
         }
 
         $Setting = Setting::where('id', 1)->first();
+        $activePlanId = (int) ($user->active_plan_id ?? 0);
+        $activeMarked = false;
         $PlanHistoryData = DB::table('tbl_plan_history as a')
             ->join('tbl_plan_pricing as b', 'a.plan_id', '=', 'b.plan_id')
             ->leftJoin('users as c', 'a.user_id', '=', 'c.id')
             ->where('a.user_id', $user->id)
-            // ->whereNotNull('a.payment_id')
-            // ->whereNotNull('a.order_id')
             ->select([
                 'a.*',
                 'b.plan_name',
                 'b.plan_price',
-                DB::raw("CASE WHEN a.plan_id = c.active_plan_id THEN 'Active' ELSE 'Expired' END as status")
-            ])->orderBy('a.id', 'DESC')
-            ->get();
+                'b.service as plan_service_default',
+                'b.job_limit as plan_job_limit_default',
+                'b.opportunity_limit as plan_opportunity_limit_default',
+                'c.plan_service',
+                'c.plan_job_limit',
+                'c.plan_opportunity_limit',
+                'c.plan_job_used',
+                'c.plan_internship_used',
+            ])
+            ->orderBy('a.id', 'DESC')
+            ->get()
+            ->map(function ($row) use ($activePlanId, &$activeMarked) {
+                $isActive = !$activeMarked
+                    && (int) $row->status === 1
+                    && $activePlanId > 0
+                    && (int) $row->plan_id === $activePlanId;
+
+                if ($isActive) {
+                    $activeMarked = true;
+                }
+
+                $row->display_status = $isActive ? 'Active' : 'Expired';
+
+                if ($isActive) {
+                    $service = \App\Models\PlanPricing::normalizeService($row->plan_service ?: ($row->plan_service_default ?? 'none'));
+                    $jobLimit = $row->plan_job_limit ?? $row->plan_job_limit_default;
+                    $oppLimit = $row->plan_opportunity_limit ?? $row->plan_opportunity_limit_default;
+                    $jobUsed = (int) ($row->plan_job_used ?? 0);
+                    $oppUsed = (int) ($row->plan_internship_used ?? 0);
+                } else {
+                    $service = \App\Models\PlanPricing::normalizeService($row->plan_service_default ?? 'none');
+                    $jobLimit = $row->plan_job_limit_default;
+                    $oppLimit = $row->plan_opportunity_limit_default;
+                    $jobUsed = null;
+                    $oppUsed = null;
+                }
+
+                if (!in_array($service, ['all', 'job'], true)) {
+                    $jobLimit = null;
+                }
+                if (!in_array($service, ['all', 'internship'], true)) {
+                    $oppLimit = null;
+                }
+
+                $row->display_service = $service === 'internship' ? 'opportunity' : $service;
+                $row->display_job_limit = $jobLimit;
+                $row->display_opportunity_limit = $oppLimit;
+                $row->display_job_used = $jobUsed;
+                $row->display_opportunity_used = $oppUsed;
+                return $row;
+            });
         // dd($PlanHistoryData);
 
-        // 🔥 ACTIVE PLAN (latest)
+        // 🔥 ACTIVE PLAN (latest active history, fallback latest)
         $activePlan = DB::table('tbl_plan_history as a')
             ->join('tbl_plan_pricing as b', 'a.plan_id', '=', 'b.plan_id')
             ->where('a.user_id', $user->id)
-            ->orderBy('a.id','DESC')
-            ->select('b.plan_price','b.plan_for')
+            ->where('a.status', 1)
+            ->orderBy('a.id', 'DESC')
+            ->select('b.plan_id', 'b.plan_price', 'b.plan_for', 'b.service', 'b.service_limit')
             ->first();
 
-        // 🔥 total job count
+        if (!$activePlan && !empty($user->active_plan_id)) {
+            $activePlan = DB::table('tbl_plan_pricing')
+                ->where('plan_id', $user->active_plan_id)
+                ->select('plan_id', 'plan_price', 'plan_for', 'service', 'service_limit')
+                ->first();
+        }
+
+        // 🔥 total job / opportunity counts (non-deleted)
         $totalJobs = DB::table('tbl_job')
             ->where('user_id', $user->id)
             ->whereNull('deleted_at')
             ->count();
-        // 🔥 button hide logic
+
+        $totalInternships = Internship::where('company_id', $user->id)->count();
+
+        // Plan service + limit checks
+        $activePlanModel = !empty($user->active_plan_id)
+            ? PlanPricing::find($user->active_plan_id)
+            : null;
+        $serviceFlags = PlanPricing::serviceFlags($activePlanModel);
+        $showJobTab = $serviceFlags['show_job_tab'];
+        $showInternshipTab = $serviceFlags['show_internship_tab'];
+        $canPostJob = PlanPricing::companyCanPost($user, 'job');
+        $canPostInternship = PlanPricing::companyCanPost($user, 'internship');
+        $jobLimitCheck = PlanPricing::checkServiceLimit($user, 'job', 'create');
+        $internshipLimitCheck = PlanPricing::checkServiceLimit($user, 'internship', 'create');
+
+        // Hide create buttons when plan service missing OR service_limit reached
+        // Legacy: free company plan (price 0) → max 1 job
         $hideCreateJobBtn = false;
-
-        if($activePlan){
-
-            // price float ma convert
+        if (!$canPostJob || empty($jobLimitCheck['allowed'])) {
+            $hideCreateJobBtn = true;
+        } elseif ($activePlan) {
             $price = (float) $activePlan->plan_price;
-
-            // lowercase compare
-            $planFor = strtolower($activePlan->plan_for);
-
-            if($price == 0 && $planFor == 'company'){
-                if($totalJobs >= 1){
-                    $hideCreateJobBtn = true;
-                }
+            $planFor = strtolower((string) $activePlan->plan_for);
+            if ($price == 0 && $planFor == 'company' && $totalJobs >= 1) {
+                $hideCreateJobBtn = true;
             }
         }
 
-    // dd($hideCreateJobBtn);
+        $hideCreateInternshipBtn = false;
+        if (!$canPostInternship || empty($internshipLimitCheck['allowed'])) {
+            $hideCreateInternshipBtn = true;
+        }
     
     
      // Fetch internships for the company
@@ -2512,7 +3560,10 @@ class WebsiteController extends Controller
         return view('website.company-profile', compact(
             'states', 'userData', 'CategoryData', 'MinqualificationData', 
             'JoblevelData', 'JobtypeData', 'WorktypeData', 'ExperiencereqData', 
-            'JobData', 'Setting', 'PlanHistoryData', 'filter', 'hideCreateJobBtn', 'InternshipData','MinqualificationData'
+            'JobData', 'Setting', 'PlanHistoryData', 'filter', 'hideCreateJobBtn', 'hideCreateInternshipBtn',
+            'InternshipData','MinqualificationData',
+            'showJobTab', 'showInternshipTab', 'canPostJob', 'canPostInternship',
+            'jobLimitCheck', 'internshipLimitCheck', 'totalJobs', 'totalInternships'
         ));
     }
     public function candidate_profile()
@@ -2619,6 +3670,8 @@ class WebsiteController extends Controller
 
             $Setting = Setting::where('id', 1)->first();
 
+            $activePlanId = (int) ($user->active_plan_id ?? 0);
+            $activeMarked = false;
             $PlanHistoryData = DB::table('tbl_plan_history as a')
                 ->join('tbl_plan_pricing as b', 'a.plan_id', '=', 'b.plan_id')
                 ->leftJoin('users as c', 'a.user_id', '=', 'c.id')
@@ -2627,9 +3680,57 @@ class WebsiteController extends Controller
                     'a.*',
                     'b.plan_name',
                     'b.plan_price',
-                    DB::raw("CASE WHEN a.plan_id = c.active_plan_id THEN 'Active' ELSE 'Expired' END as status")
-                ])->orderBy('a.id', 'DESC')
-                ->get();
+                    'b.service as plan_service_default',
+                    'b.job_limit as plan_job_limit_default',
+                    'b.opportunity_limit as plan_opportunity_limit_default',
+                    'c.plan_service',
+                    'c.plan_job_limit',
+                    'c.plan_opportunity_limit',
+                    'c.plan_job_used',
+                    'c.plan_internship_used',
+                ])
+                ->orderBy('a.id', 'DESC')
+                ->get()
+                ->map(function ($row) use ($activePlanId, &$activeMarked) {
+                    $isActive = !$activeMarked
+                        && (int) $row->status === 1
+                        && $activePlanId > 0
+                        && (int) $row->plan_id === $activePlanId;
+
+                    if ($isActive) {
+                        $activeMarked = true;
+                    }
+
+                    $row->display_status = $isActive ? 'Active' : 'Expired';
+
+                    if ($isActive) {
+                        $service = \App\Models\PlanPricing::normalizeService($row->plan_service ?: ($row->plan_service_default ?? 'none'));
+                        $jobLimit = $row->plan_job_limit ?? $row->plan_job_limit_default;
+                        $oppLimit = $row->plan_opportunity_limit ?? $row->plan_opportunity_limit_default;
+                        $jobUsed = (int) ($row->plan_job_used ?? 0);
+                        $oppUsed = (int) ($row->plan_internship_used ?? 0);
+                    } else {
+                        $service = \App\Models\PlanPricing::normalizeService($row->plan_service_default ?? 'none');
+                        $jobLimit = $row->plan_job_limit_default;
+                        $oppLimit = $row->plan_opportunity_limit_default;
+                        $jobUsed = null;
+                        $oppUsed = null;
+                    }
+
+                    if (!in_array($service, ['all', 'job'], true)) {
+                        $jobLimit = null;
+                    }
+                    if (!in_array($service, ['all', 'internship'], true)) {
+                        $oppLimit = null;
+                    }
+
+                    $row->display_service = $service === 'internship' ? 'opportunity' : $service;
+                    $row->display_job_limit = $jobLimit;
+                    $row->display_opportunity_limit = $oppLimit;
+                    $row->display_job_used = $jobUsed;
+                    $row->display_opportunity_used = $oppUsed;
+                    return $row;
+                });
 
             $Resume = Resume::where('resume_type', 1)->where('user_id', $user->id)->first();
             $Resumes = Resume::whereIn('resume_type', [1,2])->where('user_id', $user->id)->get();
@@ -2696,7 +3797,17 @@ class WebsiteController extends Controller
                     $it->complete_in_days = null;
                 }
             }
-            return view('website.candidate-profile', compact('states','MyInternshipData','userData', 'CategoryData', 'WorktypeData', 'JobtypeData', 'WorkExperienceData', 'EducationData', 'SaveJobData', 'MyjobData', 'Setting', 'PlanHistoryData', 'Resume', 'Resumes', 'experience'));
+
+            $activePlanModel = !empty($user->active_plan_id)
+                ? PlanPricing::find($user->active_plan_id)
+                : null;
+            $serviceFlags = PlanPricing::serviceFlags($activePlanModel);
+            $showJobTab = $serviceFlags['show_job_tab'];
+            $showInternshipTab = $serviceFlags['show_internship_tab'];
+            $canUseJobService = PlanPricing::hasPlanService($user, 'job');
+            $canUseInternshipService = PlanPricing::hasPlanService($user, 'internship');
+
+            return view('website.candidate-profile', compact('states','MyInternshipData','userData', 'CategoryData', 'WorktypeData', 'JobtypeData', 'WorkExperienceData', 'EducationData', 'SaveJobData', 'MyjobData', 'Setting', 'PlanHistoryData', 'Resume', 'Resumes', 'experience', 'showJobTab', 'showInternshipTab', 'canUseJobService', 'canUseInternshipService'));
         } else {
             return redirect()->route('login', ['login_type' => 'Employee'])->with('error', 'You must be logged in to view this page.');
         }
@@ -2980,9 +4091,15 @@ class WebsiteController extends Controller
         if ($user) {
             $Resumes = Resume::where('user_id', $user->id)->get();
         }
+
+        $canApplyJob = PlanPricing::employeeCanApply($user, 'job');
+        $jobApplyLimitCheck = $user
+            ? PlanPricing::checkServiceLimit($user, 'job', 'apply')
+            : ['allowed' => false, 'limit' => 0, 'used' => 0, 'remaining' => 0, 'message' => null];
+
         // dd($jobData);
 
-        return view('website.job-details', compact('jobData', 'user', 'SaveJobData', 'JobApplyHistory', 'adBanner', 'Setting', 'Resumes'));
+        return view('website.job-details', compact('jobData', 'user', 'SaveJobData', 'JobApplyHistory', 'adBanner', 'Setting', 'Resumes', 'canApplyJob', 'jobApplyLimitCheck'));
     }
 
 
@@ -4712,6 +5829,27 @@ class WebsiteController extends Controller
             $FindJob = Job::findOrFail($job_id);
             $FindUser = User::findOrFail($user_id);
 
+            if (!PlanPricing::employeeCanApply($FindUser, 'job')) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'Your current plan does not include Job service. Please upgrade your plan to apply.',
+                    'upgrade_url' => route('pricing', ['user_id' => $FindUser->id]),
+                    'contact_url' => route('contact'),
+                ]);
+            }
+
+            $limitCheck = PlanPricing::checkServiceLimit($FindUser, 'job', 'apply');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => $limitCheck['message'],
+                    'upgrade_url' => route('pricing', ['user_id' => $FindUser->id]),
+                    'contact_url' => route('contact'),
+                    'limit' => $limitCheck['limit'],
+                    'used' => $limitCheck['used'],
+                ]);
+            }
+
             $existingApply = JobApply::where('job_id', $job_id)
                 ->where('user_id', $user_id)
                 ->first();
@@ -4946,6 +6084,7 @@ class WebsiteController extends Controller
             $FindJob->total_apply = $FindJob->total_apply + 1;
             $FindJob->save();
 
+            PlanPricing::incrementServiceUsage($FindUser, 'job');
 
             $company = User::find($FindJob->user_id);
 

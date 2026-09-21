@@ -41,9 +41,15 @@
         </thead>
         <tbody>
             <tr>
-                <td>Internship Enrollment Fee</td>
-                <td class="right">₹{{ number_format($payment->total_amount - ($payment->gst_amount ?? 0), 2) }}</td>
+                <td>Registration Fee</td>
+                <td class="right">₹{{ number_format($payment->registration_fee ?? max(0, ($payment->total_amount - ($payment->gst_amount ?? 0) - ($payment->late_registration_fee ?? 0))), 2) }}</td>
             </tr>
+            @if((float) ($payment->late_registration_fee ?? 0) > 0)
+            <tr>
+                <td>Late Registration Fee</td>
+                <td class="right">₹{{ number_format($payment->late_registration_fee, 2) }}</td>
+            </tr>
+            @endif
             <tr>
                 <td>GST ({{ $payment->gst_percentage }}%)</td>
                 <td class="right">₹{{ number_format($payment->gst_amount, 2) }}</td>

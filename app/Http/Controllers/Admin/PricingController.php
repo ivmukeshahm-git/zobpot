@@ -34,6 +34,10 @@ class PricingController extends Controller
                     'plan_price',
                     'plan_description',
                     'plan_for as plan_for_type',
+                    'service',
+                    'service_limit',
+                    'job_limit',
+                    'opportunity_limit',
                     'benefits',
                     'plan_duration',
                     'plan_time',
@@ -44,6 +48,15 @@ class PricingController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->editColumn('plan_name', function ($row) {
+                    return PlanPricing::decodePlanText($row->plan_name);
+                })
+                ->editColumn('plan_description', function ($row) {
+                    return PlanPricing::decodePlanText($row->plan_description);
+                })
+                ->editColumn('benefits', function ($row) {
+                    return PlanPricing::decodePlanText($row->benefits);
+                })
                 ->addColumn('price_duration', function ($row) {
                     return $row->plan_price . ' / ' . $row->plan_time . ' ' . ($row->plan_duration == 'Y' ? 'Year' : ($row->plan_duration == 'M' ? 'Month' : 'Day'));
                 })
@@ -103,15 +116,30 @@ class PricingController extends Controller
      */
     public function store(Request $request)
     {
+        $service = PlanPricing::normalizeService($request->input('service', 'none'));
+        $request->merge(['service' => $service]);
+
         $validator = Validator::make($request->all(), [
-            'plan_name'        => 'required|string|max:255',
-            'plan_price'       => 'required|numeric',
-            'plan_description' => 'nullable|string',
-            'plan_for'         => 'required|string', // or array if needed
-            'plan_benefits'         => 'nullable',        // array or string
-            'plan_duration'    => 'required|string',
-            'duration_time'        => 'required|string',
+            'plan_name'           => 'required|string|max:255',
+            'plan_price'          => 'required|numeric',
+            'plan_description'    => 'nullable|string',
+            'plan_for'            => 'required|string',
+            'service'             => 'required|in:none,all,job,internship,opportunity',
+            'job_limit'           => 'nullable|integer|min:1',
+            'opportunity_limit'   => 'nullable|integer|min:1',
+            'plan_benefits'       => 'nullable',
+            'plan_duration'       => 'required|string',
+            'duration_time'       => 'required|string',
         ]);
+
+        $validator->after(function ($validator) use ($service, $request) {
+            if (in_array($service, ['all', 'job'], true) && !$request->filled('job_limit')) {
+                $validator->errors()->add('job_limit', 'Please enter Job Limit.');
+            }
+            if (in_array($service, ['all', 'internship'], true) && !$request->filled('opportunity_limit')) {
+                $validator->errors()->add('opportunity_limit', 'Please enter Opportunity Limit.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json([
@@ -122,39 +150,22 @@ class PricingController extends Controller
         }
 
         try {
-            // Convert benefits to comma-separated string if it's an array
-            $benefits = $request->input('plan_benefits');
-            if (is_array($benefits)) {
-                $benefits = implode(',', array_map('trim', $benefits));
-            }
-            // $benefitsArr = $request->input('plan_benefits');
-            // $benefits = '';
-
-            // if (is_array($benefitsArr)) {
-            //     $final = [];
-
-            //     foreach ($benefitsArr as $b) {
-            //         $name = $b['name'] ?? '';
-            //         $status = $b['status'] ?? 1;
-
-            //         if ($name != '') {
-            //             $final[] = trim($name) . '|' . $status;
-            //         }
-            //     }
-
-            //     $benefits = implode(',', $final);
-            // }
-
+            $benefits = $this->normalizePlanBenefits($request->input('plan_benefits'));
+            $limits = $this->resolvePlanLimits($service, $request);
 
             $plan = PlanPricing::create([
-                'plan_name'        => $request->input('plan_name'),
-                'plan_price'       => $request->input('plan_price'),
-                'plan_description' => $request->input('plan_description'),
-                'plan_for'         => $request->input('plan_for'),
-                'benefits'         => $benefits,
-                'plan_duration'    => $request->input('plan_duration'),
-                'plan_time'        => $request->input('duration_time'),
-                'status'           => 1,
+                'plan_name'          => $this->cleanPlanText($request->input('plan_name')),
+                'plan_price'         => $request->input('plan_price'),
+                'plan_description'   => $this->cleanPlanText($request->input('plan_description')),
+                'plan_for'           => $request->input('plan_for'),
+                'service'            => $service,
+                'job_limit'          => $limits['job_limit'],
+                'opportunity_limit'  => $limits['opportunity_limit'],
+                'service_limit'      => $limits['service_limit'],
+                'benefits'           => $benefits,
+                'plan_duration'      => $request->input('plan_duration'),
+                'plan_time'          => $request->input('duration_time'),
+                'status'             => 1,
             ]);
 
              StaffActivityController::insertActivity(Auth::user()->id, 'Plan Added Successfully.');
@@ -204,15 +215,30 @@ class PricingController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $service = PlanPricing::normalizeService($request->input('service', 'none'));
+        $request->merge(['service' => $service]);
+
         $validator = Validator::make($request->all(), [
-            'plan_name'        => 'required|string|max:255',
-            'plan_price'       => 'required|numeric',
-            'plan_description' => 'nullable|string',
-            'plan_for'         => 'required|string',
-            'plan_benefits'    => 'nullable',
-            'plan_duration'    => 'required|string',
-            'duration_time'    => 'required|string',
+            'plan_name'           => 'required|string|max:255',
+            'plan_price'          => 'required|numeric',
+            'plan_description'    => 'nullable|string',
+            'plan_for'            => 'required|string',
+            'service'             => 'required|in:none,all,job,internship,opportunity',
+            'job_limit'           => 'nullable|integer|min:1',
+            'opportunity_limit'   => 'nullable|integer|min:1',
+            'plan_benefits'       => 'nullable',
+            'plan_duration'       => 'required|string',
+            'duration_time'       => 'required|string',
         ]);
+
+        $validator->after(function ($validator) use ($service, $request) {
+            if (in_array($service, ['all', 'job'], true) && !$request->filled('job_limit')) {
+                $validator->errors()->add('job_limit', 'Please enter Job Limit.');
+            }
+            if (in_array($service, ['all', 'internship'], true) && !$request->filled('opportunity_limit')) {
+                $validator->errors()->add('opportunity_limit', 'Please enter Opportunity Limit.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json([
@@ -225,38 +251,22 @@ class PricingController extends Controller
         try {
             $plan = PlanPricing::findOrFail($id);
 
-            $benefits = $request->input('plan_benefits');
-            if (is_array($benefits)) {
-                $benefits = implode(',', array_map('trim', $benefits));
-            }
-            // $benefitsArr = $request->input('plan_benefits');
-            // $benefits = '';
-
-            // if (is_array($benefitsArr)) {
-            //     $final = [];
-
-            //     foreach ($benefitsArr as $b) {
-            //         $name = $b['name'] ?? '';
-            //         $status = $b['status'] ?? 1;
-
-            //         if ($name != '') {
-            //             $final[] = trim($name) . '|' . $status;
-            //         }
-            //     }
-
-            //     $benefits = implode(',', $final);
-            // }
-
+            $benefits = $this->normalizePlanBenefits($request->input('plan_benefits'));
+            $limits = $this->resolvePlanLimits($service, $request);
 
             $plan->update([
-                'plan_name'        => $request->input('plan_name'),
-                'plan_price'       => $request->input('plan_price'),
-                'plan_description' => $request->input('plan_description'),
-                'plan_for'         => $request->input('plan_for'),
-                'benefits'         => $benefits,
-                'plan_duration'    => $request->input('plan_duration'),
-                'plan_time'        => $request->input('duration_time'),
-                'status'           => 1,
+                'plan_name'          => $this->cleanPlanText($request->input('plan_name')),
+                'plan_price'         => $request->input('plan_price'),
+                'plan_description'   => $this->cleanPlanText($request->input('plan_description')),
+                'plan_for'           => $request->input('plan_for'),
+                'service'            => $service,
+                'job_limit'          => $limits['job_limit'],
+                'opportunity_limit'  => $limits['opportunity_limit'],
+                'service_limit'      => $limits['service_limit'],
+                'benefits'           => $benefits,
+                'plan_duration'      => $request->input('plan_duration'),
+                'plan_time'          => $request->input('duration_time'),
+                'status'             => 1,
             ]);
 
              StaffActivityController::insertActivity(Auth::user()->id, 'Plan Update Successfully.');
@@ -273,6 +283,34 @@ class PricingController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Resolve job/opportunity limits from request based on service type.
+     * Also keeps legacy service_limit in sync (max of set limits).
+     */
+    private function resolvePlanLimits(string $service, Request $request): array
+    {
+        $jobLimit = null;
+        $opportunityLimit = null;
+
+        if (in_array($service, ['all', 'job'], true) && $request->filled('job_limit')) {
+            $jobLimit = max(1, (int) $request->input('job_limit'));
+        }
+        if (in_array($service, ['all', 'internship'], true) && $request->filled('opportunity_limit')) {
+            $opportunityLimit = max(1, (int) $request->input('opportunity_limit'));
+        }
+
+        $legacy = null;
+        if ($jobLimit !== null || $opportunityLimit !== null) {
+            $legacy = max($jobLimit ?? 0, $opportunityLimit ?? 0) ?: null;
+        }
+
+        return [
+            'job_limit' => $jobLimit,
+            'opportunity_limit' => $opportunityLimit,
+            'service_limit' => $legacy,
+        ];
     }
 
     /**
@@ -300,5 +338,50 @@ class PricingController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Keep only non-empty benefit rows and store as CSV.
+     * Decode HTML entities so "&amp;" is never persisted as literal text.
+     */
+    private function normalizePlanBenefits($benefits): ?string
+    {
+        if (is_string($benefits)) {
+            $benefits = explode(',', $benefits);
+        }
+
+        if (!is_array($benefits)) {
+            return null;
+        }
+
+        $clean = [];
+        foreach ($benefits as $benefit) {
+            if (is_array($benefit)) {
+                $benefit = $benefit['name'] ?? '';
+            }
+
+            $text = PlanPricing::decodePlanText(trim((string) $benefit));
+            if ($text === '' || strtolower($text) === 'null') {
+                continue;
+            }
+
+            $clean[] = $text;
+        }
+
+        return empty($clean) ? null : implode(',', $clean);
+    }
+
+    /**
+     * Decode HTML entities on text fields before save.
+     */
+    private function cleanPlanText(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $text = PlanPricing::decodePlanText(trim($value));
+
+        return $text === '' ? null : $text;
     }
 }

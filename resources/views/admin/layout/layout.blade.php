@@ -1,11 +1,12 @@
   @php
       $Setting = App\Models\Setting::where('id', 1)->first();
+      $isCollegePortal = auth()->guard('college')->check() || auth()->guard('college_staff')->check();
   @endphp
 
   <!doctype html>
 
-  <html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="ltr"
-      data-theme="theme-default" data-assets-path="{{ asset('admin-assets') }}/" data-template="vertical-menu-template"
+  <html lang="en" class="light-style {{ $isCollegePortal ? 'college-saas-html' : 'layout-navbar-fixed layout-menu-fixed' }} layout-compact" dir="ltr"
+      data-theme="theme-default" data-assets-path="{{ asset('admin-assets') }}/" data-template="{{ $isCollegePortal ? 'horizontal-menu-template' : 'vertical-menu-template' }}"
       data-style="light">
 
   <head>
@@ -13,7 +14,7 @@
       <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-      <title>Zobpot - Admin</title>
+      <title>Zobpot - {{ $isCollegePortal ? 'College Admin' : 'Admin' }}</title>
 
       <!-- Favicon -->
       <link rel="icon" type="image/x-icon"
@@ -23,7 +24,7 @@
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
       <link
-          href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet" />
 
       <!-- Icons -->
@@ -67,6 +68,9 @@
       <script src="{{ asset('admin-assets/js/config.js') }}"></script>
 
       <link rel="stylesheet" href="{{ asset('admin-assets/css/toastr.css') }}" />
+      @if($isCollegePortal)
+      <link rel="stylesheet" href="{{ asset('admin-assets/css/college-saas.css') }}" />
+      @endif
       <meta name="csrf-token" content="{{ csrf_token() }}">
   </head>
   <style>
@@ -185,7 +189,7 @@
   
   <style>
     /* Tab Navigation Styles */
-    .internship-tabs {
+    .opportunity-tabs {
         background: #fff;
         border-radius: 12px;
         padding: 20px;
@@ -408,7 +412,7 @@
       var page_active_id = "Home";
   </script>
 
-  <body>
+  <body class="{{ $isCollegePortal ? 'college-saas-mode' : '' }}">
       @php
           $user = auth()->user() ?? auth()->guard('college')->user() ?? auth()->guard('college_staff')->user();
 
@@ -426,7 +430,7 @@
               $rawRole  = optional(auth()->user())->role;
               $userRole = is_string($rawRole) ? $rawRole : (optional(optional(auth()->user())->roles->first())->name ?? 'Admin');
           }
-          // Assign Internship menu: super admin only (admin panel login with Admin role or Assign-Internship permission)
+          // Assign Opportunity menu: super admin only (admin panel login with Admin role or Assign-Internship permission)
           $canAssign = false;
           try {
               if (auth()->check() && auth()->user() && method_exists(auth()->user(), 'can')) {
@@ -446,14 +450,19 @@
 
 
       <!-- Layout wrapper -->
+      @if($isCollegePortal)
+          @include('admin.layout.partials.college-topnav')
+      @endif
       <div class="layout-wrapper layout-content-navbar">
           <div class="layout-container">
               <!-- Menu -->
-              <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+              <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme {{ $isCollegePortal ? 'd-none' : '' }}">
                   <div class="app-brand demo">
                       <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
-                          <img src="{{ $Setting ?? $Setting->header_logo ? asset('uploads/logo_img/' . $Setting->header_logo) : asset('assets/imgs/logo/logo1.png') }}"
-                              alt="Logo" style="max-width: 100%;">
+                          <!-- <img src="{{ $Setting ?? $Setting->header_logo ? asset('uploads/logo_img/' . $Setting->header_logo) : asset('assets/imgs/logo/logo1.png') }}"
+                              alt="Logo" style="max-width: 100%;"> -->
+                              <img src="{{ $Setting ?? $Setting->header_logo ? asset('uploads/logo_img/' . $Setting->header_logo) : asset('assets/imgs/logo/logo1.png') }}"
+                              alt="Logo" style="max-width: 40%;">
                       </a>
 
                       <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -750,7 +759,7 @@
                                       <div class="text-truncate" data-i18n="Certificates">Certificates</div>
                                   </a>
                               </li>
-                              {{-- moved College Marks, College Marks History and Internship Reviews to top-level menu --}}
+                              {{-- moved College Marks, College Marks History and Opportunity Reviews to top-level menu --}}
                           </ul>
                       </li>
                       @endcanany
@@ -786,10 +795,10 @@
                       </li>
                       @endif
                       @if($canAssign)
-                      <!--<li class="menu-item" title="Assign Internship" id="AssignInternship">-->
+                      <!--<li class="menu-item" title="Assign Opportunity" id="AssignInternship">-->
                       <!--    <a href="{{ route('admin.staff.assign-internship-super') }}" class="menu-link">-->
                       <!--        <i class="menu-icon tf-icons bx bx-briefcase-alt-2"></i>-->
-                      <!--        <div class="text-truncate" data-i18n="Assign Internship">Assign Internship</div>-->
+                      <!--        <div class="text-truncate" data-i18n="Assign Internship">Assign Opportunity</div>-->
                       <!--    </a>-->
                       <!--</li>-->
                       @endif
@@ -987,7 +996,7 @@
                                   <!-- @can('Candidate-free_candidate') -->
                                       <li class="menu-item sub-menu" id="Internship">
                                           <a href="{{ route('admin.internship') }}" class="menu-link">
-                                              <div class="text-truncate" data-i18n="Internship List">Internship List
+                                              <div class="text-truncate" data-i18n="Internship List">Internship Directory
                                               </div>
                                           </a>
                                       </li>
@@ -996,7 +1005,8 @@
                           </li>
                           @endif
 
-                      @canany(['About-Update', 'Blog-Add', 'Blog-Edit', 'Blog-Delete', 'Testimonial-Add',
+                      @canany(['About-Update', 'Blog-Add', 'Blog-Edit', 'Blog-Delete', 'InterviewTips-Add',
+                          'InterviewTips-Edit', 'InterviewTips-Delete', 'Testimonial-Add',
                           'Testimonial-Edit', 'Testimonial-Delete', 'AdBanner-Add', 'AdBanner-Edit', 'AdBanner-Delete',
                           'PlanPricing-Add', 'PlanPricing-Edit', 'PlanPricing-Delete', 'Achievement-Update'])
                           <li class="menu-header small text-uppercase">
@@ -1018,6 +1028,14 @@
                               <a href="{{ route('admin.blog.index') }}" class="menu-link">
                                   <i class="menu-icon tf-icons bx bx-notepad"></i>
                                   <div class="text-truncate" data-i18n="Blog">Blog</div>
+                              </a>
+                          </li>
+                      @endcanany
+                      @canany(['InterviewTips-Add', 'InterviewTips-Edit', 'InterviewTips-Delete'])
+                          <li class="menu-item" title="Interview Tips" id="InterviewTips">
+                              <a href="{{ route('admin.interview-tips.index') }}" class="menu-link">
+                                  <i class="menu-icon tf-icons bx bx-bulb"></i>
+                                  <div class="text-truncate" data-i18n="Interview Tips">Interview Tips</div>
                               </a>
                           </li>
                       @endcanany
@@ -1068,6 +1086,7 @@
               <!-- Layout container -->
               <div class="layout-page">
                   <!-- Navbar -->
+                  @if(!$isCollegePortal)
                   <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
                       id="layout-navbar">
                       <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
@@ -1115,11 +1134,6 @@
                                       <li>
                                           <div class="dropdown-divider my-1"></div>
                                       </li>
-                                      {{-- <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="bx bx-user bx-md me-3"></i><span>My Profile</span>
-                                        </a>
-                                    </li> --}}
                                       @can('Setting-Update')
                                           <li>
                                               <a class="dropdown-item" href="{{ route('admin.setting.index') }}">
@@ -1136,8 +1150,8 @@
                                       @endif
 
                                       <li>
-                                          <a class="dropdown-item" href="{{ route('logout') }}"
-                                              onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                          <a class="dropdown-item" href="{{ route('admin.login') }}"
+                                              onclick="event.preventDefault(); var f=document.getElementById('logout-form'); if(f){ f.submit(); } else { window.location.href=this.href; }">
                                               <i class="bx bx-power-off bx-md me-3"></i><span>Log Out</span>
                                           </a>
                                       </li>
@@ -1145,6 +1159,7 @@
                                       <form id="logout-form" action="{{ route('logout') }}" method="POST"
                                           style="display: none;">
                                           @csrf
+                                          <input type="hidden" name="admin" value="1">
                                       </form>
                                   </ul>
                               </li>
@@ -1153,6 +1168,15 @@
 
 
                   </nav>
+                  @else
+                  {{-- College portal uses horizontal topnav; keep logout form for profile dropdown --}}
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                      @csrf
+                      <input type="hidden" name="admin" value="1">
+                  </form>
+                  <div id="layout-navbar" class="d-none"></div>
+                  <div id="navbar-collapse" class="d-none"></div>
+                  @endif
 
                   <!-- / Navbar -->
 
@@ -1164,8 +1188,18 @@
                       <!-- / Content -->
 
                       <!-- Footer -->
-                      <footer class="content-footer footer bg-footer-theme">
+                      <footer class="content-footer footer bg-footer-theme {{ $isCollegePortal ? 'college-saas-footer' : '' }}">
                           <div class="container-xxl">
+                              @if($isCollegePortal)
+                              <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column gap-2">
+                                  <div class="text-body">© 2026 Zobpot</div>
+                                  <div class="college-footer-links">
+                                      <a href="{{ route('privacy-policy') }}" target="_blank">Privacy Policy</a>
+                                      <a href="{{ route('term-and-conditions') }}" target="_blank">Terms</a>
+                                      <a href="{{ route('contact') }}" target="_blank">Support</a>
+                                  </div>
+                              </div>
+                              @else
                               <div
                                   class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
                                   <div class="text-body">
@@ -1175,6 +1209,7 @@
                                       <a href="https://ivinfotech.com/" target="_blank">IV Infotech.</a>
                                   </div>
                               </div>
+                              @endif
                           </div>
                       </footer>
                       <!-- / Footer -->
@@ -1258,7 +1293,7 @@
 
           // Open Accept Modal
     function openAcceptModal(internshipId) {
-        // Fetch internship details
+        // Fetch opportunity details
         $.ajax({
             url: '{{ url("admin/internship/details") }}/' + internshipId,
             method: 'GET',
@@ -1266,9 +1301,10 @@
                 if (response.success) {
                     const data = response.data;
                     
-                    // Populate modal with internship details
+                    // Populate modal with opportunity details
                     $('#internshipTitle').text(data.internship_title || '-');
                     $('#category').text(data.category_name || '-');
+                    $('#subcategory').text(data.subcategory_names || 'N/A');
                     $('#companyName').text(data.company_name || '-');
                     $('#companyWebsite').text(data.company_website || '-');
                     $('#workMode').text(data.mode || '-');
@@ -1289,6 +1325,9 @@
                     if (data.end_date) {
                         $('#modalEndDate').val(data.end_date);
                     }
+
+                    // Store application deadline for last-registration date bounds
+                    $('#acceptInternshipModal').data('application-deadline', data.application_deadline || '');
                     
                     // Batch Days
                     if (data.batch_days && Object.keys(data.batch_days).length > 0) {
@@ -1350,13 +1389,92 @@
                     $('#internshipObjective').html(data.internship_objective || '-');
                     $('#internshipOutcome').html(data.internship_outcome || '-');
                     
-                    // Store internship ID for accept action
-                    $('#acceptInternshipModal').data('internship-id', internshipId);
+                    // Store opportunity ID for accept action
+                    $('#acceptInternshipModal').data('opportunity-id', internshipId);
+
+                    // Category / Subcategory approval handling
+                    const categoryApproved = data.category_approved;
+                    const subcategoriesApproved = data.subcategories_approved;
+                    const categoryRejected = data.category_request_status === 'rejected';
+                    const subcategoryRejected = data.subcategory_request_status === 'rejected';
+                    const categoryPending = data.category_request_status === 'pending';
+                    const subcategoryPending = data.subcategory_request_status === 'pending';
+
+                    const acceptBtn = $('#acceptApproveBtn');
+                    const noteBox = $('#categoryApprovalNote');
+                    const noteText = $('#categoryApprovalNoteText');
+                    const reselectSection = $('#categoryReselectSection');
+
+                    // Reset re-select controls (destroy Select2 first if initialized)
+                    if ($('#reselectCategory').hasClass('select2-hidden-accessible')) {
+                        $('#reselectCategory').select2('destroy');
+                    }
+                    if ($('#reselectSubcategory').hasClass('select2-hidden-accessible')) {
+                        $('#reselectSubcategory').select2('destroy');
+                    }
+                    $('#reselectCategory').empty().append('<option value="">Select Category</option>');
+                    $('#reselectSubcategory').empty();
+
+                    let noteMsg = '';
+                    let showReselect = false;
+
+                    if (!categoryApproved || !subcategoriesApproved) {
+                        // Disable Accept & Approve until category/subcategory is resolved
+                        acceptBtn.prop('disabled', true).css({ 'opacity': '0.6', 'cursor': 'not-allowed' });
+
+                        if (categoryRejected || subcategoryRejected) {
+                            showReselect = true;
+                            noteMsg = 'The requested Category/Subcategory was rejected. Select a different Category & Subcategory below to enable approval.';
+                        } else if (categoryPending || subcategoryPending) {
+                            noteMsg = 'Category/Subcategory request is still pending. Approve the Category & Subcategory request from Master first.';
+                        } else {
+                            noteMsg = 'This internship has no approved Category/Subcategory. Approve the Category & Subcategory request from Master first.';
+                        }
+                    } else {
+                        acceptBtn.prop('disabled', false).css({ 'opacity': '1', 'cursor': 'pointer' });
+                    }
+
+                    noteText.text(noteMsg);
+                    noteBox.toggle(noteMsg !== '');
+                    reselectSection.toggle(showReselect);
+
+                    if (showReselect) {
+                        const $catSelect = $('#reselectCategory');
+                        (data.categories || []).forEach(c => {
+                            $catSelect.append(`<option value="${c.id}">${c.name}</option>`);
+                        });
+                        window.__internshipSubcategories = data.subcategories || [];
+
+                        // Initialize Select2 on both dropdowns
+                        $catSelect.select2({
+                            placeholder: 'Select Category',
+                            allowClear: true,
+                            width: '100%',
+                            dropdownParent: $('#acceptInternshipModal')
+                        });
+                        $('#reselectSubcategory').select2({
+                            placeholder: 'Select Sub Category',
+                            allowClear: true,
+                            width: '100%',
+                            dropdownParent: $('#acceptInternshipModal')
+                        });
+
+                        // Focus the category select once the modal is visible
+                        $('#acceptInternshipModal').off('shown.bs.modal.reselect').one('shown.bs.modal.reselect', function() {
+                            setTimeout(() => $catSelect.select2('open'), 400);
+                        });
+                    }
 
                     // Default: Associate with College + Enable Task Management
                     $('#internshipType').val('1');
                     $('#manageTaskStatus').prop('checked', true);
-                    $('#registrationFees').val($('#registrationFees').val() || '1000');
+                    $('#registrationFees').val(data.registration_fees != null ? data.registration_fees : ($('#registrationFees').val() || '1000'));
+                    $('#lastRegistrationDate').val(data.last_registration_date || '');
+                    $('#lateRegistrationFee').val(data.late_registration_fee != null ? data.late_registration_fee : 0);
+                    if (typeof window.updateAcceptModalDateConstraints === 'function') {
+                        window.updateAcceptModalDateConstraints();
+                    }
+                    $('#registrationFees').trigger('input');
                     
                     // Show modal
                     $('#acceptInternshipModal').modal('show');
@@ -1364,7 +1482,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: response.message || 'Failed to load internship details'
+                        text: response.message || 'Failed to load Internship details'
                     });
                 }
             },
@@ -1372,15 +1490,44 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: 'Failed to load internship details'
+                    text: 'Failed to load Internship details'
                 });
             }
         });
     }
 
-    // Edit Internship - Redirect to edit page
+    // Populate subcategories based on selected category (re-selection after rejection)
+    $(document).on('change', '#reselectCategory', function() {
+        const categoryId = $(this).val();
+        const $subSelect = $('#reselectSubcategory');
+        $subSelect.empty();
+        const subs = (window.__internshipSubcategories || []).filter(s => String(s.category_id) === String(categoryId));
+        subs.forEach(s => {
+            $subSelect.append(`<option value="${s.id}">${s.name}</option>`);
+        });
+        $subSelect.trigger('change.select2');
+        // Enable/disable Approve button based on selection
+        updateAcceptButtonState();
+    });
+    $(document).on('change', '#reselectSubcategory', function() {
+        updateAcceptButtonState();
+    });
+
+    function updateAcceptButtonState() {
+        if (!$('#categoryReselectSection').is(':visible')) return;
+        const catId = $('#reselectCategory').val();
+        const subIds = $('#reselectSubcategory').val() || [];
+        const $btn = $('#acceptApproveBtn');
+        if (catId && subIds.length > 0) {
+            $btn.prop('disabled', false).css({ 'opacity': '1', 'cursor': 'pointer' });
+        } else {
+            $btn.prop('disabled', true).css({ 'opacity': '0.6', 'cursor': 'not-allowed' });
+        }
+    }
+
+    // Update Opportunity - Redirect to edit page
     function editInternship() {
-        const internshipId = $('#acceptInternshipModal').data('internship-id');
+        const internshipId = $('#acceptInternshipModal').data('opportunity-id');
         
         if (!internshipId) {
             Swal.fire({
@@ -1398,9 +1545,9 @@
         window.location.href = '{{ url("admin/internship/edit") }}/' + internshipId;
     }
 
-    // Confirm Accept Internship
+    // Confirm Accept Opportunity
     function confirmAcceptInternship() {
-        const internshipId = $('#acceptInternshipModal').data('internship-id');
+        const internshipId = $('#acceptInternshipModal').data('opportunity-id');
         
         if (!internshipId) {
             Swal.fire({
@@ -1431,7 +1578,7 @@
             Swal.fire({
                 icon: 'warning',
                 title: 'Validation Error',
-                text: 'Please select internship type'
+                text: 'Please select program type'
             });
             return;
         }
@@ -1446,9 +1593,34 @@
             return;
         }
         
+        // Validate re-selected Category/Subcategory when visible (after rejection)
+        let reselectedCategoryId = null;
+        let reselectedSubIds = [];
+        if ($('#categoryReselectSection').is(':visible')) {
+            reselectedCategoryId = $('#reselectCategory').val();
+            reselectedSubIds = $('#reselectSubcategory').val() || [];
+            
+            if (!reselectedCategoryId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Category Required',
+                    text: 'Please select a Category to proceed with approval'
+                });
+                return;
+            }
+            if (reselectedSubIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sub Category Required',
+                    text: 'Please select at least one Sub Category to proceed with approval'
+                });
+                return;
+            }
+        }
+        
         Swal.fire({
             title: 'Are you sure?',
-            text: "Do you want to approve this internship with the configured fees?",
+            text: "Do you want to approve this Internship with the configured fees?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#28a745',
@@ -1457,17 +1629,31 @@
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Collect form data including GST calculation
+                // Collect form data — save admin-edited fee configuration
+                const baseFee = parseFloat(registrationFees) || 0;
+                const lateFee = parseFloat($('#lateRegistrationFee').val()) || 0;
+                const lastRegDate = $('#lastRegistrationDate').val() || '';
+                const gstPct = 18;
+                // Store opportunity base fee + GST (late fee applied dynamically at student apply time)
+                const baseGst = (baseFee * gstPct) / 100;
                 const formData = {
                     start_date: startDate,
                     end_date: endDate,
-                    registration_fees: parseFloat(registrationFees) || 0,
-                    gst_percentage: 18, // Fixed at 18%
-                    gst_amount: parseFloat($('#gstAmount').val()) || 0,
-                    final_amount: parseFloat($('#finalAmount').val()) || 0,
+                    registration_fees: baseFee,
+                    last_registration_date: lastRegDate,
+                    late_registration_fee: lateFee,
+                    gst_percentage: gstPct,
+                    gst_amount: parseFloat(baseGst.toFixed(2)),
+                    final_amount: parseFloat((baseFee + baseGst).toFixed(2)),
                     manage_task_status: $('#manageTaskStatus').is(':checked') ? 1 : 0,
                     internship_type: internshipType
                 };
+                
+                // Attach re-selected category/subcategory if chosen
+                if (reselectedCategoryId) {
+                    formData.category_id = reselectedCategoryId;
+                    formData.sub_category_ids = reselectedSubIds;
+                }
                 
                 $.ajax({
                     url: '{{ url("admin/internship/accept") }}/' + internshipId,
@@ -1506,12 +1692,12 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                text: response.message || 'Failed to approve internship'
+                                text: response.message || 'Failed to approve Internship'
                             });
                         }
                     },
                     error: function(xhr) {
-                        let errorMessage = 'Failed to approve internship';
+                        let errorMessage = 'Failed to approve Internship';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
@@ -1527,12 +1713,12 @@
     }
 
 
-           // Reject Internship
+           // Reject Opportunity
     function rejectInternship(internshipId) {
         Swal.fire({
             title: 'Reject Internship',
             html: `
-                <p>Are you sure you want to reject this internship?</p>
+                <p>Are you sure you want to reject this Internship?</p>
                 <textarea id="rejectionReason" class="form-control mt-3" rows="3" placeholder="Enter rejection reason (optional)"></textarea>
             `,
             icon: 'warning',
@@ -1579,12 +1765,12 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                text: response.message || 'Failed to reject internship'
+                                text: response.message || 'Failed to reject Internship'
                             });
                         }
                     },
                     error: function(xhr) {
-                        let errorMessage = 'Failed to reject internship';
+                        let errorMessage = 'Failed to reject Internship';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
@@ -1623,17 +1809,44 @@
 
               // Clear previous active/open classes
               $(".menu-inner .menu-item").removeClass("active open");
-              $(".menu-inner .menu-item#" + parts[0]).addClass("active open");
+              $(".college-nav-link").removeClass("active");
+
+              // Prefer exact id match (College-Dashboard, CollegeStaff, etc.)
+              if ($(".menu-item#" + page_active_id).length) {
+                  $(".menu-item#" + page_active_id).addClass("active open");
+              } else {
+                  $(".menu-inner .menu-item#" + parts[0]).addClass("active open");
+              }
 
               // Optional: Check if parts[1] exists before applying submenu highlight
-              if (parts.length > 1 && parts[1]) {
+              if (parts.length > 1 && parts[1] && !$(".menu-item#" + page_active_id).length) {
                   $(".menu-inner .menu-sub .sub-menu").removeClass("active open");
                   $(".menu-inner .menu-sub .sub-menu#" + parts[1]).addClass("active open");
               }
+
+              // Mobile drawer active state
+              $('.college-nav-link[data-menu-id="' + page_active_id + '"]').addClass('active');
           }
 
 
           setActive();
+
+          // College mobile hamburger
+          (function () {
+              var toggle = document.getElementById('collegeNavToggle');
+              var drawer = document.getElementById('collegeMobileDrawer');
+              if (!toggle || !drawer) return;
+              toggle.addEventListener('click', function () {
+                  drawer.classList.toggle('open');
+                  drawer.setAttribute('aria-hidden', drawer.classList.contains('open') ? 'false' : 'true');
+              });
+              drawer.addEventListener('click', function (e) {
+                  if (e.target === drawer) {
+                      drawer.classList.remove('open');
+                      drawer.setAttribute('aria-hidden', 'true');
+                  }
+              });
+          })();
       </script>
       <script>
           const suggestions = ['Frontend Developer', 'Backend Developer', 'UI/UX Designer', 'Laravel Developer',
@@ -1849,30 +2062,82 @@
       var internshipConfigValidator;
 
       $(document).ready(function() {
-          // Function to calculate GST and final amount (Fixed 18% GST)
+          // Last Date of Registration: between Application Deadline and Start Date
+          window.updateAcceptModalDateConstraints = function() {
+              const $start = $('#modalStartDate');
+              const $lastReg = $('#lastRegistrationDate');
+              if (!$lastReg.length) return;
+
+              const startDate = $start.val() || '';
+              const appDeadline = $('#acceptInternshipModal').data('application-deadline') || '';
+
+              if (appDeadline) {
+                  $lastReg.attr('min', appDeadline);
+              } else {
+                  $lastReg.removeAttr('min');
+              }
+              if (startDate) {
+                  $lastReg.attr('max', startDate);
+              } else {
+                  $lastReg.removeAttr('max');
+              }
+
+              const lastVal = $lastReg.val() || '';
+              if (lastVal) {
+                  if (appDeadline && lastVal < appDeadline) {
+                      $lastReg.val('');
+                  } else if (startDate && lastVal > startDate) {
+                      $lastReg.val('');
+                  }
+              }
+          };
+
+          $(document).on('change input', '#modalStartDate', function() {
+              window.updateAcceptModalDateConstraints();
+          });
+
+          // Calculate GST + total. Late fee is included in preview when today is past last registration date.
           function calculateGST() {
               const registrationFees = parseFloat($('#registrationFees').val()) || 0;
+              const lateFeeConfigured = parseFloat($('#lateRegistrationFee').val()) || 0;
+              const lastDate = $('#lastRegistrationDate').val();
               const gstPercentage = 18; // Fixed 18% GST
-              
-              // Calculate GST amount
-              const gstAmount = (registrationFees * gstPercentage) / 100;
-              
-              // Calculate final amount
-              const finalAmount = registrationFees + gstAmount;
-              
-              // Update input fields
+
+              let isLate = false;
+              if (lastDate) {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const deadline = new Date(lastDate + 'T00:00:00');
+                  isLate = !isNaN(deadline.getTime()) && today > deadline;
+              }
+
+              const appliedLateFee = isLate ? lateFeeConfigured : 0;
+              const subtotal = registrationFees + appliedLateFee;
+              const gstAmount = (subtotal * gstPercentage) / 100;
+              const finalAmount = subtotal + gstAmount;
+
               $('#gstPercentage').val(gstPercentage);
               $('#gstAmount').val(gstAmount.toFixed(2));
               $('#finalAmount').val(finalAmount.toFixed(2));
-              
-              // Update summary section
+
               $('#summaryRegFees').text(registrationFees.toFixed(2));
+              $('#summaryLateFee').text(appliedLateFee.toFixed(2));
+              $('#summaryGstPct').text(gstPercentage);
               $('#summaryGst').text(gstAmount.toFixed(2));
               $('#summaryTotal').text(finalAmount.toFixed(2));
+
+              // Always keep late fee input visible for admin editing
+              $('#lateRegistrationFeeWrap').show();
+
+              if (appliedLateFee > 0) {
+                  $('#summaryLateWrap').show();
+              } else {
+                  $('#summaryLateWrap').hide();
+              }
           }
           
-          // Trigger calculation on registration fees input change
-          $('#registrationFees').on('input change', function() {
+          // Recalculate when any fee/date field changes
+          $('#registrationFees, #lateRegistrationFee, #lastRegistrationDate').on('input change', function() {
               calculateGST();
           });
           
@@ -1888,12 +2153,12 @@
           // Initialize validation when modal is shown
           $('#acceptInternshipModal').on('shown.bs.modal', function() {
               // Destroy existing validator if any
-              if (internshipConfigValidator) {
-                  internshipConfigValidator.destroy();
+              if (opportunityConfigValidator) {
+                  opportunityConfigValidator.destroy();
               }
 
-              // Initialize jQuery Validation for Internship Config Form
-              internshipConfigValidator = $('#internshipConfigForm').validate({
+              // Initialize jQuery Validation for Opportunity Config Form
+              opportunityConfigValidator = $('#internshipConfigForm').validate({
                   rules: {
                       internship_type: {
                           required: true
@@ -1909,11 +2174,18 @@
                           required: true,
                           number: true,
                           min: 0
+                      },
+                      late_registration_fee: {
+                          number: true,
+                          min: 0
+                      },
+                      last_registration_date: {
+                          date: false
                       }
                   },
                   messages: {
                       internship_type: {
-                          required: "Please select internship type"
+                          required: "Please select program type"
                       },
                       start_date: {
                           required: "Please select start date"
@@ -1926,6 +2198,10 @@
                           required: "Please enter registration fees",
                           number: "Please enter a valid number",
                           min: "Registration fees must be at least 0"
+                      },
+                      late_registration_fee: {
+                          number: "Please enter a valid late fee",
+                          min: "Late registration fee must be at least 0"
                       }
                   },
                   errorElement: 'div',
@@ -1948,26 +2224,47 @@
 
               // Trigger GST calculation
               calculateGST();
+              if (typeof window.updateAcceptModalDateConstraints === 'function') {
+                  window.updateAcceptModalDateConstraints();
+              }
           });
 
           // Reset validation when modal is hidden
           $('#acceptInternshipModal').on('hidden.bs.modal', function() {
-              if (internshipConfigValidator) {
-                  internshipConfigValidator.resetForm();
+              if (opportunityConfigValidator) {
+                  opportunityConfigValidator.resetForm();
                   $('#internshipConfigForm').find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
                   $('#internshipConfigForm').find('.invalid-feedback').remove();
               }
               // Reset form
               $('#internshipConfigForm')[0].reset();
               $('#registrationFees').val('1000');
+              $('#lastRegistrationDate').val('');
+              $('#lateRegistrationFee').val('0');
               $('#internshipType').val('1');
               $('#manageTaskStatus').prop('checked', true);
+              $('#acceptInternshipModal').removeData('application-deadline');
+              $('#lastRegistrationDate').removeAttr('min').removeAttr('max');
+              // Reset category/subcategory approval UI
+              $('#categoryReselectSection').hide();
+              $('#categoryApprovalNote').hide();
+              $('#categoryApprovalNoteText').text('');
+              if ($('#reselectCategory').hasClass('select2-hidden-accessible')) {
+                  $('#reselectCategory').select2('destroy');
+              }
+              if ($('#reselectSubcategory').hasClass('select2-hidden-accessible')) {
+                  $('#reselectSubcategory').select2('destroy');
+              }
+              $('#reselectCategory').empty().append('<option value="">Select Category</option>');
+              $('#reselectSubcategory').empty();
+              window.__internshipSubcategories = [];
+              $('#acceptApproveBtn').prop('disabled', false).css({ 'opacity': '1', 'cursor': 'pointer' });
               calculateGST();
           });
       });
   </script>
 
-  <!-- Accept Internship Modal (Common for all pages) -->
+  <!-- Accept Opportunity Modal (Common for all pages) -->
   <div class="modal fade" id="acceptInternshipModal" tabindex="-1" aria-labelledby="acceptInternshipModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
@@ -1976,11 +2273,33 @@
                       <h5 class="modal-title" id="acceptInternshipModalLabel" style="color:#fff;">
                           <i class="bx bx-check-circle"></i> Accept Internship Application
                       </h5>
-                      <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Review internship details before approval</p>
+                      <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Review Internship details before approval</p>
                   </div>
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body" style="padding: 30px;">
+                  <!-- Category/Subcategory Re-selection (shown when request rejected) -->
+                  <div class="detail-section" id="categoryReselectSection" style="display: none; background: #fff8e6; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                      <h6 style="color: #856404; font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 5px;">
+                          <i class="bx bx-refresh"></i> Update Category & Sub Category
+                      </h6>
+                      <p style="font-size: 12px; color: #856404; margin-bottom: 15px;">
+                          The requested Category/Subcategory was <strong>rejected</strong>. Please select an approved Category and Sub Category below — the Accept &amp; Approve button will be enabled after selection.
+                      </p>
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              <label for="reselectCategory" class="form-label" style="font-weight: 600;">Category <span class="text-danger">*</span></label>
+                              <select class="form-control" id="reselectCategory" name="reselect_category" style="width: 100%;">
+                                  <option value="">Select Category</option>
+                              </select>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                              <label for="reselectSubcategory" class="form-label" style="font-weight: 600;">Sub Category <span class="text-danger">*</span></label>
+                              <select class="form-control" id="reselectSubcategory" name="reselect_subcategory[]" multiple style="width: 100%;">
+                              </select>
+                          </div>
+                      </div>
+                  </div>
                   <div class="detail-section" style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                       <div class="d-flex justify-content-between align-items-center mb-3">
                           <h6 style="color: #242a62; font-weight: 700; font-size: 14px; text-transform: uppercase; margin: 0; padding-bottom: 10px; border-bottom: 2px solid #242a62; flex-grow: 1;">
@@ -1999,6 +2318,10 @@
                               <div class="detail-row" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #dee2e6;">
                                   <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Category:</span>
                                   <span class="detail-value" style="color: #212529; font-size: 13px;" id="category">-</span>
+                              </div>
+                              <div class="detail-row" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #dee2e6;">
+                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Sub Category:</span>
+                                  <span class="detail-value" style="color: #212529; font-size: 13px;" id="subcategory">-</span>
                               </div>
                               <div class="detail-row" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #dee2e6;">
                                   <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Company Name:</span>
@@ -2071,7 +2394,7 @@
                           </div>
                           <div class="col-12 mb-2">
                               <div class="detail-row">
-                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Internship Description:</span>
+                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Program Overview:</span>
                               </div>
                               <div class="detail-value" id="internshipDescription" style="padding: 10px; background: #fff; border-radius: 6px; font-size: 12px; border: 1px solid #dee2e6; margin-top: 5px;">-</div>
                           </div>
@@ -2083,13 +2406,13 @@
                           </div>
                           <div class="col-12 mb-2">
                               <div class="detail-row">
-                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Internship Objective:</span>
+                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Learning Objectives:</span>
                               </div>
                               <div class="detail-value" id="internshipObjective" style="padding: 10px; background: #fff; border-radius: 6px; font-size: 12px; border: 1px solid #dee2e6; margin-top: 5px;">-</div>
                           </div>
                           <div class="col-12 mb-2">
                               <div class="detail-row">
-                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Internship Outcome:</span>
+                                  <span class="detail-label" style="font-weight: 600; color: #495057; font-size: 13px;">Skills You'll Gain:</span>
                               </div>
                               <div class="detail-value" id="internshipOutcome" style="padding: 10px; background: #fff; border-radius: 6px; font-size: 12px; border: 1px solid #dee2e6; margin-top: 5px;">-</div>
                           </div>
@@ -2104,21 +2427,21 @@
                       <form id="internshipConfigForm">
                           <div class="row">
                             <div class="col-md-4 mb-3">
-                                   <label for="internshipType" class="form-label" style="font-weight: 600;">
-                                        Internship Type <span class="text-danger">*</span>
+                                   <label for="opportunityType" class="form-label" style="font-weight: 600;">
+                                        Program Type <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-control" id="internshipType" name="internship_type" required>
-                                        <option value="">Select Internship Type</option>
+                                        <option value="">Select Program Type</option>
                                         <option value="1" selected>Associate with College</option>
-                                        <option value="2">Internship With Industry</option>
+                                        <option value="2">Industry Partnership Program</option>
                                     </select>
                               </div>
                               <div class="col-md-4 mb-3">
-                                  <label for="modalStartDate" class="form-label" style="font-weight: 600;">Internship Start Date <span class="text-danger">*</span></label>
+                                  <label for="modalStartDate" class="form-label" style="font-weight: 600;">Program Start Date <span class="text-danger">*</span></label>
                                   <input type="date" class="form-control" id="modalStartDate" name="start_date" required>
                               </div>
                               <div class="col-md-4 mb-3">
-                                  <label for="modalEndDate" class="form-label" style="font-weight: 600;">Internship End Date <span class="text-danger">*</span></label>
+                                  <label for="modalEndDate" class="form-label" style="font-weight: 600;">Program End Date <span class="text-danger">*</span></label>
                                   <input type="date" class="form-control" id="modalEndDate" name="end_date" required>
                               </div>
                           </div>
@@ -2128,6 +2451,18 @@
                                   <label for="registrationFees" class="form-label" style="font-weight: 600;">Registration Fees (₹) <span class="text-danger">*</span></label>
                                   <input type="number" class="form-control" id="registrationFees" name="registration_fees" placeholder="Enter amount" value="1000" min="0" step="0.01" required>
                                   <small class="text-muted">Base registration fee</small>
+                              </div>
+
+                              <div class="col-md-4 mb-3">
+                                  <label for="lastRegistrationDate" class="form-label" style="font-weight: 600;">Last Date of Registration</label>
+                                  <input type="date" class="form-control" id="lastRegistrationDate" name="last_registration_date">
+                                  <small class="text-muted">After this date, late fee applies</small>
+                              </div>
+
+                              <div class="col-md-4 mb-3" id="lateRegistrationFeeWrap">
+                                  <label for="lateRegistrationFee" class="form-label" style="font-weight: 600;">Late Registration Fee (₹)</label>
+                                  <input type="number" class="form-control" id="lateRegistrationFee" name="late_registration_fee" value="0" min="0" step="0.01" placeholder="Enter late fee">
+                                  <small class="text-muted">Charged only after last registration date</small>
                               </div>
                               
                               <div class="col-md-4 mb-3">
@@ -2141,13 +2476,13 @@
                                   <input type="number" class="form-control" id="gstAmount" name="gst_amount" placeholder="Auto calculated" readonly style="background-color: #fff3cd; font-weight: 600;">
                                   <small class="text-muted">Calculated automatically</small>
                               </div>
-                              <div class="col-md-6 mb-3">
+                              <div class="col-md-4 mb-3">
                                   <label class="form-label" style="font-weight: 600;">Enable Task Management?</label>
                                   <div class="form-check form-switch">
                                       <input class="form-check-input" type="checkbox" id="manageTaskStatus" name="manage_task_status" value="1" checked>
-                                      <label class="form-check-label" for="manageTaskStatus">Enable task management for this internship</label>
+                                      <label class="form-check-label" for="manageTaskStatus">Enable task management for this Internship</label>
                                   </div>
-                                  <small class="text-muted">If enabled, internship tasks feature will be active for this internship.</small>
+                                  <small class="text-muted">If enabled, Internship tasks feature will be active for this Internship.</small>
                               </div>
                           </div>
                           
@@ -2155,7 +2490,7 @@
                               <div class="col-md-12 mb-3">
                                   <label for="finalAmount" class="form-label" style="font-weight: 600; font-size: 15px;">Total Pay Amount (₹) <span class="text-danger">*</span></label>
                                   <input type="number" class="form-control" id="finalAmount" name="final_amount" placeholder="Total amount with GST" readonly style="background-color: #d1e7dd; font-weight: 700; font-size: 18px; color: #0f5132; border: 2px solid #28a745;">
-                                  <small class="text-success"><i class="bx bx-info-circle"></i> This is the final amount including GST that will be charged</small>
+                                  <small class="text-success"><i class="bx bx-info-circle"></i> Includes GST. Late fee is added automatically if today is after the last registration date.</small>
                               </div>
                           </div>
 
@@ -2170,8 +2505,11 @@
                                                   <span style="color: #495057; font-size: 13px;">
                                                       Registration Fees: <strong style="color: #242a62;">₹<span id="summaryRegFees">1000.00</span></strong>
                                                   </span>
+                                                  <span id="summaryLateWrap" style="color: #495057; font-size: 13px; margin-left: 15px; display:none;">
+                                                      + Late Fee: <strong style="color: #dc3545;">₹<span id="summaryLateFee">0.00</span></strong>
+                                                  </span>
                                                   <span style="color: #495057; font-size: 13px; margin-left: 15px;">
-                                                      + GST (18%): <strong style="color: #ff9800;">₹<span id="summaryGst">180.00</span></strong>
+                                                      + GST (<span id="summaryGstPct">18</span>%): <strong style="color: #ff9800;">₹<span id="summaryGst">180.00</span></strong>
                                                   </span>
                                                   <span style="color: #495057; font-size: 13px; margin-left: 15px;">
                                                       = Total: <strong style="color: #28a745; font-size: 15px;">₹<span id="summaryTotal">1180.00</span></strong>
@@ -2185,17 +2523,75 @@
                       </form>
                   </div>
               </div>
+              <div id="categoryApprovalNote" style="display: none; background: #fff3cd; border: 1px solid #ffc107; color: #856404; border-radius: 8px; padding: 10px 15px; margin: 0 30px 10px 30px; font-size: 13px; font-weight: 600;">
+                  <i class="bx bx-info-circle"></i> <span id="categoryApprovalNoteText"></span>
+              </div>
               <div class="modal-footer" style="background: #f8f9fa; padding: 20px 30px;">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                       <i class="bx bx-x"></i> Cancel
                   </button>
-                  <button type="button" class="btn" onclick="confirmAcceptInternship()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);">
+                  <button type="button" id="acceptApproveBtn" class="btn" onclick="confirmAcceptInternship()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); display: inline-flex; align-items: center;">
                       <i class="bx bx-check-circle"></i> Accept & Approve Internship
                   </button>
               </div>
           </div>
       </div>
   </div>
+
+  <style>
+      #categoryReselectSection .select2-container--default .select2-selection--single {
+          height: 38px;
+          border: 1px solid #ced4da;
+          border-radius: 6px;
+          padding: 5px 10px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--single .select2-selection__rendered {
+          line-height: 26px;
+          color: #212529;
+          font-size: 13px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--single .select2-selection__arrow {
+          height: 36px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--multiple {
+          min-height: 38px;
+          border: 1px solid #ced4da;
+          border-radius: 6px;
+          padding: 4px 8px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--multiple .select2-selection__choice {
+          background: #696cff;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          padding: 2px 8px;
+          margin: 2px;
+          font-size: 12px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+          color: #fff;
+          margin-right: 4px;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+          color: #ffcdd2;
+      }
+      #categoryReselectSection .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+          color: #6c757d;
+          font-size: 13px;
+      }
+      #categoryReselectSection .select2-container--default.select2-container--focus .select2-selection--multiple,
+      #categoryReselectSection .select2-container--default.select2-container-open .select2-selection--multiple {
+          border-color: #696cff;
+          box-shadow: 0 0 0 0.15rem rgba(105, 108, 255, 0.25);
+      }
+      /* Ensure Select2 dropdowns render above modal scrollable body */
+      #acceptInternshipModal .select2-dropdown {
+          z-index: 9999 !important;
+      }
+      #acceptInternshipModal .select2-container--open {
+          z-index: 9999 !important;
+      }
+  </style>
 
   </body>
 

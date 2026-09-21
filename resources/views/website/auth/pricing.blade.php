@@ -23,14 +23,14 @@
                                         </div>
                                         <div class="border-bottom mb-30">
                                             <p class="text-desc-package font-sm color-text-paragraph mb-30">
-                                                {{ $row->plan_description }}</p>
+                                                {{ \App\Models\PlanPricing::decodePlanText($row->plan_description) }}</p>
                                         </div>
                                         @php
-                                            $benefitsArray = $row->benefits ? explode(',', $row->benefits) : [];
+                                            $benefitsArray = $row->benefits_list;
                                         @endphp
                                         <ul class="list-package-feature">
                                             @foreach ($benefitsArray as $benefit)
-                                                <li>{{ trim($benefit) }}</li>
+                                                <li>{{ $benefit }}</li>
                                             @endforeach
                                         </ul>
                                         <div><button class="btn btn-border buy-btn" type="button" data-id="{{$row->plan_id}}"
@@ -58,7 +58,7 @@
                         <div class="row">
                             @foreach ($pricing as $row)
                                 @php
-                                    $benefitsArray = $row->benefits ? explode(',', $row->benefits) : [];
+                                    $benefitsArray = $row->benefits_list;
                                     $totalBenefits = count($benefitsArray);
                                     $showMore = $totalBenefits > 3;
                                 @endphp
@@ -108,7 +108,7 @@
 
                                         <!-- Description -->
                                         <div class="custom-plan-description" style="padding: 15px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0;">
-                                            <p class="custom-description-text" style="color: #666; text-align: center; margin: 0; font-size: 13px; line-height: 1.4;">{{ $row->plan_description }}</p>
+                                            <p class="custom-description-text" style="color: #666; text-align: center; margin: 0; font-size: 13px; line-height: 1.4;">{{ \App\Models\PlanPricing::decodePlanText($row->plan_description) }}</p>
                                         </div>
 
                                         <!-- Benefits List - Scrollable Container -->
@@ -117,7 +117,7 @@
                                                 @foreach ($benefitsArray as $benefit)
                                                     <li class="custom-benefit-item" style="display: flex; align-items: flex-start; padding: 8px 0; color: #555; font-size: 13px; line-height: 1.3;">
                                                         <span class="custom-check-icon" style="background: #242b62; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-right: 10px; flex-shrink: 0; margin-top: 2px;">✓</span>
-                                                        <span style="flex: 1;">{{ trim($benefit) }}</span>
+                                                        <span style="flex: 1;">{{ $benefit }}</span>
                                                     </li>
                                                 @endforeach
                                             </ul>

@@ -100,13 +100,13 @@
 
 
 
-                        <div class="col-lg-8 mt-4">
+                        <div class="col-lg-12 mt-4">
                             <label for="nameBackdrop" class="form-label mb-2">Plan Description <span
                                     style="color:red;">*</span></label>
                             <input type="text" id="plan_description" name="plan_description" class="form-control"
                                 placeholder="Enter Description">
                         </div>
-                        <div class="col-lg-4 mt-4">
+                        <div class="col-lg-6 mt-4">
                             <label for="nameBackdrop" class="form-label mb-2">Plan For <span
                                     style="color:red;">*</span></label>
                             <select name="plan_for" class="form-control" id="plan_for">
@@ -115,13 +115,43 @@
                             </select>
                         </div>
 
+                        <div class="col-lg-6 mt-4">
+                            <label for="plan_service" class="form-label mb-2">Service <span
+                                    style="color:red;">*</span></label>
+                            <select name="service" class="form-control" id="plan_service">
+                                <option value="none" selected>None</option>
+                                <option value="all">All</option>
+                                <option value="job">Job</option>
+                                <option value="internship">Internship</option>
+                            </select>
+                            <small class="text-muted">Controls Job / Internship tabs on user profile</small>
+                        </div>
+
+                        <div class="col-lg-6 mt-4" id="job_limit_wrap" style="display: none;">
+                            <label for="job_limit" class="form-label mb-2">
+                                Job Limit <span style="color:red;">*</span>
+                            </label>
+                            <input type="number" min="1" step="1" id="job_limit" name="job_limit"
+                                class="form-control" placeholder="Enter Job Limit (e.g. 1)">
+                            <small class="text-muted">Company: max jobs to create. Candidate: max job applications.</small>
+                        </div>
+
+                        <div class="col-lg-6 mt-4" id="opportunity_limit_wrap" style="display: none;">
+                            <label for="opportunity_limit" class="form-label mb-2">
+                                Internship Limit <span style="color:red;">*</span>
+                            </label>
+                            <input type="number" min="1" step="1" id="opportunity_limit" name="opportunity_limit"
+                                class="form-control" placeholder="Enter Internship Limit (e.g. 1)">
+                            <small class="text-muted">Company: max internships to create. Candidate: max internship applications.</small>
+                        </div>
+
 
                         <div class="mt-5">
                             <label for="nameBackdrop" class="form-label mb-2">
                                 Plan Benefits <span style="color:red;">*</span>
                             </label>
                             <div class="plan-benifits-box" id="benifitsBoxHtml">
-                                <div class="row mb-4 benefit-row">
+                                <div class="row mb-4 benefit-row benefit-add-row">
                                     <div class="col-lg-11">
                                         <input type="text" class="form-control" name="plan_benefits[]"
                                             id="plan_benefits" placeholder="Enter Benefits"
@@ -155,6 +185,49 @@
 @push('script')
     <script>
         $(document).ready(function() {
+            function decodeHtmlEntities(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                var text = String(value);
+                var textarea = document.createElement('textarea');
+                // Decode repeatedly in case value was double-escaped (&amp;amp;)
+                for (var i = 0; i < 3; i++) {
+                    textarea.innerHTML = text;
+                    var decoded = textarea.value;
+                    if (decoded === text) {
+                        break;
+                    }
+                    text = decoded;
+                }
+                return text;
+            }
+
+            function toggleServiceLimitField() {
+                var service = ($("#plan_service").val() || 'none').toString().trim();
+                var showJob = (service === 'all' || service === 'job');
+                var showOpp = (service === 'all' || service === 'opportunity' || service === 'internship');
+
+                if (showJob) {
+                    $("#job_limit_wrap").show();
+                    $("#job_limit").prop('disabled', false);
+                } else {
+                    $("#job_limit_wrap").hide();
+                    $("#job_limit").val('').prop('disabled', true);
+                }
+
+                if (showOpp) {
+                    $("#opportunity_limit_wrap").show();
+                    $("#opportunity_limit").prop('disabled', false);
+                } else {
+                    $("#opportunity_limit_wrap").hide();
+                    $("#opportunity_limit").val('').prop('disabled', true);
+                }
+            }
+
+            $("#plan_service").on('change', toggleServiceLimitField);
+            toggleServiceLimitField();
+
             var datatable = $('#PricingDataTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -206,32 +279,68 @@
                 $("#JobPricing").modal("show");
 
 
-                // Fill form fields
-                $("#plan_name").val(rowData.plan_name);
+                // Fill form fields (decode DataTables HTML escaping so "&amp;" never appears in inputs)
+                $("#plan_name").val(decodeHtmlEntities(rowData.plan_name));
                 $("#plan_price").val(rowData.plan_price);
                 $("#duration_time").val(rowData.plan_time);
-                $("#plan_description").val(rowData.plan_description);
-                $("#plan_for").val(rowData.plan_for_type.trim()).trigger('change');
+                $("#plan_description").val(decodeHtmlEntities(rowData.plan_description));
+                $("#plan_for").val(String(rowData.plan_for_type || '').trim()).trigger('change');
                 $("#plan_duration").val(rowData.plan_duration).trigger('change');
+                var serviceVal = (rowData.service || 'none').toString().trim();
+                if (serviceVal === 'opportunity') {
+                    serviceVal = 'internship';
+                }
+                $("#plan_service").val(serviceVal).trigger('change');
+                $("#job_limit").val(rowData.job_limit || '');
+                $("#opportunity_limit").val(rowData.opportunity_limit || '');
+                // Fallback: old single service_limit
+                if (!rowData.job_limit && !rowData.opportunity_limit && rowData.service_limit) {
+                    if (serviceVal === 'all' || serviceVal === 'job') {
+                        $("#job_limit").val(rowData.service_limit);
+                    }
+                    if (serviceVal === 'all' || serviceVal === 'opportunity' || serviceVal === 'internship') {
+                        $("#opportunity_limit").val(rowData.service_limit);
+                    }
+                }
+                toggleServiceLimitField();
 
-                // Set benefits
-                var benefits = rowData.benefits ? rowData.benefits.split(',') : [];
+                // Load existing benefits first, keep blank "+" row always at the end
+                var addRowHtml = `
+                <div class="row mb-4 benefit-row benefit-add-row">
+                    <div class="col-lg-11">
+                        <input type="text" class="form-control" name="plan_benefits[]"
+                            placeholder="Enter Benefits" style="background-color: #fff;">
+                    </div>
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-sm btn-primary p-2 add-benefit">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>`;
+                $("#benifitsBoxHtml").empty();
 
-
+                var benefitsRaw = decodeHtmlEntities(rowData.benefits || '');
+                var benefits = benefitsRaw ? benefitsRaw.split(',') : [];
                 benefits.forEach(function(benefit) {
-                    var newBenefitRow = `
+                    var text = decodeHtmlEntities((benefit || '').toString().trim());
+                    if (!text || text.toLowerCase() === 'null') {
+                        return;
+                    }
+                    var $row = $(`
         <div class="row mb-4 benefit-row">
             <div class="col-lg-11">
-                <input type="text" class="form-control" name="plan_benefits[]" value="${benefit.trim()}" placeholder="Enter Benefits" style="background-color: #fff;">
+                <input type="text" class="form-control" name="plan_benefits[]" value="" placeholder="Enter Benefits" style="background-color: #fff;">
             </div>
             <div class="col-lg-1">
                 <button type="button" class="btn btn-sm btn-danger p-2 remove-benefit">
                     <i class="fa fa-trash"></i>
                 </button>
             </div>
-        </div>`;
-                    $("#benifitsBoxHtml").append(newBenefitRow);
+        </div>`);
+                    $row.find("input[name='plan_benefits[]']").val(text);
+                    $("#benifitsBoxHtml").append($row);
                 });
+                $("#benifitsBoxHtml").append(addRowHtml);
 
                 // Set form state
                 $("#JobPricingTitle").text("Edit Plan & Pricing");
@@ -301,7 +410,42 @@
 
 
             $('#JobPricing').on('hidden.bs.modal', function() {
+                var $form = $("#pricing-form");
+                $form[0].reset();
+                if (typeof validator !== 'undefined' && validator) {
+                    validator.resetForm();
+                }
+                $form.find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+                $form.find('.error').remove();
+
                 $("#_method").val("POST");
+                $("#flag").val("A");
+                $("#row_id").val("");
+                $("#JobPricingTitle").text("Plan & Pricing");
+
+                $("#plan_name").val('');
+                $("#plan_price").val('');
+                $("#duration_time").val('');
+                $("#plan_description").val('');
+                $("#plan_for").val('').trigger('change');
+                $("#plan_duration").val('').trigger('change');
+                $("#plan_service").val("none").trigger('change');
+                $("#job_limit").val('').prop('disabled', true);
+                $("#opportunity_limit").val('').prop('disabled', true);
+                toggleServiceLimitField();
+
+                $("#benifitsBoxHtml").html(`
+                <div class="row mb-4 benefit-row benefit-add-row">
+                    <div class="col-lg-11">
+                        <input type="text" class="form-control" name="plan_benefits[]"
+                            placeholder="Enter Benefits" style="background-color: #fff;">
+                    </div>
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-sm btn-primary p-2 add-benefit">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>`);
             });
 
 
@@ -328,6 +472,29 @@
                 plan_for: {
                     required: true
                 },
+                service: {
+                    required: true
+                },
+                job_limit: {
+                    required: {
+                        depends: function() {
+                            var service = ($("#plan_service").val() || 'none').toString().trim();
+                            return service === 'all' || service === 'job';
+                        }
+                    },
+                    digits: true,
+                    min: 1
+                },
+                opportunity_limit: {
+                    required: {
+                        depends: function() {
+                            var service = ($("#plan_service").val() || 'none').toString().trim();
+                            return service === 'all' || service === 'opportunity' || service === 'internship';
+                        }
+                    },
+                    digits: true,
+                    min: 1
+                },
 
             },
             messages: {
@@ -348,6 +515,19 @@
                 },
                 plan_for: {
                     required: "Please Select Plan For"
+                },
+                service: {
+                    required: "Please Select Service"
+                },
+                job_limit: {
+                    required: "Please Enter Job Limit",
+                    digits: "Please Enter a Valid Number",
+                    min: "Job Limit must be at least 1"
+                },
+                opportunity_limit: {
+                    required: "Please Enter Internship Limit",
+                    digits: "Please Enter a Valid Number",
+                    min: "Internship Limit must be at least 1"
                 },
             },
             errorElement: "div",
@@ -371,9 +551,25 @@
                 return;
             }
 
+            // Clear empty / null values from trailing add row before serialize
+            $("#benifitsBoxHtml .benefit-add-row input[name='plan_benefits[]']").each(function() {
+                var val = ($(this).val() || '').toString().trim();
+                if (!val || val.toLowerCase() === 'null') {
+                    $(this).prop('disabled', true);
+                }
+            });
+            $("#benifitsBoxHtml .benefit-row:not(.benefit-add-row) input[name='plan_benefits[]']").each(function() {
+                var val = ($(this).val() || '').toString().trim();
+                if (!val || val.toLowerCase() === 'null') {
+                    $(this).closest('.benefit-row').remove();
+                }
+            });
+
             let form = $(this);
-            // let url = form.attr('action');
-            let formData = form.serialize(); // Use FormData for file uploads
+            let formData = form.serialize();
+
+            // Re-enable add-row input after serialize
+            $("#benifitsBoxHtml .benefit-add-row input[name='plan_benefits[]']").prop('disabled', false);
 
             $.ajaxSetup({
                 headers: {
@@ -423,11 +619,16 @@
 
             benefitsBox.addEventListener("click", function(e) {
                 if (e.target.closest(".add-benefit")) {
+                    const addRow = e.target.closest(".benefit-row");
+                    const addInput = addRow ? addRow.querySelector("input[name='plan_benefits[]']") : null;
+                    const typedValue = addInput ? (addInput.value || '').trim() : '';
+
                     const newBenefitRow = document.createElement("div");
                     newBenefitRow.classList.add("row", "mb-4", "benefit-row");
+                    const safeValue = $('<div>').text(typedValue).html();
                     newBenefitRow.innerHTML = `
                     <div class="col-lg-11">
-                        <input type="text" class="form-control" name="plan_benefits[]" id="plan_benefits" placeholder="Enter Benefits" style="background-color: #fff;">
+                        <input type="text" class="form-control" name="plan_benefits[]" value="${safeValue}" placeholder="Enter Benefits" style="background-color: #fff;">
                     </div>
                     <div class="col-lg-1">
                         <button type="button" class="btn btn-sm btn-danger p-2 remove-benefit">
@@ -435,7 +636,21 @@
                         </button>
                     </div>
                 `;
-                    benefitsBox.appendChild(newBenefitRow);
+                    // Prefer setting value via property so "&" stays as "&" (no &amp; in the field)
+                    const createdInput = newBenefitRow.querySelector("input[name='plan_benefits[]']");
+                    if (createdInput) {
+                        createdInput.value = typedValue;
+                    }
+                    // Keep "+" row always last
+                    if (addRow && addRow.parentNode) {
+                        addRow.parentNode.insertBefore(newBenefitRow, addRow);
+                    } else {
+                        benefitsBox.appendChild(newBenefitRow);
+                    }
+                    if (addInput) {
+                        addInput.value = '';
+                        addInput.focus();
+                    }
                 }
 
                 if (e.target.closest(".remove-benefit")) {

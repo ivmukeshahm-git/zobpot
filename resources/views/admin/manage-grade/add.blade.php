@@ -149,6 +149,23 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if(auth()->guard('college')->check() || auth()->guard('college_staff')->check())
+    @component('admin.layout.partials.college-page-banner', [
+        'emoji' => '🏅',
+        'title' => 'Add Grade Configuration',
+        'subtitle' => 'Configure grade system for ' . ($college->college_name ?? 'college'),
+        'illustration' => 'grade',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Manage Grade', 'url' => route('admin.manage-grade.index')],
+            ['label' => 'Add Grade'],
+        ],
+    ])
+        <a href="{{ route('admin.manage-grade.index') }}" class="btn zp-banner-btn">
+            <i class="bx bx-arrow-back"></i> Back to List
+        </a>
+    @endcomponent
+    @else
     <!-- Page Header -->
     <div class="grade-page-header" style="background: #242a62; padding: 25px 30px; border-radius: 12px; margin-bottom: 30px;">
         <div class="d-flex justify-content-between align-items-center">
@@ -165,6 +182,7 @@
             </a>
         </div>
     </div>
+    @endif
 
     <form id="gradeForm">
         @csrf

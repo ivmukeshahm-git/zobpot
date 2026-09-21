@@ -108,9 +108,32 @@ Route::post('get-majors-by-degree-and-college', [WebsiteController::class, 'getM
 Route::post('submit-college-info', [WebsiteController::class, 'submitCollegeInfo'])->name('submit.college.info');
 // Create internship application (called before initiating payment)
 Route::post('internship/application/create', [WebsiteController::class, 'createInternshipApplication'])->name('internship.application.create');
+Route::post('internship/razorpay/create-order', [WebsiteController::class, 'createInternshipRazorpayOrder'])->name('internship.razorpay.create-order');
+Route::post('internship/razorpay/verify', [WebsiteController::class, 'verifyInternshipRazorpayPayment'])->name('internship.razorpay.verify');
 
 
 Route::get('/my-internship-details/{slug}', [WebsiteController::class, 'my_internship_details'])->name('my-internship-details')->middleware('auth','role.user');
+
+Route::get('/my-internship-certificate/{applicationId}/{type}/download', [WebsiteController::class, 'downloadMyCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('my-internship-certificate.download');
+
+Route::get('/my-internship-certificate/{applicationId}/{type}/preview', [WebsiteController::class, 'previewMyCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('my-internship-certificate.preview');
+
+// Company: download/preview student certificates from internship applications page
+Route::get('/company-internship-certificate/{applicationId}/{type}/download', [WebsiteController::class, 'downloadCompanyStudentCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('company-internship-certificate.download');
+
+Route::get('/company-internship-certificate/{applicationId}/{type}/preview', [WebsiteController::class, 'previewCompanyStudentCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('company-internship-certificate.preview');
 
 
 // Submit internship task (student submission)
@@ -248,6 +271,7 @@ Route::post('internship/website/save-feedback', [WebsiteController::class, 'save
 Route::get('internship/website/fetch-marks/{id}', [WebsiteController::class, 'fetchInternshipMarks'])->name('website.internship.fetch-marks')->middleware('auth','role.user');
 Route::post('internship/website/submit-completion', [WebsiteController::class, 'submitInternshipCompletion'])->name('website.internship.submit-completion')->middleware('auth','role.user');
 Route::get('internship/complete/{id}', [WebsiteController::class, 'internshipCompletePage'])->name('website.internship.complete')->middleware('auth','role.user');
+Route::post('internship/website/instructions/{id}', [WebsiteController::class, 'saveInstructions'])->name('website.internship.instructions.save')->middleware('auth','role.user');
 
 
 // Return JSON details for a single internship task
@@ -738,6 +762,13 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
 
     // Certificate Management Routes
     Route::get('internship/certificates', [InternshipController::class, 'certificates'])->name('internship.certificates');
+
+    Route::get('internship/certificate-settings', [\App\Http\Controllers\Admin\CertificateSettingController::class, 'index'])
+        ->name('internship.certificate-settings')
+        ->middleware('canany:Internship-Add,Internship-Edit,Internship-View');
+    Route::post('internship/certificate-settings', [\App\Http\Controllers\Admin\CertificateSettingController::class, 'update'])
+        ->name('internship.certificate-settings.update')
+        ->middleware('canany:Internship-Add,Internship-Edit');
     
     Route::get('internship/certificates/students/{id}', [InternshipController::class, 'getCertificateStudents'])->name('internship.certificates.students');
     
@@ -746,6 +777,14 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
     Route::get('internship/certificates/download-all/{internshipId}', [InternshipController::class, 'downloadAllCertificates'])->name('internship.certificates.download.all');
     
     Route::get('internship/certificates/export', [InternshipController::class, 'exportCertificates'])->name('internship.certificates.export');
+
+    // Student certificate preview & PDF download (company / college)
+    Route::get('internship/certificate/{applicationId}/{type}/preview', [InternshipController::class, 'previewStudentCertificate'])
+        ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+        ->name('internship.certificate.preview');
+    Route::get('internship/certificate/{applicationId}/{type}/download', [InternshipController::class, 'downloadStudentCertificate'])
+        ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+        ->name('internship.certificate.download');
 
     // Internship Task Management Routes
     Route::post('internship/{id}/tasks/store', [InternshipController::class, 'storeTask'])->name('internship.tasks.store');
@@ -894,6 +933,8 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
     
     // College Dashboard Routes
     Route::get('college-dashboard', [CollegeDashboardController::class, 'index'])->name('college.dashboard');
+    Route::get('college-settings', [\App\Http\Controllers\College\CollegeSettingsController::class, 'index'])->name('college.settings');
+    Route::post('college-settings/update', [\App\Http\Controllers\College\CollegeSettingsController::class, 'update'])->name('college.settings.update');
     Route::get('college-registration-list', [CollegeDashboardController::class, 'registrationList'])->name('college.registration-list');
     Route::post('college-registration-list/data', [CollegeDashboardController::class, 'getRegistrationData'])->name('college.registration-list.data');
     Route::post('college-staff-dashboard/assigned-students', [CollegeDashboardController::class, 'getAssignedStudentsData'])->name('college.staff-dashboard.assigned-students');

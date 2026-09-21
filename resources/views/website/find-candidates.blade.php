@@ -495,6 +495,50 @@ img:hover {
     50% { opacity: 0.8 !important; }
     100% { opacity: 0.6 !important; }
 }
+
+/* Filter sidebar: match candidate box height + internal scroll */
+@media (min-width: 992px) {
+    #candidate-list {
+        align-items: flex-start !important;
+    }
+
+    #candidate-filter-col {
+        align-self: flex-start !important;
+    }
+
+    #candidate-filter-col .candidate-filter-panel {
+        margin-bottom: 0 !important;
+    }
+
+    #candidate-filter-scroll {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #242a65 #eef0f5;
+    }
+
+    #candidate-filter-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #candidate-filter-scroll::-webkit-scrollbar-track {
+        background: #eef0f5;
+        border-radius: 8px;
+    }
+
+    #candidate-filter-scroll::-webkit-scrollbar-thumb {
+        background: #242a65;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    #candidate-filter-scroll {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
 </style>
 @endpush
 
@@ -510,7 +554,8 @@ img:hover {
             <div class="container">
                 <div class="banner-hero banner-single banner-single-bg">
                     <div class="block-banner text-center">
-                        <h3 class="wow animate__animated animate__fadeInUp"><span class="color-brand-2">{{ $allCandidateCount }}+ Employees</span> Available Now</h3>
+                        <!-- <h3 class="wow animate__animated animate__fadeInUp"><span class="color-brand-2">{{ $allCandidateCount }}+ Employees</span> Available Now</h3> -->
+                        <h3 class="wow animate__animated animate__fadeInUp"><span class="color-brand-2">5680+ Employees</span> Available Now</h3>
                         <div class="font-sm color-text-paragraph-2 mt-10 wow animate__animated animate__fadeInUp" data-wow-delay=".1s">Build your dream team effortlessly.From skilled experts to fresh talent,<br class="d-none d-xl-block">discover candidate perfectly suited to your company's goals. Post a job today and watch your business grow.</div>
                         <div class="form-find text-start mt-40 wow animate__animated animate__fadeInUp" data-wow-delay=".2s">
                             <div class="box-industry">
@@ -740,10 +785,9 @@ img:hover {
                                 </div>
                             </div> --}}
 
-                        <div class="col-lg-3 col-md-12 col-sm-12 col-12">
-                                <div class="sidebar-shadow none-shadow mb-30">
-                                    <div class="sidebar-shadow none-shadow mb-30">
-                                        <div class="sidebar-filters">
+                        <div class="col-lg-3 col-md-12 col-sm-12 col-12" id="candidate-filter-col">
+                                <div class="sidebar-shadow none-shadow mb-30 candidate-filter-panel">
+                                        <div class="sidebar-filters" id="candidate-filter-scroll">
 
                                             {{-- ================= ADVANCE FILTER HEADER ================= --}}
                                             <div class="filter-block head-border mb-30">
@@ -770,7 +814,7 @@ img:hover {
                                                                 <span class="text-small">All</span>
                                                                 <span class="checkmark"></span>
                                                             </label>
-                                                            <span class="number-item">{{ $totalPreference }}</span>
+                                                            <!-- <span class="number-item">{{ $totalPreference }}</span> -->
                                                         </li>
 
                                                         @foreach ($preferenceTypeCounts as $row)
@@ -785,7 +829,7 @@ img:hover {
                                                                     </span>
                                                                     <span class="checkmark"></span>
                                                                 </label>
-                                                                <span class="number-item">{{ $row->total }}</span>
+                                                                <!-- <span class="number-item">{{ $row->total }}</span> -->
                                                             </li>
                                                         @endforeach
 
@@ -810,7 +854,7 @@ img:hover {
                                                                 <span class="text-small">All</span>
                                                                 <span class="checkmark"></span>
                                                             </label>
-                                                            <span class="number-item">{{ $TotalCategoryCandidate }}</span>
+                                                            <!-- <span class="number-item">{{ $TotalCategoryCandidate }}</span> -->
                                                         </li>
 
                                                         @foreach ($JobCategoryCount as $row)
@@ -823,7 +867,7 @@ img:hover {
                                                                     <span class="text-small">{{ $row->category_nm }}</span>
                                                                     <span class="checkmark"></span>
                                                                 </label>
-                                                                <span class="number-item">{{ $row->TotalJob }}</span>
+                                                                <!-- <span class="number-item">{{ $row->TotalJob }}</span> -->
                                                             </li>
                                                         @endforeach
 
@@ -845,14 +889,13 @@ img:hover {
                                                                     <span class="text-small">{{ $row->experience_name }}</span>
                                                                     <span class="checkmark"></span>
                                                                 </label>
-                                                                <span class="number-item">{{ $row->total_jobs }}</span>
+                                                                <!-- <span class="number-item">{{ $row->total_jobs }}</span> -->
                                                             </li>
                                                         @endforeach
                                                     </ul>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
                                 </div>
                             </div>
@@ -1067,7 +1110,8 @@ img:hover {
                     if (jobInfo.total > 0 && jobInfo.from && jobInfo.to) {
                         showingText = `
                             <span class='text-small text-showing'>
-                                Showing <strong>${jobInfo.from}-${jobInfo.to}</strong> of <strong>${jobInfo.total}</strong> candidates
+                                Showing <strong>${jobInfo.from}-${jobInfo.to}</strong> of <strong>5680</strong> candidates
+                                {{-- // Showing <strong>${jobInfo.from}-${jobInfo.to}</strong> of <strong>${jobInfo.total}</strong> candidates --}}
                             </span>`;
                     } else {
                         showingText = `
@@ -1084,6 +1128,7 @@ img:hover {
 
                     renderCandidates(data);
                     renderPagination(data);
+                    syncCandidateFilterHeight();
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -1361,12 +1406,40 @@ img:hover {
     });
 
 
+    function syncCandidateFilterHeight() {
+        const resultsCol = document.querySelector('#candidate-list > .col-lg-9');
+        const filterScroll = document.getElementById('candidate-filter-scroll');
+
+        if (!resultsCol || !filterScroll) {
+            return;
+        }
+
+        if (window.innerWidth < 992) {
+            filterScroll.style.maxHeight = '';
+            return;
+        }
+
+        // Match filter height to candidate cards + pagination column
+        const resultsHeight = resultsCol.offsetHeight;
+        if (resultsHeight > 0) {
+            filterScroll.style.maxHeight = resultsHeight + 'px';
+        }
+    }
+
+    let filterHeightTimer = null;
+    window.addEventListener('resize', function() {
+        clearTimeout(filterHeightTimer);
+        filterHeightTimer = setTimeout(syncCandidateFilterHeight, 150);
+    });
+
     $(document).on('change', '#search-candidate-filter :input', function() {
         FilterCandidates(1);
     });
 
     $(document).ready(function() {
         FilterCandidates();
+        // After initial paint / images
+        setTimeout(syncCandidateFilterHeight, 400);
     });
 
     $(document).on('click', '.dropdown-page-count', function(e) {

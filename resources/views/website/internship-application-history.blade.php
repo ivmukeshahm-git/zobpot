@@ -2,38 +2,92 @@
 @section('website-content')
 
     <style>
-        /* Internship Application History Page Styles */
-        .internship-history-header {
-            background: #242a62;
-            border-radius: 12px;
-            padding: 40px;
-            margin-bottom: 30px;
-            color: white;
-            box-shadow: 0 4px 20px rgba(36, 42, 98, 0.3);
+        /* Candidate Application History Page Styles */
+        .internship-history-header,
+        .opportunity-history-header {
+            background: linear-gradient(135deg, #242a62 0%, #3d4575 55%, #f26e2c 160%);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            color: #ffffff;
+            box-shadow: 0 10px 28px rgba(36, 42, 98, 0.22);
         }
 
-        .internship-history-header h2 {
-            margin: 0 0 10px 0;
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .internship-history-header p {
+        .internship-history-header h2,
+        .opportunity-history-header h2 {
             margin: 0;
-            opacity: 0.9;
-            font-size: 16px;
+            font-size: 30px;
+            font-weight: 800;
+            color: #ffffff !important;
+            line-height: 1.25;
+        }
+
+        .internship-history-header h2 i,
+        .opportunity-history-header h2 i {
+            color: #ffd7c2;
+            margin-right: 8px;
+        }
+
+        .internship-history-header p,
+        .opportunity-history-header p {
+            margin: 8px 0 0 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.92) !important;
+        }
+
+        .internship-history-header .header-meta,
+        .opportunity-history-header .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .internship-history-header .header-meta span,
+        .opportunity-history-header .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #fff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .internship-history-header .btn-back-home,
+        .opportunity-history-header .btn-back-home {
+            background: rgba(255, 255, 255, 0.18) !important;
+            color: #ffffff !important;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            white-space: nowrap;
+        }
+
+        .internship-history-header .btn-back-home:hover,
+        .opportunity-history-header .btn-back-home:hover {
+            background: #ffffff !important;
+            color: #242a62 !important;
         }
 
         /* Tab Navigation */
-        .nav-tabs-internship-history {
+        .nav-tabs-internship-history,
+        .nav-tabs-opportunity-history {
             background: #fff;
             border-radius: 12px 12px 0 0;
             padding: 15px 20px 0 20px;
             border-bottom: 3px solid #242a62;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            flex-wrap: wrap;
         }
 
-        .nav-tabs-internship-history .nav-link {
+        .nav-tabs-internship-history .nav-link,
+        .nav-tabs-opportunity-history .nav-link {
             color: #666;
             border: none;
             border-bottom: 3px solid transparent;
@@ -45,15 +99,45 @@
             margin-bottom: -3px;
         }
 
-        .nav-tabs-internship-history .nav-link:hover {
+        .nav-tabs-internship-history .nav-link:hover,
+        .nav-tabs-opportunity-history .nav-link:hover {
             color: #242a62;
             background: #fff5f0;
         }
 
-        .nav-tabs-internship-history .nav-link.active {
+        .nav-tabs-internship-history .nav-link.active,
+        .nav-tabs-opportunity-history .nav-link.active {
             color: #242a62;
             background: transparent;
             border-bottom-color: #f26e2c;
+        }
+
+        .table-internship-view thead th,
+        .table-opportunity-view thead th {
+            background: #242a62;
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        #CompanyStudentsTable,
+        #CompanyTasksTable,
+        #completionTable {
+            width: 100% !important;
+        }
+
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #242a62 !important;
+            color: #fff !important;
+            border-color: #242a62 !important;
         }
 
         .tab-content-card {
@@ -137,16 +221,16 @@
         }
 
         /* Table Styles */
-        .table-internship-view .table-hover tbody tr:hover {
+        .table-opportunity-view .table-hover tbody tr:hover {
             background-color: #fff5f0;
         }
 
-        .table-internship-view thead {
+        .table-opportunity-view thead {
             background: #f8f9fa;
             border-bottom: 2px solid #242a62;
         }
 
-        .table-internship-view thead th {
+        .table-opportunity-view thead th {
             font-weight: 600;
             color: #242a62;
             font-size: 13px;
@@ -154,13 +238,13 @@
             border: none;
         }
 
-        .table-internship-view tbody td {
+        .table-opportunity-view tbody td {
             padding: 12px;
             vertical-align: middle;
             font-size: 13px;
         }
 
-        /* Internship Application Card */
+        /* Candidate Application Card */
         .application-card {
             background: #fff;
             border-radius: 12px;
@@ -270,12 +354,14 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .internship-history-header {
-                padding: 30px 20px;
+            .internship-history-header,
+            .opportunity-history-header {
+                padding: 22px 18px;
             }
 
-            .internship-history-header h2 {
-                font-size: 24px;
+            .internship-history-header h2,
+            .opportunity-history-header h2 {
+                font-size: 22px;
             }
 
             .detail-row-view {
@@ -297,63 +383,108 @@
             color: #fff !important;
         }
 
-        /* Complete Internship Table Styles */
-        .complete-internship-table {
+        /* Complete Program Table Styles */
+        .complete-internship-table,
+        .complete-opportunity-table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: separate;
             border-spacing: 0;
             background: white;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 0;
         }
 
-        .complete-internship-table thead {
+        .complete-internship-table thead,
+        .complete-opportunity-table thead {
             background: linear-gradient(135deg, #242a62 0%, #3d4575 100%);
         }
 
-        .complete-internship-table thead th {
-            color: white;
+        .complete-internship-table thead th,
+        .complete-opportunity-table thead th {
+            color: #ffffff !important;
             font-weight: 600;
-            padding: 16px 12px;
+            padding: 14px 12px;
             text-align: center;
-            font-size: 13px;
+            vertical-align: middle;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.4px;
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            white-space: nowrap;
         }
 
-        .complete-internship-table thead th:last-child {
+        .complete-internship-table thead th:last-child,
+        .complete-opportunity-table thead th:last-child {
             border-right: none;
         }
 
-        .complete-internship-table tbody tr {
+        .complete-internship-table tbody tr,
+        .complete-opportunity-table tbody tr {
             border-bottom: 1px solid #e9ecef;
-            transition: all 0.3s ease;
+            transition: background 0.2s ease;
         }
 
-        .complete-internship-table tbody tr:hover {
+        .complete-internship-table tbody tr:hover,
+        .complete-opportunity-table tbody tr:hover {
             background: #f8f9fa;
         }
 
-        .complete-internship-table tbody td {
-            padding: 16px 12px;
+        .complete-internship-table tbody td,
+        .complete-opportunity-table tbody td {
+            padding: 14px 12px;
             vertical-align: middle;
-            font-size: 14px;
+            font-size: 13px;
             color: #495057;
+            text-align: center;
+            word-wrap: break-word;
         }
 
-        .complete-internship-table tbody td:first-child {
+        .complete-internship-table tbody td:first-child,
+        .complete-opportunity-table tbody td:first-child {
             text-align: center;
+            font-weight: 700;
+            color: #242a62;
+        }
+
+        .complete-internship-table .col-sr { width: 70px; }
+        .complete-internship-table .col-student { width: 160px; text-align: left !important; }
+        .complete-internship-table .col-college { width: 140px; }
+        .complete-internship-table .col-industry { width: 240px; }
+        .complete-internship-table .col-feedback { width: 220px; }
+        .complete-internship-table .col-total { width: 90px; }
+        .complete-internship-table .col-percent { width: 90px; }
+        .complete-internship-table .col-grade { width: 90px; }
+
+        .complete-internship-table td.col-student > div {
+            text-align: left;
             font-weight: 600;
             color: #242a62;
+            line-height: 1.35;
+        }
+
+        .complete-program-table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
         }
 
         .marks-input-group {
             display: flex;
             align-items: center;
             gap: 8px;
-            justify-content: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            border: 1px solid #eef0f4;
+        }
+
+        .marks-input-group:last-child {
+            margin-bottom: 0;
         }
 
         .marks-input-group label {
@@ -361,6 +492,8 @@
             font-size: 12px;
             color: #6c757d;
             font-weight: 600;
+            min-width: 90px;
+            text-align: left;
         }
 
         .marks-input {
@@ -464,29 +597,9 @@
             color: white;
         }
 
-        .btn-complete-internship {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 14px 32px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-complete-internship:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        }
-
-        .btn-complete-internship:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        .btn-complete-opportunity,
+        .btn-complete-internship,
+        .btn-complete-opportunity-submit,
         .btn-complete-internship-submit {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
@@ -499,12 +612,18 @@
             transition: all 0.3s ease;
         }
 
+        .btn-complete-opportunity:hover,
+        .btn-complete-internship:hover,
+        .btn-complete-opportunity-submit:hover,
         .btn-complete-internship-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
             color: white;
         }
 
+        .btn-complete-opportunity:disabled,
+        .btn-complete-internship:disabled,
+        .btn-complete-opportunity-submit:disabled,
         .btn-complete-internship-submit:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -600,7 +719,8 @@
         }
 
         @media (max-width: 768px) {
-            .complete-internship-table {
+            .complete-internship-table,
+            .complete-opportunity-table {
                 font-size: 12px;
             }
 
@@ -611,7 +731,9 @@
             }
 
             .complete-internship-table thead th,
-            .complete-internship-table tbody td {
+            .complete-opportunity-table thead th,
+            .complete-internship-table tbody td,
+            .complete-opportunity-table tbody td {
                 padding: 10px 6px;
             }
         }
@@ -626,13 +748,26 @@
             <div class="container">
                 <!-- Page Header -->
                 <div class="internship-history-header">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                         <div>
-                            <h2 style="color: #fff;"><i class="bx bx-history"></i> My Internship Applications</h2>
-                            <p style="color: #fff;">Track and manage your internship application history</p>
+                            <h2><i class="bx bx-briefcase"></i> {{ $internship->internship_title ?? 'Internship' }}</h2>
+                            <p>Manage enrolled students, tasks, and program completion for this Internship.</p>
+                            <div class="header-meta">
+                                @if(!empty($internship->company) && !empty($internship->company->name))
+                                    <span><i class="bx bx-buildings"></i> {{ $internship->company->name }}</span>
+                                @endif
+                                @if(!empty($internship->duration))
+                                    <span><i class="bx bx-time"></i> {{ $internship->duration }}</span>
+                                @endif
+                                @if(!empty($internship->mode))
+                                    <span><i class="bx bx-globe"></i> {{ $internship->mode }}</span>
+                                @endif
+                                @if(!empty($internship->location))
+                                    <span><i class="bx bx-map"></i> {{ $internship->location }}</span>
+                                @endif
+                            </div>
                         </div>
-                        <a href="{{ route('/') }}" class="btn"
-                            style="background: white; color: #242a62; padding: 12px 24px; border-radius: 8px; font-weight: 600;">
+                        <a href="{{ route('/') }}" class="btn btn-back-home">
                             <i class="bx bx-arrow-back"></i> Back to Home
                         </a>
                     </div>
@@ -759,7 +894,7 @@
                                     <i class="bx bx-eye"></i> &nbsp;&nbsp;View Marks
                                 @endif
                             @else
-                                <i class="bx bx-check-circle"></i> &nbsp;&nbsp;Complete Internship
+                                <i class="bx bx-check-circle"></i> &nbsp;&nbsp;Complete Program
                             @endif
                         </button>
                     </li>
@@ -768,7 +903,7 @@
 
                 <!-- Tab Content -->
                 <div class="tab-content tab-content-card" id="applicationTabsContent">
-                    <!-- Internship Details Tab -->
+                    <!-- Opportunity Details Tab -->
                     <div class="tab-pane fade show active" id="details" role="tabpanel">
                         <h5 style="color: #242a62; font-weight: 700; margin-bottom: 20px;">
                             <i class="bx bx-detail"></i> Internship Information
@@ -944,7 +1079,7 @@
                         </div>
 
                         <div class="section-card">
-                            <h6><i class="bx bx-detail"></i> Internship Description</h6>
+                            <h6><i class="bx bx-detail"></i> Program Overview</h6>
                             <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                                 {!! $internship->internship_description ?? '<p class="text-muted">No description available</p>' !!}
                             </div>
@@ -958,14 +1093,14 @@
                         </div>
 
                         <div class="section-card">
-                            <h6><i class="bx bx-target-lock"></i> Internship Objective</h6>
+                            <h6><i class="bx bx-target-lock"></i> Learning Objectives</h6>
                             <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                                 {!! $internship->internship_objective ?? '<p class="text-muted">No objective defined</p>' !!}
                             </div>
                         </div>
 
                         <div class="section-card">
-                            <h6><i class="bx bx-trophy"></i> Internship Outcome</h6>
+                            <h6><i class="bx bx-trophy"></i> Skills You'll Gain</h6>
                             <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                                 {!! $internship->internship_outcome ?? '<p class="text-muted">No outcome defined</p>' !!}
                             </div>
@@ -985,7 +1120,7 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-sm table-striped table-hover table-internship-view">
+                            <table id="CompanyStudentsTable" class="table table-sm table-striped table-hover table-internship-view" style="width:100%">
                                 <thead class="border-top">
                                     <tr>
                                         <th>Sr. No.</th>
@@ -1032,10 +1167,6 @@
                                                 </td>
                                             </tr>
                                         @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="7" class="text-center">No applications found for this internship.</td>
-                                        </tr>
                                     @endif
                                 </tbody>
                             </table>
@@ -1058,7 +1189,7 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-sm table-striped table-hover table-internship-view">
+                            <table id="CompanyTasksTable" class="table table-sm table-striped table-hover table-internship-view" style="width:100%">
                                 <thead class="border-top">
                                     <tr>
                                         <th>Sr. No.</th>
@@ -1119,10 +1250,6 @@
                                                 </td>
                                             </tr>
                                         @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="7" class="text-center">No tasks found for this internship.</td>
-                                        </tr>
                                     @endif
                                 </tbody>
                             </table>
@@ -1156,7 +1283,7 @@
                                     Full-Stack Web Development Internship!</h6>
 
                                 <p style="color: #6c757d; margin-bottom: 20px;">Please read the following instructions
-                                    carefully before starting your internship:</p>
+                                    carefully before starting your Internship:</p>
 
                                 <h6 style="color: #242a62; font-weight: 700; margin-top: 25px; margin-bottom: 12px;">
                                     General Guidelines:</h6>
@@ -1189,7 +1316,7 @@
                         </div>
                     </div>
 
-                    <!-- Complete Internship Tab -->
+                    <!-- Complete Program Tab -->
                     <div class="tab-pane fade" id="complete" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -1225,7 +1352,7 @@
                             <div class="alert alert-success d-flex align-items-center" role="alert" style="margin-bottom:18px;">
                                 <i class="bx bx-check-circle" style="font-size:20px;"></i>
                                 <div class="ms-3">
-                                    <strong>Completed by company.</strong> This is a company-only internship and marks are submitted.
+                                    <strong>Completed by company.</strong> This is a company-only Internship and marks are submitted.
                                 </div>
                             </div>
                         @elseif($internship->company_complete_sts == 1 && $internship->college_complete_sts == 0 && $internship->complete_status == 0)
@@ -1237,7 +1364,7 @@
                             </div>
                         @elseif($internship->complete_status == 1)
                             <div class="alert alert-success" role="alert">
-                                <i class="bx bx-check-circle"></i> <strong>Completed!</strong> This internship has been finalized. Grades and feedback are locked.
+                                <i class="bx bx-check-circle"></i> <strong>Completed!</strong> This Internship has been finalized. Grades and feedback are locked.
                             </div>
                         @endif
 
@@ -1249,23 +1376,23 @@
                             if($internship->internship_type == 1) $colspan += 3; // TOTAL, PERCENTAGE, GRADE
                         @endphp
 
-                        <div class="table-responsive">
-                            <table class="complete-internship-table" id="completionTable">
+                        <div class="table-responsive complete-program-table-wrap">
+                            <table class="complete-internship-table" id="completionTable" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>SR.NO</th>
-                                        <th>STUDENT</th>
+                                        <th class="col-sr">SR.NO</th>
+                                        <th class="col-student">STUDENT</th>
                                         @if($internship->internship_type == 1)
-                                            <th>COLLEGE</th>
+                                            <th class="col-college">COLLEGE</th>
                                         @endif
                                         @if($internship->internship_type == 1 && $hasIndustryCriteria)
-                                            <th style="min-width: 300px;">INDUSTRY (INDUSTRY MARKS)</th>
+                                            <th class="col-industry">INDUSTRY MARKS</th>
                                         @endif
-                                        <th>FEEDBACK</th>
+                                        <th class="col-feedback">FEEDBACK</th>
                                         @if($internship->internship_type == 1)
-                                            <th>TOTAL</th>
-                                            <th>PERCENTAGE</th>
-                                            <th>GRADE</th>
+                                            <th class="col-total">TOTAL</th>
+                                            <th class="col-percent">%</th>
+                                            <th class="col-grade">GRADE</th>
                                         @endif
                                     </tr>
                                 </thead>
@@ -1281,56 +1408,53 @@
                                             $maxTotal = $studentCriteria->sum('marks');
                                         @endphp
                                         <tr data-student-id="{{ $student->id }}">
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>
-                                                <div style="font-weight: 600; color: #242a62;">
-                                                    {{ strtoupper($student->name ?? 'N/A') }}
-                                                </div>
+                                            <td class="col-sr">{{ $index + 1 }}</td>
+                                            <td class="col-student">
+                                                <div>{{ strtoupper($student->name ?? 'N/A') }}</div>
                                             </td>
                                             @if($internship->internship_type == 1)
-                                            <td>{{ $college ? $college->college_name : 'N/A' }}</td>
+                                            <td class="col-college">{{ $college ? $college->college_name : 'N/A' }}</td>
                                             @endif
-                                            @if($internship->internship_type == 1 && $studentCriteria->count() > 0)
-                                            <td>
-                                                @foreach($studentCriteria as $criterion)
-                                                    <div class="marks-input-group mb-2">
-                                                        <label>{{ $criterion->title }}</label>
-                                                        <input type="number"
-                                                               class="marks-input industry-mark"
-                                                               min="0"
-                                                               max="{{ $criterion->marks }}"
-                                                               data-max="{{ $criterion->marks }}"
-                                                               data-criteria-id="{{ $criterion->id }}"
-                                                               data-criteria-name="{{ $criterion->title }}"
-                                                               data-student-id="{{ $student->id }}"
-                                                               placeholder="0"
-                                                               value="{{ isset($studentSavedMarks[$criterion->id]) ? $studentSavedMarks[$criterion->id]->marks : '' }}"
-                                                               {{ $isSubmitted ? 'disabled' : '' }}>
-                                                        <span class="max-marks">/ {{ $criterion->marks }}</span>
-                                                    </div>
-                                                @endforeach
+                                            @if($internship->internship_type == 1 && $hasIndustryCriteria)
+                                            <td class="col-industry">
+                                                @if($studentCriteria->count() > 0)
+                                                    @foreach($studentCriteria as $criterion)
+                                                        <div class="marks-input-group">
+                                                            <label>{{ $criterion->title }}</label>
+                                                            <input type="number"
+                                                                   class="marks-input industry-mark"
+                                                                   min="0"
+                                                                   max="{{ $criterion->marks }}"
+                                                                   data-max="{{ $criterion->marks }}"
+                                                                   data-criteria-id="{{ $criterion->id }}"
+                                                                   data-criteria-name="{{ $criterion->title }}"
+                                                                   data-student-id="{{ $student->id }}"
+                                                                   placeholder="0"
+                                                                   value="{{ isset($studentSavedMarks[$criterion->id]) ? $studentSavedMarks[$criterion->id]->marks : '' }}"
+                                                                   {{ $isSubmitted ? 'disabled' : '' }}>
+                                                            <span class="max-marks">/ {{ $criterion->marks }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    <div class="text-muted" style="font-size:12px;">No grade configured</div>
+                                                @endif
                                             </td>
                                             @endif
-                                            <td>
+                                            <td class="col-feedback">
                                                 <textarea class="feedback-textarea"
                                                           data-student-id="{{ $student->id }}"
                                                           placeholder="Enter feedback for student..."
                                                           {{ $isSubmitted ? 'disabled' : '' }}>{{ $savedFeedback }}</textarea>
                                             </td>
                                             @if($internship->internship_type == 1)
-                                                <td class="total-display">0 / {{ $maxTotal }}</td>
-                                                <td class="percentage-display">0.00%</td>
-                                                <td>
+                                                <td class="col-total total-display">0 / {{ $maxTotal }}</td>
+                                                <td class="col-percent percentage-display">0.00%</td>
+                                                <td class="col-grade">
                                                     <span class="grade-badge grade-F">-</span>
                                                 </td>
                                             @endif
                                         </tr>
                                     @empty
-                                        <tr>
-                                            <td colspan="{{ $colspan }}" class="text-center py-4">
-                                                <i class="bx bx-info-circle"></i> No students enrolled in this internship
-                                            </td>
-                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -1339,7 +1463,7 @@
                         @if($internship->company_complete_sts == 0 && $students->count() > 0)
                         <div class="text-center mt-4">
                             <button class="btn btn-complete-internship-submit" onclick="showConfirmModal()">
-                                <i class="fa fa-check-circle"></i> Submit & Complete Internship
+                                <i class="fa fa-check-circle"></i> Submit & Complete Program
                             </button>
                         </div>
                         @endif
@@ -1601,7 +1725,7 @@
                                     </label>
                                 </div>
                                 <small class="text-muted" style="margin-left: 2.5em; display: block; margin-top: 4px;">
-                                    Check this box if the task is the final assignment or report for this internship.
+                                    Check this box if the task is the final assignment or report for this Internship.
                                 </small>
                             </div>
                         </div>
@@ -1981,12 +2105,12 @@
                         </div>
 
                         <!-- Content Editor Area (server-rendered form) -->
-                        <form id="updateInstructionsForm" method="POST" action="{{ url('admin/internship/update-instructions/' . ($internship->id ?? 0)) }}">
+                        <form id="updateInstructionsForm" method="POST" action="{{ route('website.internship.instructions.save', $internship->id ?? 0) }}">
                             @csrf
                             <textarea id="instructionsContent" name="general_instructions"
                                 style="min-height: 400px; border: 1px solid #dee2e6; border-radius: 0 0 6px 6px; padding: 20px; background: white; font-size: 14px; line-height: 1.8; color: #495057; width:100%;">{!! $internship->general_instructions ?? '<p style="color: #6a7681; margin-bottom: 15px;">Welcome to the Full-Stack Web Development Internship!</p>
 
-<p style="margin-bottom: 15px;">Please read the following instructions carefully before starting your internship:</p>
+<p style="margin-bottom: 15px;">Please read the following instructions carefully before starting your Internship:</p>
 
 <p style="font-weight: 600; margin-top: 20px; margin-bottom: 10px;">General Guidelines:</p>
 <ul style="margin-left: 20px; margin-bottom: 15px;">
@@ -2030,24 +2154,30 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('script')
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 @php
     $completionAlerts = $internship->internship_type == 2 ? [
-        'tabTitle' => 'Open Complete Internship',
-        'tabText' => 'You are about to review student feedback and complete this industry internship.',
+        'tabTitle' => 'Open Complete Program',
+        'tabText' => 'You are about to review student feedback and complete this industry Internship.',
         'tabConfirm' => 'Continue',
-        'submitTitle' => 'Confirm Internship Completion',
-        'submitHtml' => '<p>This will finalize all student feedback and mark the internship as completed.</p><p><strong>This action cannot be undone.</strong></p>',
-        'submitConfirm' => '<i class="fa fa-check-circle"></i> Yes, Complete Internship',
+        'submitTitle' => 'Confirm Program Completion',
+        'submitHtml' => '<p>This will finalize all student feedback and mark the Internship as completed.</p><p><strong>This action cannot be undone.</strong></p>',
+        'submitConfirm' => '<i class="fa fa-check-circle"></i> Yes, Complete Program',
         'loadingTitle' => 'Completing...',
-        'loadingText' => 'Please wait while we finalize the internship',
+        'loadingText' => 'Please wait while we finalize the Internship',
         'incompleteText' => 'Please fill in feedback for all students before submitting.',
     ] : [
-        'tabTitle' => 'Open Complete Internship',
+        'tabTitle' => 'Open Complete Program',
         'tabText' => 'You are about to evaluate students and submit industry marks. College marks will still be required after submission.',
         'tabConfirm' => 'Continue',
         'submitTitle' => 'Submit Industry Marks',
-        'submitHtml' => '<p>This will submit industry (company) marks and feedback for all students.</p><p><strong>College marks are still required before the internship can be fully completed.</strong></p>',
+        'submitHtml' => '<p>This will submit industry (company) marks and feedback for all students.</p><p><strong>College marks are still required before the Internship can be fully completed.</strong></p>',
         'submitConfirm' => '<i class="fa fa-check-circle"></i> Yes, Submit Industry Marks',
         'loadingTitle' => 'Submitting...',
         'loadingText' => 'Please wait while we submit industry marks',
@@ -2483,7 +2613,7 @@
                 use Illuminate\Support\Facades\Route as RouteFacade;
                 if (RouteFacade::has('admin.internship.tasks.store')) {
                     $storeUrl = route('admin.internship.tasks.store', $internship->id);
-                } elseif (RouteFacade::has('internship.tasks.store')) {
+                } elseif (RouteFacade::has('opportunity.tasks.store')) {
                     $storeUrl = route('internship.tasks.store', $internship->id);
                 } else {
                     $storeUrl = url('admin/internship/' . $internship->id . '/tasks/store');
@@ -2750,27 +2880,109 @@
             }
         });
 
-        // Initialize CKEditor for instructions modal and sync on submit
+        // Initialize CKEditor for instructions modal and save via AJAX + SweetAlert
         (function() {
             var modalEl = document.getElementById('updateInstructionsModal');
-            if (modalEl) {
-                modalEl.addEventListener('shown.bs.modal', function () {
-                    if (!instructionsEditor && typeof ClassicEditor !== 'undefined') {
-                        ClassicEditor.create(document.querySelector('#instructionsContent'))
-                            .then(editor => { instructionsEditor = editor; })
-                            .catch(error => { console.error(error); });
-                    }
+            if (!modalEl) return;
+
+            modalEl.addEventListener('shown.bs.modal', function () {
+                if (!instructionsEditor && typeof ClassicEditor !== 'undefined') {
+                    ClassicEditor.create(document.querySelector('#instructionsContent'))
+                        .then(editor => { instructionsEditor = editor; })
+                        .catch(error => { console.error(error); });
+                }
+            });
+
+            var form = document.getElementById('updateInstructionsForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var content = '';
+                if (instructionsEditor && typeof instructionsEditor.getData === 'function') {
+                    content = (instructionsEditor.getData() || '').trim();
+                } else {
+                    var ta = document.getElementById('instructionsContent');
+                    content = ta ? (ta.value || '').trim() : '';
+                }
+
+                if (!content || content === '<p></p>' || content === '<p><br></p>') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Empty content',
+                        text: 'Please enter instructions content before saving.'
+                    });
+                    return;
+                }
+
+                var tokenInput = form.querySelector('input[name="_token"]');
+                var csrf = tokenInput ? tokenInput.value : ($('meta[name="csrf-token"]').attr('content') || '');
+
+                Swal.fire({
+                    title: 'Saving...',
+                    allowOutsideClick: false,
+                    didOpen: function () { Swal.showLoading(); }
                 });
 
-                var form = document.getElementById('updateInstructionsForm');
-                if (form) {
-                    form.addEventListener('submit', function () {
-                        if (instructionsEditor && typeof instructionsEditor.getData === 'function') {
-                            document.getElementById('instructionsContent').value = instructionsEditor.getData();
+                $.ajax({
+                    url: form.getAttribute('action'),
+                    method: 'POST',
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    data: {
+                        _token: csrf,
+                        general_instructions: content,
+                        instructions: content
+                    },
+                    success: function (response) {
+                        if (response && response.success) {
+                            var displayServer = document.getElementById('instructionsDisplayServer');
+                            if (displayServer) {
+                                displayServer.innerHTML = content;
+                            }
+                            var displayContent = document.getElementById('instructionsDisplayContent');
+                            if (displayContent) {
+                                displayContent.style.display = 'none';
+                            }
+
+                            var modalInstance = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.message || 'Instructions saved successfully.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: (response && response.message) ? response.message : 'Failed to save instructions.'
+                            });
                         }
-                    });
-                }
-            }
+                    },
+                    error: function (xhr) {
+                        var msg = 'Failed to save instructions.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: msg
+                        });
+                    }
+                });
+            });
         })();
 
         // Open Feedback Modal
@@ -2894,8 +3106,10 @@
 
         // ==================== INTERNSHIP COMPLETION / GRADING ====================
         const completionInternshipId = {{ $internship->id }};
+        const completionOpportunityId = completionInternshipId;
         const completionCsrfToken = '{{ csrf_token() }}';
         const internshipType = {{ $internship->internship_type }};
+        const opportunityType = internshipType;
         const companyCompleteSts = {{ (int) $internship->company_complete_sts }};
         const completionAlerts = @json($completionAlerts);
         let marksLoaded = false;
@@ -2929,7 +3143,7 @@
                     method: 'POST',
                     data: {
                         _token: completionCsrfToken,
-                        internship_id: completionInternshipId,
+                        internship_id: completionOpportunityId,
                         student_id: studentId,
                         criteria_id: criteriaId,
                         criteria_name: criteriaName,
@@ -2965,7 +3179,7 @@
                     method: 'POST',
                     data: {
                         _token: completionCsrfToken,
-                        internship_id: completionInternshipId,
+                        internship_id: completionOpportunityId,
                         student_id: studentId,
                         feedback: feedback
                     },
@@ -3027,8 +3241,8 @@
 
         // ==================== CALCULATION LOGIC ====
         function calculateMarks(row) {
-            // Skip calculations for internships with type != 1 (feedback-only)
-            if (parseInt(internshipType) !== 1) return;
+            // Skip calculations for opportunities with type != 1 (feedback-only)
+            if (parseInt(opportunityType) !== 1) return;
 
             const inputs = row.querySelectorAll('.industry-mark');
             let total = 0;
@@ -3068,16 +3282,83 @@
             }
         }
 
-        // Recalculate on page load
+        // Recalculate on page load + init DataTables
         $(document).ready(function() {
             document.querySelectorAll('#completionTable tbody tr[data-student-id]').forEach(row => calculateMarks(row));
             // jQuery safety: ensure inputs/textareas are disabled when company marks already submitted
             if (companyCompleteSts == 1) {
                 $('input.marks-input, textarea.feedback-textarea').prop('disabled', true);
             }
+
+            var studentsTable = null;
+            var tasksTable = null;
+            var completionTable = null;
+
+            if ($.fn.DataTable && $('#CompanyStudentsTable').length) {
+                studentsTable = $('#CompanyStudentsTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    autoWidth: false,
+                    columnDefs: [
+                        { orderable: false, targets: [6] }
+                    ],
+                    language: {
+                        emptyTable: 'No applications found for this Internship.',
+                        search: 'Search students:'
+                    }
+                });
+            }
+
+            if ($.fn.DataTable && $('#CompanyTasksTable').length) {
+                tasksTable = $('#CompanyTasksTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    autoWidth: false,
+                    columnDefs: [
+                        { orderable: false, targets: [4, 6] }
+                    ],
+                    language: {
+                        emptyTable: 'No tasks found for this Internship.',
+                        search: 'Search tasks:'
+                    }
+                });
+            }
+
+            if ($.fn.DataTable && $('#completionTable').length) {
+                var nonOrderable = [];
+                $('#completionTable thead th').each(function(i) {
+                    var txt = ($(this).text() || '').toUpperCase();
+                    if (txt.indexOf('MARKS') !== -1 || txt.indexOf('FEEDBACK') !== -1 || txt.indexOf('GRADE') !== -1 || txt.indexOf('TOTAL') !== -1 || txt.indexOf('%') !== -1) {
+                        nonOrderable.push(i);
+                    }
+                });
+                completionTable = $('#completionTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    autoWidth: false,
+                    searching: true,
+                    columnDefs: [
+                        { orderable: false, targets: nonOrderable }
+                    ],
+                    language: {
+                        emptyTable: 'No students enrolled in this Internship.',
+                        search: 'Search students:'
+                    }
+                });
+            }
+
+            $('button[data-bs-target="#student"], #student-tab').on('shown.bs.tab', function () {
+                if (studentsTable) studentsTable.columns.adjust().draw(false);
+            });
+            $('button[data-bs-target="#tasks"], #tasks-tab').on('shown.bs.tab', function () {
+                if (tasksTable) tasksTable.columns.adjust().draw(false);
+            });
+            $('button[data-bs-target="#complete"], #complete-tab').on('shown.bs.tab', function () {
+                if (completionTable) completionTable.columns.adjust().draw(false);
+            });
         });
 
-        // Load marks when Complete Internship tab is clicked
+        // Load marks when Complete Program tab is clicked
         $('button[data-bs-target="#complete"]').on('click', function(e) {
             @if(!$internship->complete_status && !$internship->company_complete_sts)
             e.preventDefault();
@@ -3116,7 +3397,7 @@
                 const studentName = row.querySelector('td:nth-child(2)').textContent.trim();
                 const feedback = row.querySelector('.feedback-textarea');
 
-                if (parseInt(internshipType) === 1) {
+                if (parseInt(opportunityType) === 1) {
                     const inputs = row.querySelectorAll('.industry-mark');
                     inputs.forEach(input => {
                         if (!input.value || parseFloat(input.value) === 0) {
@@ -3143,7 +3424,7 @@
             Swal.fire({
                 title: completionAlerts.submitTitle,
                 html: completionAlerts.submitHtml,
-                icon: parseInt(internshipType) === 2 ? 'warning' : 'question',
+                icon: parseInt(opportunityType) === 2 ? 'warning' : 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#6c757d',
@@ -3171,7 +3452,7 @@
                 method: 'POST',
                 data: {
                     _token: completionCsrfToken,
-                    internship_id: completionInternshipId
+                    internship_id: completionOpportunityId
                 },
                 success: function(res) {
                     if (res.success) {
@@ -3184,7 +3465,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: xhr.responseJSON?.message || 'An error occurred while completing the internship.'
+                        text: xhr.responseJSON?.message || 'An error occurred while completing the Internship.'
                     });
                 }
             });
@@ -3210,7 +3491,7 @@
                 if (result.isConfirmed && result.value) {
                     const filename = result.value.trim().replace(/[^a-zA-Z0-9_\-]/g, '_') || 'internship_report';
                     const table = document.querySelector('#completionTable');
-                    if (!table) { console.error('Complete internship table not found'); return; }
+                    if (!table) { console.error('Complete Internship table not found'); return; }
                     const clone = table.cloneNode(true);
 
                     clone.querySelectorAll('.industry-mark').forEach(input => {

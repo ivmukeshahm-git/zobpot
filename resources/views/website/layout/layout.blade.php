@@ -275,7 +275,7 @@
                             @endif
 
                             <li><a class="{{ request()->routeIs('skillthon') ? 'active' : '' }}" href="{{ route('skillthon') }}">Skillothon</a></li>                            
-                            <li><a class="{{ request()->routeIs('internship') ? 'active' : '' }}" href="#">Internship</a></li>
+                            <li><a class="{{ request()->routeIs('internship') ? 'active' : '' }}" href="{{ route('internship') }}">Internship</a></li>
                             
                             <li><a class="{{ request()->routeIs('blog') ? 'active' : '' }}" href="{{ route('blog') }}">Blog & Tips</a></li>
                             <li><a class="{{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact us</a></li>

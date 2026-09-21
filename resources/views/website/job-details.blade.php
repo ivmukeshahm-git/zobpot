@@ -6,6 +6,18 @@
 
 @push('css')
     <style>
+        .job-plan-limit-msg {
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.45;
+            color: #842029;
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+            border-radius: 8px;
+            max-width: 360px;
+            display: inline-block;
+        }
+
         .premium-sidebar {
     border-radius: 14px;
     background: #fff;
@@ -161,10 +173,22 @@
                                     <div class="btn btn-apply-icon btn-apply btn-apply-big hover-up">Already Applied</div>
                                 @else
                                     @if ($user && $user->active_plan_id == 0)
-                                        @if ($user && $user->profile_type == 'Employee')
-                                            <a class="btn btn-apply-icon btn-apply btn-apply-big hover-up"
-                                                href="{{ route('pricing', ['user_id' => $user->id]) }}">Apply now</a>
-                                        @endif
+                                        <a class="btn btn-apply-icon btn-apply btn-apply-big hover-up"
+                                            href="{{ route('pricing', ['user_id' => $user->id]) }}"><i class="fa fa-lock"></i> Upgrade Plan</a>
+                                        <p class="job-plan-limit-msg mt-2 mb-0 text-start text-lg-end">
+                                            {{ $jobApplyLimitCheck['message'] ?? 'Your plan has expired or is not active. Please upgrade your plan to continue.' }}
+                                        </p>
+                                    @elseif(empty($canApplyJob) || empty($jobApplyLimitCheck['allowed']))
+                                        <a class="btn btn-apply-icon btn-apply btn-apply-big hover-up" href="javascript:void(0);"
+                                            onclick="showCandidatePlanLimitAlert(@json($jobApplyLimitCheck['message'] ?? 'Your plan job apply limit has been reached.'), @json($jobApplyLimitCheck['upgrade_url'] ?? route('pricing', ['user_id' => $user->id])))">
+                                            <i class="fa fa-lock"></i> Upgrade Plan
+                                        </a>
+                                        <p class="job-plan-limit-msg mt-2 mb-0 text-start text-lg-end">
+                                            {{ $jobApplyLimitCheck['message'] ?? 'Your plan job apply limit has been reached. Please upgrade your plan to continue.' }}
+                                            @if(isset($jobApplyLimitCheck['limit']) && $jobApplyLimitCheck['limit'] !== null)
+                                                <span class="d-block fw-semibold">(Used {{ (int) ($jobApplyLimitCheck['used'] ?? 0) }}/{{ (int) $jobApplyLimitCheck['limit'] }})</span>
+                                            @endif
+                                        </p>
                                     @else
                                         <div class="btn btn-apply-icon btn-apply btn-apply-big hover-up"
                                             data-bs-toggle="modal" data-bs-target="#ModalApplyJobForm">Apply now</div>
@@ -374,8 +398,21 @@
                                                 @else
                                                     @if ($user->active_plan_id == 0)
                                                         <a class="btn btn-default mr-15"
-                                                            href="{{ route('pricing', ['user_id' => $user->id]) }}">Apply
-                                                            now</a>
+                                                            href="{{ route('pricing', ['user_id' => $user->id]) }}"><i class="fa fa-lock"></i> Upgrade Plan</a>
+                                                        <p class="job-plan-limit-msg mt-2 mb-0">
+                                                            {{ $jobApplyLimitCheck['message'] ?? 'Your plan has expired or is not active. Please upgrade your plan to continue.' }}
+                                                        </p>
+                                                    @elseif(empty($canApplyJob) || empty($jobApplyLimitCheck['allowed']))
+                                                        <a class="btn btn-default mr-15" href="javascript:void(0);"
+                                                            onclick="showCandidatePlanLimitAlert(@json($jobApplyLimitCheck['message'] ?? 'Your plan job apply limit has been reached.'), @json($jobApplyLimitCheck['upgrade_url'] ?? route('pricing', ['user_id' => $user->id])))">
+                                                            <i class="fa fa-lock"></i> Upgrade Plan
+                                                        </a>
+                                                        <p class="job-plan-limit-msg mt-2 mb-0">
+                                                            {{ $jobApplyLimitCheck['message'] ?? 'Your plan job apply limit has been reached. Please upgrade your plan to continue.' }}
+                                                            @if(isset($jobApplyLimitCheck['limit']) && $jobApplyLimitCheck['limit'] !== null)
+                                                                <span class="d-block fw-semibold">(Used {{ (int) ($jobApplyLimitCheck['used'] ?? 0) }}/{{ (int) $jobApplyLimitCheck['limit'] }})</span>
+                                                            @endif
+                                                        </p>
                                                     @else
                                                         <a class="btn btn-default mr-15" href="javascript:void(0);"
                                                             data-bs-toggle="modal"
@@ -774,24 +811,70 @@
                         }, 1000);
                     } else {
                         submitBtn.prop('disabled', false).html(originalBtnText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: response.message,
-                        });
+                        if (response.upgrade_url) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Upgrade Plan Required',
+                                text: response.message,
+                                showCancelButton: true,
+                                confirmButtonText: 'Upgrade Plan',
+                                cancelButtonText: 'Close'
+                            }).then(function(result) {
+                                if (result.isConfirmed) {
+                                    window.location.href = response.upgrade_url;
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message,
+                            });
+                        }
                     }
                 },
                 error: function(xhr) {
                     submitBtn.prop('disabled', false).html(originalBtnText);
-                    console.log(xhr.responseText);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Something went wrong. Please try again.',
-                    });
+                    var res = xhr.responseJSON || {};
+                    var msg = res.message || 'Something went wrong. Please try again.';
+                    if (res.upgrade_url) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Upgrade Plan Required',
+                            text: msg,
+                            showCancelButton: true,
+                            confirmButtonText: 'Upgrade Plan',
+                            cancelButtonText: 'Close'
+                        }).then(function(result) {
+                            if (result.isConfirmed) {
+                                window.location.href = res.upgrade_url;
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: msg,
+                        });
+                    }
                 }
             });
         });
+
+        function showCandidatePlanLimitAlert(message, upgradeUrl) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Upgrade Plan Required',
+                text: message || 'Your plan limit has been reached. Please upgrade your plan.',
+                showCancelButton: true,
+                confirmButtonText: 'Upgrade Plan',
+                cancelButtonText: 'Close'
+            }).then(function(result) {
+                if (result.isConfirmed && upgradeUrl) {
+                    window.location.href = upgradeUrl;
+                }
+            });
+        }
 
         $('#ModalApplyJobForm').on('hidden.bs.modal', function() {
             $('#apply-job-btn').prop('disabled', false).html('Apply Job');

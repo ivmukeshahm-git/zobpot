@@ -5,20 +5,26 @@
     </script>
 
     <div class="container-xxl flex-grow-1 container-p-y">
+        @component('admin.layout.partials.college-page-banner', [
+            'emoji' => '🏫',
+            'title' => 'College Staff Management',
+            'subtitle' => 'Manage all college staff members, roles and permissions from one place.',
+            'illustration' => 'staff',
+            'crumbs' => [
+                ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+                ['label' => 'Staff Management'],
+            ],
+        ])
+            <button type="button" class="btn zp-banner-btn" id="addStaffBtn">
+                <i class="bx bx-plus"></i> Add Staff
+            </button>
+        @endcomponent
+
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center"
-                style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); border-radius: 12px 12px 0 0;">
-                <h5 class="mb-0" style="color: #fff; font-weight: 700;">
-                    <i class="bx bx-group"></i> College Staff Management
-                </h5>
-                <button type="button" class="btn btn-light btn-sm" id="addStaffBtn">
-                    <i class="bx bx-plus"></i> Add Staff
-                </button>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="staffDataTable" style="width:100%">
-                        <thead style="background: #f8f9fa;">
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>

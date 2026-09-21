@@ -5,24 +5,28 @@
 </script>
 
 <style>
-    /* Reuse existing internship view styles */
-    .internship-view-header {
+    /* Reuse existing opportunity view styles */
+    .opportunity-view-header {
         background: #242a62; border-radius: 12px; padding: 30px; margin-bottom: 30px;
         color: white; box-shadow: 0 4px 15px rgba(36, 42, 98, 0.3);
     }
-    .internship-view-header h4 { margin: 0; font-size: 28px; font-weight: 700; }
-    .internship-view-header p { margin: 8px 0 0 0; opacity: 0.9; }
+    .opportunity-view-header h4 { margin: 0; font-size: 28px; font-weight: 700; }
+    .opportunity-view-header p { margin: 8px 0 0 0; opacity: 0.9; }
 
+    .nav-tabs-opportunity,
     .nav-tabs-internship {
         background: #fff; border-radius: 12px 12px 0 0; padding: 15px 20px 0 20px;
         border-bottom: 3px solid #242a62; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
+    .nav-tabs-opportunity .nav-link,
     .nav-tabs-internship .nav-link {
         color: #666; border: none; border-bottom: 3px solid transparent;
         border-radius: 0; padding: 12px 24px; font-weight: 600; font-size: 14px;
         transition: all 0.3s ease; margin-bottom: -3px;
     }
+    .nav-tabs-opportunity .nav-link:hover,
     .nav-tabs-internship .nav-link:hover { color: #242a62; background: #fff5f0; }
+    .nav-tabs-opportunity .nav-link.active,
     .nav-tabs-internship .nav-link.active {
         color: #242a62; background: transparent; border-bottom-color: #242a62;
     }
@@ -65,26 +69,28 @@
         $isStaff = isset($isStaff) ? $isStaff : (auth()->guard('college_staff')->check());
     @endphp
     {{-- Header --}}
-    <div class="internship-view-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h4 style="color: #fff;">
-                    <i class="bx bx-briefcase-alt-2"></i> {{ $internship->internship_title }}
-                </h4>
-                <p>{{ $internship->company ? $internship->company->name : 'N/A' }} &bull; {{ $internship->duration }} &bull; {{ $internship->mode }} Mode</p>
-            </div>
-            <a href="{{ route('admin.college.dashboard') }}" class="btn btn-light">
-                <i class="bx bx-arrow-back"></i> Back to Dashboard
-            </a>
-        </div>
-    </div>
+    @component('admin.layout.partials.college-page-banner', [
+        'emoji' => '💼',
+        'title' => $internship->internship_title,
+        'subtitle' => ($internship->company ? $internship->company->name : 'N/A') . ' • ' . $internship->duration . ' • ' . $internship->mode . ' Mode',
+        'illustration' => 'opportunity',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Opportunities', 'url' => route('admin.college.dashboard') . '#college-internship-section'],
+            ['label' => 'Details'],
+        ],
+    ])
+        <a href="{{ route('admin.college.dashboard') }}" class="btn zp-banner-btn">
+            <i class="bx bx-arrow-back"></i> Back to Dashboard
+        </a>
+    @endcomponent
 
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs nav-tabs-internship" id="collegeViewTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="ci-details-tab" data-bs-toggle="tab"
                 data-bs-target="#ci-details" type="button" role="tab">
-                <i class="bx bx-info-circle"></i> &nbsp;Internship Details
+                <i class="bx bx-info-circle"></i> &nbsp;Opportunity Details
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -98,16 +104,16 @@
     {{-- Tab Content --}}
     <div class="tab-content tab-content-card" id="collegeViewTabContent">
 
-        {{-- ═══════  TAB 1 – Internship Details  ═══════ --}}
+        {{-- ═══════  TAB 1 – Opportunity Details  ═══════ --}}
         <div class="tab-pane fade show active" id="ci-details" role="tabpanel">
             <h5 style="color: #242a62; font-weight: 700; margin-bottom: 20px;">
-                <i class="bx bx-detail"></i> Internship Information
+                <i class="bx bx-detail"></i> Opportunity Information
             </h5>
 
             <div class="section-card">
                 <h6><i class="bx bx-info-circle"></i> Basic Details</h6>
                 <div class="detail-row-view">
-                    <span class="detail-label-view">Internship Title:</span>
+                    <span class="detail-label-view">Opportunity Title:</span>
                     <span class="detail-value-view">{{ $internship->internship_title }}</span>
                 </div>
                 <div class="detail-row-view">
@@ -170,6 +176,18 @@
                     <span class="detail-label-view">Registration Fee:</span>
                     <span class="detail-value-view">₹{{ number_format($internship->registration_fees, 2) }}</span>
                 </div>
+                @if(!empty($internship->last_registration_date))
+                <div class="detail-row-view">
+                    <span class="detail-label-view">Last Date of Registration:</span>
+                    <span class="detail-value-view">{{ $internship->last_registration_date->format('d M Y') }}</span>
+                </div>
+                @endif
+                @if((float) ($internship->late_registration_fee ?? 0) > 0)
+                <div class="detail-row-view">
+                    <span class="detail-label-view">Late Registration Fee:</span>
+                    <span class="detail-value-view">₹{{ number_format($internship->late_registration_fee, 2) }}</span>
+                </div>
+                @endif
                 <div class="detail-row-view">
                     <span class="detail-label-view">GST ({{ $internship->gst_percentage }}%):</span>
                     <span class="detail-value-view">₹{{ number_format($internship->gst_amount, 2) }}</span>
@@ -362,7 +380,7 @@ $(function(){
             { data: 'action', orderable: false, searchable: false }
         ],
         order: [[isStaff ? 1 : 2, 'asc']],
-        language: { emptyTable: "No students found for this internship." }
+        language: { emptyTable: "No students found for this opportunity." }
     });
 
     // Lazy-load on tab switch

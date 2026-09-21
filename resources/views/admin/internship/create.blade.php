@@ -51,6 +51,25 @@
         transition: all 0.3s ease;
     }
 
+    .internship-other-row .other-toggle-link {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #696cff;
+        text-decoration: none;
+        border-bottom: 1px dashed #696cff;
+        line-height: 1.2;
+    }
+
+    .internship-other-row .other-toggle-link:hover {
+        color: #4f52d7;
+    }
+
+    .internship-other-row.is-other-mode .select-wrap {
+        display: none !important;
+    }
+
     .select2-container--default .select2-selection--multiple:focus,
     .select2-container--default.select2-container--focus .select2-selection--multiple {
         border-color: #667eea;
@@ -135,7 +154,7 @@
         border-radius: 0 10px 0 0;
     }
 
-    .batch-days-table tbody tr {
+    .batch-days-table tbody tr.batch-day-row {
         transition: all 0.3s ease;
     }
 
@@ -145,13 +164,27 @@
         vertical-align: middle;
     }
 
-    .batch-days-table tbody tr:last-child td {
-        border-bottom: none;
+    .batch-days-table tbody tr.batch-day-row:last-of-type td {
+        border-bottom: 1px solid #f0f0f0;
     }
 
-    .batch-days-table tbody tr:hover {
+    .batch-days-table tbody tr.batch-day-row:hover {
         background: linear-gradient(90deg, #f8f9ff 0%, #ffffff 100%);
         transform: scale(1.01);
+    }
+
+    #copy_batch_times_row,
+    #copy_batch_times_row:hover {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    #copy_batch_times_row td {
+        border-bottom: 1px solid #f0f0f0 !important;
+        background: #f8f9fc !important;
+        padding: 12px 20px !important;
+        vertical-align: middle;
     }
 
     .batch-day-row .day-name {
@@ -259,12 +292,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-1">
-                <i class="bx bx-plus-circle"></i> Create New Internship
+                <i class="bx bx-plus-circle"></i> Launch New Internship Program
             </h4>
-            <p class="text-muted mb-0">Fill in the details step by step to create a new internship program</p>
+            <p class="text-muted mb-0">Complete each step to publish a new career internship</p>
         </div>
         <a href="{{ route('admin.internship.management') }}" class="btn btn-secondary">
-            <i class="bx bx-arrow-back"></i> Back to List
+            <i class="bx bx-arrow-back"></i> Back to Dashboard
         </a>
     </div>
 
@@ -343,16 +376,22 @@
                             <div class="col-lg-6">
                                 <label class="form-label">Internship Title <span class="text-danger">*</span></label>
                                 <input type="text" name="internship_title" class="form-control" 
-                                       placeholder="e.g. Web Development Intern" required />
+                                       placeholder="Enter internship title" required />
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Category <span class="text-danger">*</span></label>
-                                <select name="category_id" class="form-select" required>
-                                    <option value="">Select Category</option>
+                                <label class="form-label">Internship Domain <span class="text-danger">*</span></label>
+                                <select name="category_id" id="admin_internship_category_id" class="form-select" required>
+                                    <option value="">Choose internship domain</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->category_id }}">{{ $category->category_nm }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <label class="form-label">Specialization <span class="text-danger">*</span></label>
+                                <select name="sub_category_id[]" id="admin_internship_sub_category_id" class="form-select" multiple required>
                                 </select>
                             </div>
 
@@ -367,37 +406,40 @@
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Company Website (Optional)</label>
+                                <label class="form-label">Official Website (Optional)</label>
                                 <input type="url" name="company_website" class="form-control" 
                                        placeholder="https://www.example.com" />
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Mode <span class="text-danger">*</span></label>
+                                <label class="form-label">Work Format <span class="text-danger">*</span></label>
                                 <select name="internship_mode" class="form-select" required>
                                     <option value="">Select Mode</option>
                                     <option value="Online">Online</option>
                                     <option value="Offline">Offline</option>
                                     <option value="Hybrid">Hybrid</option>
+                                    <option value="Weekly">Weekly Internship</option>
+                                    <option value="Part Time">Part Time Internship</option>
+                                    <option value="Full Time">Full Time Internship</option>
                                 </select>
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Location <span class="text-danger">*</span></label>
+                                <label class="form-label">Work Location <span class="text-danger">*</span></label>
                                 <input type="text" name="location" class="form-control" 
-                                       placeholder="City / Office Location" required />
+                                       placeholder="Enter work location" required />
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Stipend (₹)</label>
+                                <label class="form-label">Monthly Stipend (₹)</label>
                                 <input type="number" name="stipend" class="form-control" 
-                                       placeholder="Enter Stipend Amount" min="0" />
+                                       placeholder="Enter monthly stipend amount" min="0" />
                             </div>
 
                             <div class="col-lg-6">
-                                <label class="form-label">Openings <span class="text-danger">*</span></label>
+                                <label class="form-label">Available Positions <span class="text-danger">*</span></label>
                                 <input type="number" name="openings" class="form-control" 
-                                       placeholder="Number of positions" required min="1" />
+                                       placeholder="Enter available positions" required min="1" />
                             </div>
 
                             <div class="col-12 d-flex justify-content-between mt-4">
@@ -420,43 +462,87 @@
                             <small>Set the duration and schedule for the internship.</small>
                         </div>
                         <div class="row g-6">
-                            <div class="col-lg-4">
-                                <label class="form-label">Duration <span class="text-danger">*</span></label>
-                                <input type="text" name="duration" class="form-control" 
-                                       placeholder="e.g. 3 Months, 6 Weeks" required />
+                            <div class="col-lg-4 internship-other-row" id="duration-other-row">
+                                <label class="form-label">Program Duration <span class="text-danger">*</span></label>
+                                <div class="select-wrap" id="duration-select-wrap">
+                                    <select id="duration_select" class="form-select">
+                                        <option value="">Select Duration</option>
+                                        <option value="1 Month">1 Month</option>
+                                        <option value="2 Months">2 Months</option>
+                                        <option value="3 Months">3 Months</option>
+                                        <option value="4 Months">4 Months</option>
+                                        <option value="5 Months">5 Months</option>
+                                        <option value="6 Months">6 Months</option>
+                                    </select>
+                                </div>
+                                <div id="other-duration-wrap" style="display:none;">
+                                    <input type="text" id="duration_other" class="form-control" placeholder="Enter custom duration" />
+                                </div>
+                                <a href="javascript:void(0);" id="toggle-other-duration" class="other-toggle-link">Other</a>
+                                <input type="hidden" name="duration" id="duration" value="" />
+                                <input type="hidden" id="use_other_duration" value="0" />
+                            </div>
+
+                            <div class="col-lg-4 internship-other-row" id="weeks-other-row">
+                                <label class="form-label">Program Length (Weeks) <span class="text-danger">*</span></label>
+                                <div class="select-wrap" id="weeks-select-wrap">
+                                    <select id="weeks_select" class="form-select">
+                                        <option value="">Select Weeks</option>
+                                        <option value="4">4</option>
+                                        <option value="8">8</option>
+                                        <option value="12">12</option>
+                                        <option value="16">16</option>
+                                        <option value="20">20</option>
+                                        <option value="24">24</option>
+                                    </select>
+                                </div>
+                                <div id="other-weeks-wrap" style="display:none;">
+                                    <input type="number" id="weeks_other" class="form-control" placeholder="Enter custom weeks" min="1" />
+                                </div>
+                                <a href="javascript:void(0);" id="toggle-other-weeks" class="other-toggle-link">Other</a>
+                                <input type="hidden" name="weeks" id="weeks" value="" />
+                                <input type="hidden" id="use_other_weeks" value="0" />
+                            </div>
+
+                            <div class="col-lg-4 internship-other-row" id="hours-other-row">
+                                <label class="form-label">Learning Hours <span class="text-danger">*</span></label>
+                                <div class="select-wrap" id="hours-select-wrap">
+                                    <select id="hours_select" class="form-select">
+                                        <option value="">Select Hours</option>
+                                        <option value="60">60</option>
+                                        <option value="120">120</option>
+                                        <option value="240">240</option>
+                                        <option value="320">320</option>
+                                        <option value="360">360</option>
+                                    </select>
+                                </div>
+                                <div id="other-hours-wrap" style="display:none;">
+                                    <input type="number" id="hours_other" class="form-control" placeholder="Enter custom hours" min="1" />
+                                </div>
+                                <a href="javascript:void(0);" id="toggle-other-hours" class="other-toggle-link">Other</a>
+                                <input type="hidden" name="hours" id="hours" value="" />
+                                <input type="hidden" id="use_other_hours" value="0" />
                             </div>
 
                             <div class="col-lg-4">
-                                <label class="form-label">Total Weeks <span class="text-danger">*</span></label>
-                                <input type="number" name="weeks" class="form-control" 
-                                       placeholder="Enter total weeks" required />
-                            </div>
-
-                            <div class="col-lg-4">
-                                <label class="form-label">Total Hours <span class="text-danger">*</span></label>
-                                <input type="number" name="hours" class="form-control" 
-                                       placeholder="Enter total hours" required />
-                            </div>
-
-                            <div class="col-lg-4">
-                                <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                                <label class="form-label">Program Start Date <span class="text-danger">*</span></label>
                                 <input type="date" name="start_date" class="form-control" required />
                             </div>
 
                             <div class="col-lg-4">
-                                <label class="form-label">End Date <span class="text-danger">*</span></label>
+                                <label class="form-label">Program End Date <span class="text-danger">*</span></label>
                                 <input type="date" name="end_date" class="form-control" required />
                             </div>
 
                             <div class="col-lg-4">
-                                <label class="form-label">Application Deadline <span class="text-danger">*</span></label>
+                                <label class="form-label">Last Date to Apply <span class="text-danger">*</span></label>
                                 <input type="date" name="application_deadline" class="form-control" required />
                             </div>
 
                             <div class="col-lg-12">
                                 <label class="form-label" style="font-weight: 600; color: #2d3748; display: flex; align-items: center; gap: 8px;">
                                     <i class="bx bx-calendar-week" style="color: #667eea; font-size: 20px;"></i>
-                                    Select Batch Days <span class="text-danger">*</span>
+                                    Training Schedule <span class="text-danger">*</span>
                                 </label>
                                 <select id="batchDaysSelect" class="form-select" multiple>
                                     <option value="Monday">Monday</option>
@@ -467,6 +553,10 @@
                                     <option value="Saturday">Saturday</option>
                                     <option value="Sunday">Sunday</option>
                                 </select>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="all_week_days">
+                                    <label class="form-check-label" for="all_week_days">All Week</label>
+                                </div>
                                 <small class="text-muted" style="display: flex; align-items: center; gap: 5px; margin-top: 8px;">
                                     <i class="bx bx-info-circle"></i>
                                     Select days to add individual start and end dates for each day
@@ -526,7 +616,7 @@
                         </div>
                         <div class="row g-6">
                             <div class="col-lg-12">
-                                <label class="form-label">Required Skills</label>
+                                <label class="form-label">Preferred Skills</label>
                                 <div id="skill-input-container" class="skill-input-container">
                                     <input type="text" id="skills" placeholder="Type a skill and press Enter" 
                                            style="border: none; outline: none; flex: 1; min-width: 200px;" />
@@ -536,7 +626,7 @@
                             </div>
 
                             <div class="col-lg-12">
-                                <label class="form-label">Eligibility Criteria</label>
+                                <label class="form-label">Candidate Eligibility</label>
                                 <div id="eligibility_criteria_input_container" class="eligibility_criteria_input_container">
                                     <input type="text" id="eligibility_criteria" placeholder="Type criteria and press Enter" 
                                            style="border: none; outline: none; flex: 1; min-width: 200px;" />
@@ -548,7 +638,7 @@
                             <div class="col-lg-12">
                                 <label class="form-label" style="font-weight: 600; color: #2d3748; display: flex; align-items: center; gap: 8px;">
                                     <i class="bx bx-gift" style="color: #667eea; font-size: 20px;"></i>
-                                    Perks & Benefits
+                                    Program Benefits
                                 </label>
                                 <select id="perksSelect" name="perks[]" class="form-select" multiple>
                                     <option value="Certificate">Certificate</option>
@@ -584,25 +674,25 @@
                         </div>
                         <div class="row g-6">
                             <div class="col-lg-12">
-                                <label class="form-label">Internship Description <span class="text-danger">*</span></label>
+                                <label class="form-label">Program Overview <span class="text-danger">*</span></label>
                                 <div id="full-editor-internship-description" style="height:150px;"></div>
                                 <input type="hidden" name="internship_description" id="internship_description">
                             </div>
 
                             <div class="col-lg-12">
-                                <label class="form-label">Module Brief Description <span class="text-danger">*</span></label>
+                                <label class="form-label">Learning Modules <span class="text-danger">*</span></label>
                                 <div id="editor-module-desc" style="height:150px;"></div>
                                 <input type="hidden" name="module_description" id="module_description">
                             </div>
 
                             <div class="col-lg-12">
-                                <label class="form-label">Internship Objective <span class="text-danger">*</span></label>
+                                <label class="form-label">Learning Objectives <span class="text-danger">*</span></label>
                                 <div id="full-editor-key-responsibilities" style="height:150px;"></div>
                                 <input type="hidden" name="internship_objective" id="internship_objective">
                             </div>
 
                             <div class="col-lg-12">
-                                <label class="form-label">Internship Outcome <span class="text-danger">*</span></label>
+                                <label class="form-label">Skills You'll Gain <span class="text-danger">*</span></label>
                                 <div id="editor-industry-outcome" style="height:150px;"></div>
                                 <input type="hidden" name="internship_outcome" id="internship_outcome">
                             </div>
@@ -735,7 +825,7 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <label class="text-muted small">Internship Description</label>
+                                            <label class="text-muted small">Program Overview</label>
                                             <div id="preview_description" class="border rounded p-3 bg-light">-</div>
                                         </div>
                                         <div class="mb-3">
@@ -743,11 +833,11 @@
                                             <div id="preview_module" class="border rounded p-3 bg-light">-</div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="text-muted small">Internship Objective</label>
+                                            <label class="text-muted small">Learning Objectives</label>
                                             <div id="preview_objective" class="border rounded p-3 bg-light">-</div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="text-muted small">Internship Outcome</label>
+                                            <label class="text-muted small">Skills You'll Gain</label>
                                             <div id="preview_outcome" class="border rounded p-3 bg-light">-</div>
                                         </div>
                                     </div>
@@ -760,7 +850,7 @@
                                     <span class="align-middle d-sm-inline-block d-none">Previous</span>
                                 </button>
                                 <button type="submit" class="btn btn-success">
-                                    <i class="bx bx-save"></i> Create Internship
+                                    <i class="bx bx-save"></i> Publish Internship
                                 </button>
                             </div>
                         </div>
@@ -809,12 +899,127 @@
 
 <script>
 $(document).ready(function() {
+    // Application Deadline: today → start date (other dates disabled via min/max)
+    function updateAdminInternshipDateConstraints() {
+        const pad = (n) => String(n).padStart(2, '0');
+        const now = new Date();
+        const today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+        const $form = $('#internshipForm');
+        const $start = $form.find('input[name="start_date"]');
+        const $deadline = $form.find('input[name="application_deadline"]');
+        const startDate = $start.val() || '';
+        const deadlineVal = $deadline.val() || '';
+
+        $deadline.attr('min', today);
+        if (startDate) {
+            $deadline.attr('max', startDate);
+            if (deadlineVal && deadlineVal > startDate) {
+                $deadline.val('');
+            }
+        } else {
+            $deadline.removeAttr('max');
+        }
+        if (deadlineVal && deadlineVal < today) {
+            $deadline.val('');
+        }
+    }
+
+    $('#internshipForm').on('change input', 'input[name="start_date"], input[name="application_deadline"]', updateAdminInternshipDateConstraints);
+    updateAdminInternshipDateConstraints();
+
+    // Duration / Weeks / Hours — Other toggle (hide select, show text input)
+    function syncAdminDurationWeeksHours(field) {
+        if (field === 'duration') {
+            if ($('#use_other_duration').val() === '1') {
+                $('#duration').val(($('#duration_other').val() || '').trim());
+            } else {
+                $('#duration').val($('#duration_select').val() || '');
+            }
+        } else if (field === 'weeks') {
+            if ($('#use_other_weeks').val() === '1') {
+                $('#weeks').val(($('#weeks_other').val() || '').trim());
+            } else {
+                $('#weeks').val($('#weeks_select').val() || '');
+            }
+        } else if (field === 'hours') {
+            if ($('#use_other_hours').val() === '1') {
+                $('#hours').val(($('#hours_other').val() || '').trim());
+            } else {
+                $('#hours').val($('#hours_select').val() || '');
+            }
+        }
+    }
+
+    function setDurationOtherMode(enabled) {
+        $('#use_other_duration').val(enabled ? '1' : '0');
+        $('#duration-other-row').toggleClass('is-other-mode', enabled);
+        $('#other-duration-wrap').toggle(enabled);
+        $('#toggle-other-duration').text(enabled ? 'Select from list' : 'Other');
+        if (enabled) {
+            $('#duration_select').val(null).trigger('change');
+        } else {
+            $('#duration_other').val('');
+        }
+        syncAdminDurationWeeksHours('duration');
+    }
+
+    function setWeeksOtherMode(enabled) {
+        $('#use_other_weeks').val(enabled ? '1' : '0');
+        $('#weeks-other-row').toggleClass('is-other-mode', enabled);
+        $('#other-weeks-wrap').toggle(enabled);
+        $('#toggle-other-weeks').text(enabled ? 'Select from list' : 'Other');
+        if (enabled) {
+            $('#weeks_select').val(null).trigger('change');
+        } else {
+            $('#weeks_other').val('');
+        }
+        syncAdminDurationWeeksHours('weeks');
+    }
+
+    function setHoursOtherMode(enabled) {
+        $('#use_other_hours').val(enabled ? '1' : '0');
+        $('#hours-other-row').toggleClass('is-other-mode', enabled);
+        $('#other-hours-wrap').toggle(enabled);
+        $('#toggle-other-hours').text(enabled ? 'Select from list' : 'Other');
+        if (enabled) {
+            $('#hours_select').val(null).trigger('change');
+        } else {
+            $('#hours_other').val('');
+        }
+        syncAdminDurationWeeksHours('hours');
+    }
+
+    $('#toggle-other-duration').on('click', function() {
+        setDurationOtherMode($('#use_other_duration').val() !== '1');
+        if ($('#use_other_duration').val() === '1') $('#duration_other').focus();
+    });
+    $('#toggle-other-weeks').on('click', function() {
+        setWeeksOtherMode($('#use_other_weeks').val() !== '1');
+        if ($('#use_other_weeks').val() === '1') $('#weeks_other').focus();
+    });
+    $('#toggle-other-hours').on('click', function() {
+        setHoursOtherMode($('#use_other_hours').val() !== '1');
+        if ($('#use_other_hours').val() === '1') $('#hours_other').focus();
+    });
+
+    $('#duration_select').on('change', function() { syncAdminDurationWeeksHours('duration'); });
+    $('#weeks_select').on('change', function() { syncAdminDurationWeeksHours('weeks'); });
+    $('#hours_select').on('change', function() { syncAdminDurationWeeksHours('hours'); });
+    $('#duration_other, #weeks_other, #hours_other').on('input change', function() {
+        if (this.id === 'duration_other') syncAdminDurationWeeksHours('duration');
+        if (this.id === 'weeks_other') syncAdminDurationWeeksHours('weeks');
+        if (this.id === 'hours_other') syncAdminDurationWeeksHours('hours');
+    });
+
     // Initialize jQuery Validation
     $('#internshipForm').validate({
+        ignore: [],
         errorElement: 'span',
         errorClass: 'error',
         errorPlacement: function(error, element) {
-            if (element.parent().hasClass('select2-container')) {
+            if (element.hasClass('select2-hidden-accessible')) {
+                error.insertAfter(element.next('.select2-container'));
+            } else if (element.parent().hasClass('select2-container')) {
                 error.insertAfter(element.parent());
             } else {
                 error.insertAfter(element);
@@ -822,9 +1027,15 @@ $(document).ready(function() {
         },
         highlight: function(element) {
             $(element).addClass('error').removeClass('valid');
+            if ($(element).hasClass('select2-hidden-accessible')) {
+                $(element).next('.select2-container').addClass('error');
+            }
         },
         unhighlight: function(element) {
             $(element).removeClass('error').addClass('valid');
+            if ($(element).hasClass('select2-hidden-accessible')) {
+                $(element).next('.select2-container').removeClass('error');
+            }
         },
         rules: {
             internship_title: {
@@ -832,6 +1043,9 @@ $(document).ready(function() {
                 minlength: 3
             },
             category_id: {
+                required: true
+            },
+            'sub_category_id[]': {
                 required: true
             },
             company_id: {
@@ -874,6 +1088,7 @@ $(document).ready(function() {
                 minlength: "Title must be at least 3 characters"
             },
             category_id: "Please select a category",
+            'sub_category_id[]': "Please select at least one subcategory",
             company_id: "Please select a company",
             internship_mode: "Please select internship mode",
             location: "Please enter location",
@@ -896,10 +1111,60 @@ $(document).ready(function() {
         }
     });
 
+    // Fields may belong to a parent <form> (invalid nested form in layout).
+    // jquery.validate reads validator from element.form — sync it so .valid() does not crash.
+    (function syncInternshipFormValidator() {
+        var validator = $('#internshipForm').data('validator');
+        var firstField = $('#internshipForm').find('input, select, textarea').get(0);
+        if (validator && firstField && firstField.form && !$.data(firstField.form, 'validator')) {
+            $.data(firstField.form, 'validator', validator);
+        }
+    })();
+
     // Initialize Select2 for all select elements
     $('select[name="category_id"]').select2({
         placeholder: 'Select Category',
         allowClear: true
+    });
+
+    $('#admin_internship_sub_category_id').select2({
+        placeholder: 'Select Subcategory',
+        allowClear: true,
+        closeOnSelect: false,
+        width: '100%'
+    });
+
+    function loadAdminInternshipSubCategories(categoryId, selectedIds) {
+        selectedIds = selectedIds || [];
+        var $subSelect = $('#admin_internship_sub_category_id');
+        $subSelect.empty().trigger('change');
+
+        if (!categoryId) {
+            return;
+        }
+
+        $.ajax({
+            url: "{{ route('admin.skills.get_sub_category') }}",
+            type: "POST",
+            data: {
+                category_id: categoryId,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function (response) {
+                if (response.status === 1 && response.data) {
+                    response.data.forEach(function (item) {
+                        var isSelected = selectedIds.map(String).indexOf(String(item.sub_category_id)) !== -1;
+                        var option = new Option(item.sub_category_nm, item.sub_category_id, isSelected, isSelected);
+                        $subSelect.append(option);
+                    });
+                    $subSelect.trigger('change');
+                }
+            }
+        });
+    }
+
+    $('#admin_internship_category_id').on('change', function () {
+        loadAdminInternshipSubCategories($(this).val());
     });
 
     $('select[name="company_id"]').select2({
@@ -910,6 +1175,24 @@ $(document).ready(function() {
     $('select[name="internship_mode"]').select2({
         placeholder: 'Select Mode',
         allowClear: true
+    });
+
+    $('#duration_select').select2({
+        placeholder: 'Select Duration',
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#weeks_select').select2({
+        placeholder: 'Select Weeks',
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#hours_select').select2({
+        placeholder: 'Select Hours',
+        allowClear: true,
+        width: '100%'
     });
 
     // Initialize Select2 for Batch Days
@@ -927,6 +1210,102 @@ $(document).ready(function() {
 
     // Batch Days Management
     let selectedDays = [];
+    const adminWeekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    function syncAdminAllWeekCheckbox() {
+        const selected = $('#batchDaysSelect').val() || [];
+        const allSelected = adminWeekDays.every(function(day) {
+            return selected.indexOf(day) !== -1;
+        });
+        $('#all_week_days').prop('checked', allSelected && selected.length === adminWeekDays.length);
+    }
+
+    function ensureAdminCopyTimesRow() {
+        if ($('#copy_batch_times_row').length) return;
+        const row = `
+            <tr id="copy_batch_times_row" class="copy-batch-times-row" style="display:none;">
+                <td colspan="4">
+                    <div class="form-check mb-0" id="copy_batch_times_wrap">
+                        <input class="form-check-input" type="checkbox" id="copy_batch_times">
+                        <label class="form-check-label" for="copy_batch_times">Copy start &amp; end time to all days</label>
+                    </div>
+                </td>
+            </tr>
+        `;
+        const $first = $('#batchDaysTableBody tr.batch-day-row').first();
+        if ($first.length) {
+            $first.after(row);
+        } else {
+            $('#batchDaysTableBody').append(row);
+        }
+    }
+
+    function updateAdminCopyTimesVisibility() {
+        ensureAdminCopyTimesRow();
+        const $rows = $('#batchDaysTableBody tr.batch-day-row');
+        const $first = $rows.first();
+        const startVal = $first.length ? ($first.find('input[type="time"]').eq(0).val() || '') : '';
+        const endVal = $first.length ? ($first.find('input[type="time"]').eq(1).val() || '') : '';
+        const hasFirstDayTime = !!(startVal && endVal);
+        const $copyRow = $('#copy_batch_times_row');
+
+        if ($first.length) {
+            $copyRow.insertAfter($first);
+        }
+
+        if ($rows.length > 1 && hasFirstDayTime) {
+            $copyRow.show();
+        } else {
+            $('#copy_batch_times').prop('checked', false);
+            $copyRow.hide();
+        }
+    }
+
+    function copyAdminBatchTimesToAll() {
+        const $rows = $('#batchDaysTableBody tr.batch-day-row');
+        if ($rows.length < 2) return;
+        const $first = $rows.first();
+        const startVal = $first.find('input[type="time"]').eq(0).val() || '';
+        const endVal = $first.find('input[type="time"]').eq(1).val() || '';
+        $rows.each(function(index) {
+            if (index === 0) return;
+            $(this).find('input[type="time"]').eq(0).val(startVal);
+            $(this).find('input[type="time"]').eq(1).val(endVal);
+        });
+    }
+
+    function clearAdminBatchTimesExceptFirst() {
+        const $rows = $('#batchDaysTableBody tr.batch-day-row');
+        $rows.each(function(index) {
+            if (index === 0) return;
+            $(this).find('input[type="time"]').eq(0).val('');
+            $(this).find('input[type="time"]').eq(1).val('');
+        });
+    }
+
+    $('#all_week_days').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#batchDaysSelect').val(adminWeekDays).trigger('change');
+        } else {
+            $('#batchDaysSelect').val(null).trigger('change');
+        }
+    });
+
+    $(document).on('change', '#copy_batch_times', function() {
+        if ($(this).is(':checked')) {
+            copyAdminBatchTimesToAll();
+        } else {
+            clearAdminBatchTimesExceptFirst();
+        }
+    });
+
+    $(document).on('change input', '#batchDaysTableBody tr.batch-day-row input[type="time"]', function() {
+        const $row = $(this).closest('tr.batch-day-row');
+        updateAdminCopyTimesVisibility();
+        if ($('#copy_batch_times').is(':checked') && $row.is($('#batchDaysTableBody tr.batch-day-row').first())) {
+            copyAdminBatchTimesToAll();
+        }
+    });
 
     $('#batchDaysSelect').on('change', function() {
         const currentSelection = $(this).val() || [];
@@ -955,6 +1334,14 @@ $(document).ready(function() {
             $('#batchDaysTableContainer').show();
         } else {
             $('#batchDaysTableContainer').hide();
+            $('#copy_batch_times').prop('checked', false);
+            $('#copy_batch_times_row').hide();
+        }
+
+        syncAdminAllWeekCheckbox();
+        updateAdminCopyTimesVisibility();
+        if ($('#copy_batch_times').is(':checked')) {
+            copyAdminBatchTimesToAll();
         }
     });
 
@@ -977,6 +1364,7 @@ $(document).ready(function() {
             </tr>
         `;
         $('#batchDaysTableBody').append(row);
+        updateAdminCopyTimesVisibility();
     }
 
     // Make removeBatchDay function global
@@ -1021,6 +1409,33 @@ $(document).ready(function() {
         });
     }
 
+    function isInternshipFieldValid(field) {
+        const element = $('#internshipForm').find(field).first();
+        if (!element.length) {
+            return false;
+        }
+        // Skip hidden custom inputs unless they are required (Other mode)
+        if (element.hasClass('d-none') || !element.is(':visible')) {
+            if (!element.prop('required') && element.attr('type') === 'number') {
+                // Value should already be synced from select
+                const val = element.val();
+                return val !== null && val !== undefined && val !== '';
+            }
+        }
+        const nativeForm = element[0].form;
+        if (nativeForm && $.data(nativeForm, 'validator')) {
+            return element.valid();
+        }
+        const val = element.val();
+        const empty = val === null || val === undefined || val === '' || ($.isArray(val) && val.length === 0);
+        if (empty) {
+            element.addClass('error').removeClass('valid');
+            return false;
+        }
+        element.removeClass('error').addClass('valid');
+        return true;
+    }
+
     // Validation function for each step
     function validateStep(stepElement) {
         if (!stepElement) return true;
@@ -1034,6 +1449,7 @@ $(document).ready(function() {
                 const basicFields = [
                     'input[name="internship_title"]',
                     'select[name="category_id"]',
+                    'select[name="sub_category_id[]"]',
                     'select[name="company_id"]',
                     'select[name="internship_mode"]',
                     'input[name="location"]',
@@ -1041,33 +1457,67 @@ $(document).ready(function() {
                 ];
                 
                 basicFields.forEach(field => {
-                    const element = $(field);
-                    if (!element.valid()) {
+                    if (!isInternshipFieldValid(field)) {
                         isValid = false;
                     }
                 });
                 break;
                 
             case 'duration-schedule':
-                // Validate duration and schedule fields
-                const scheduleFields = [
-                    'input[name="duration"]',
-                    'input[name="weeks"]',
-                    'input[name="hours"]',
+                syncAdminDurationWeeksHours('duration');
+                syncAdminDurationWeeksHours('weeks');
+                syncAdminDurationWeeksHours('hours');
+
+                if (!$('#duration').val()) {
+                    const $dEl = $('#use_other_duration').val() === '1' ? $('#duration_other') : $('#duration_select');
+                    $dEl.addClass('error').removeClass('valid');
+                    if ($dEl.hasClass('select2-hidden-accessible')) {
+                        $dEl.next('.select2-container').addClass('error');
+                    }
+                    isValid = false;
+                } else {
+                    $('#duration_other, #duration_select').removeClass('error').addClass('valid');
+                    $('#duration_select').next('.select2-container').removeClass('error');
+                }
+
+                if (!$('#weeks').val()) {
+                    const $wEl = $('#use_other_weeks').val() === '1' ? $('#weeks_other') : $('#weeks_select');
+                    $wEl.addClass('error').removeClass('valid');
+                    if ($wEl.hasClass('select2-hidden-accessible')) {
+                        $wEl.next('.select2-container').addClass('error');
+                    }
+                    isValid = false;
+                } else {
+                    $('#weeks_other, #weeks_select').removeClass('error').addClass('valid');
+                    $('#weeks_select').next('.select2-container').removeClass('error');
+                }
+
+                if (!$('#hours').val()) {
+                    const $hEl = $('#use_other_hours').val() === '1' ? $('#hours_other') : $('#hours_select');
+                    $hEl.addClass('error').removeClass('valid');
+                    if ($hEl.hasClass('select2-hidden-accessible')) {
+                        $hEl.next('.select2-container').addClass('error');
+                    }
+                    isValid = false;
+                } else {
+                    $('#hours_other, #hours_select').removeClass('error').addClass('valid');
+                    $('#hours_select').next('.select2-container').removeClass('error');
+                }
+
+                const scheduleDateFields = [
                     'input[name="start_date"]',
                     'input[name="end_date"]',
                     'input[name="application_deadline"]'
                 ];
                 
-                scheduleFields.forEach(field => {
-                    const element = $(field);
-                    if (!element.valid()) {
+                scheduleDateFields.forEach(field => {
+                    if (!isInternshipFieldValid(field)) {
                         isValid = false;
                     }
                 });
                 
                 // Validate batch days if selected
-                const batchDaysRows = $('#batchDaysTableBody tr');
+                const batchDaysRows = $('#batchDaysTableBody tr.batch-day-row');
                 if (batchDaysRows.length > 0) {
                     let allTimesValid = true;
                     batchDaysRows.each(function() {
@@ -1102,13 +1552,13 @@ $(document).ready(function() {
                 
             case 'descriptions':
                 // Validate descriptions
-                const descContent = internshipDescEditor.root.innerHTML.trim();
+                const descContent = opportunityDescEditor.root.innerHTML.trim();
                 const moduleContent = moduleDescEditor.root.innerHTML.trim();
                 const objectiveContent = objectiveEditor.root.innerHTML.trim();
                 const outcomeContent = outcomeEditor.root.innerHTML.trim();
                 
                 if (!descContent || descContent === '<p><br></p>') {
-                    alert('Please fill in the Internship Description.');
+                    alert('Please fill in the Program Overview.');
                     isValid = false;
                 }
                 if (!moduleContent || moduleContent === '<p><br></p>') {
@@ -1116,11 +1566,11 @@ $(document).ready(function() {
                     isValid = false;
                 }
                 if (!objectiveContent || objectiveContent === '<p><br></p>') {
-                    alert('Please fill in the Internship Objective.');
+                    alert('Please fill in the Learning Objectives.');
                     isValid = false;
                 }
                 if (!outcomeContent || outcomeContent === '<p><br></p>') {
-                    alert('Please fill in the Internship Outcome.');
+                    alert("Please fill in the Skills You'll Gain.");
                     isValid = false;
                 }
                 break;
@@ -1130,7 +1580,7 @@ $(document).ready(function() {
     }
 
     // Initialize Quill Editors
-    const internshipDescEditor = new Quill('#full-editor-internship-description', {
+    const opportunityDescEditor = new Quill('#full-editor-internship-description', {
         theme: 'snow',
         placeholder: 'Describe the internship program...'
     });
@@ -1152,51 +1602,110 @@ $(document).ready(function() {
 
     // Skills Management
     let skillsArray = [];
+    function parseTagList(raw) {
+        if (!raw) return [];
+        raw = String(raw).trim();
+        if (!raw) return [];
+
+        let items = [];
+        try {
+            let decoded = JSON.parse(raw);
+            if (typeof decoded === 'string') {
+                try { decoded = JSON.parse(decoded); } catch (e2) {}
+            }
+            if (Array.isArray(decoded)) {
+                items = decoded;
+            } else if (decoded && typeof decoded === 'object') {
+                items = Object.values(decoded);
+            }
+        } catch (e) {}
+
+        if (!items.length) {
+            items = raw.split(',');
+        }
+
+        const unique = {};
+        const result = [];
+        items.forEach(function(item) {
+            if (Array.isArray(item)) {
+                item = item.join(' ');
+            }
+            let name = String(item == null ? '' : item).replace(/<[^>]*>/g, '');
+            name = name.replace(/^[\s\[\]"']+|[\s\[\]"']+$/g, '').replace(/\s+/g, ' ').trim();
+            if (!name) return;
+            const key = name.toLowerCase();
+            if (!unique[key]) {
+                unique[key] = true;
+                result.push(name);
+            }
+        });
+        return result;
+    }
+
+    function syncSkillsInput() {
+        $('#required_skills').val(JSON.stringify(skillsArray));
+    }
+    function syncCriteriaInput() {
+        $('#required_eligibility_criteria').val(JSON.stringify(criteriaArray));
+    }
+
+    skillsArray = parseTagList($('#required_skills').val());
+    skillsArray.forEach(skill => addSkillTag(skill));
+    syncSkillsInput();
+
     $('#skills').on('keypress', function(e) {
         if (e.which === 13) {
             e.preventDefault();
             const skill = $(this).val().trim();
-            if (skill && !skillsArray.includes(skill)) {
+            if (skill && !skillsArray.map(s => s.toLowerCase()).includes(skill.toLowerCase())) {
                 skillsArray.push(skill);
                 addSkillTag(skill);
                 $(this).val('');
-                $('#required_skills').val(skillsArray.join(','));
+                syncSkillsInput();
             }
         }
     });
 
     function addSkillTag(skill) {
-        const tag = $('<span class="skill-tag">' + skill + ' <span class="remove">×</span></span>');
-        tag.find('.remove').on('click', function() {
+        const tag = $('<span class="skill-tag"></span>').text(skill + ' ');
+        const remove = $('<span class="remove">×</span>');
+        remove.on('click', function() {
             skillsArray = skillsArray.filter(s => s !== skill);
-            $('#required_skills').val(skillsArray.join(','));
+            syncSkillsInput();
             tag.remove();
         });
+        tag.append(remove);
         tag.insertBefore('#skills');
     }
 
     // Eligibility Criteria Management
     let criteriaArray = [];
+    criteriaArray = parseTagList($('#required_eligibility_criteria').val());
+    criteriaArray.forEach(criteria => addCriteriaTag(criteria));
+    syncCriteriaInput();
+
     $('#eligibility_criteria').on('keypress', function(e) {
         if (e.which === 13) {
             e.preventDefault();
             const criteria = $(this).val().trim();
-            if (criteria && !criteriaArray.includes(criteria)) {
+            if (criteria && !criteriaArray.map(c => c.toLowerCase()).includes(criteria.toLowerCase())) {
                 criteriaArray.push(criteria);
                 addCriteriaTag(criteria);
                 $(this).val('');
-                $('#required_eligibility_criteria').val(criteriaArray.join(','));
+                syncCriteriaInput();
             }
         }
     });
 
     function addCriteriaTag(criteria) {
-        const tag = $('<span class="eligibility-tag">' + criteria + ' <span class="remove">×</span></span>');
-        tag.find('.remove').on('click', function() {
+        const tag = $('<span class="eligibility-tag"></span>').text(criteria + ' ');
+        const remove = $('<span class="remove">×</span>');
+        remove.on('click', function() {
             criteriaArray = criteriaArray.filter(c => c !== criteria);
-            $('#required_eligibility_criteria').val(criteriaArray.join(','));
+            syncCriteriaInput();
             tag.remove();
         });
+        tag.append(remove);
         tag.insertBefore('#eligibility_criteria');
     }
 
@@ -1219,15 +1728,20 @@ $(document).ready(function() {
         $('#preview_stipend').text(stipend ? '₹' + stipend : 'Not specified');
 
         // Duration & Schedule
-        $('#preview_duration').text($('input[name="duration"]').val() || '-');
-        $('#preview_weeks').text($('input[name="weeks"]').val() + ' weeks' || '-');
-        $('#preview_hours').text($('input[name="hours"]').val() + ' hours' || '-');
-        $('#preview_start_date').text($('input[name="start_date"]').val() || '-');
-        $('#preview_end_date').text($('input[name="end_date"]').val() || '-');
-        $('#preview_deadline').text($('input[name="application_deadline"]').val() || '-');
+        syncAdminDurationWeeksHours('duration');
+        syncAdminDurationWeeksHours('weeks');
+        syncAdminDurationWeeksHours('hours');
+        $('#preview_duration').text($('#internshipForm').find('[name="duration"]').val() || '-');
+        const weeksVal = $('#internshipForm').find('[name="weeks"]').val();
+        const hoursVal = $('#internshipForm').find('[name="hours"]').val();
+        $('#preview_weeks').text(weeksVal ? weeksVal + ' weeks' : '-');
+        $('#preview_hours').text(hoursVal ? hoursVal + ' hours' : '-');
+        $('#preview_start_date').text($('#internshipForm').find('input[name="start_date"]').val() || '-');
+        $('#preview_end_date').text($('#internshipForm').find('input[name="end_date"]').val() || '-');
+        $('#preview_deadline').text($('#internshipForm').find('input[name="application_deadline"]').val() || '-');
         
         // Batch Days with Time
-        const batchDaysRows = $('#batchDaysTableBody tr');
+        const batchDaysRows = $('#batchDaysTableBody tr.batch-day-row');
         if (batchDaysRows.length > 0) {
             let batchDaysHtml = '<div class="d-flex flex-column gap-2">';
             batchDaysRows.each(function() {
@@ -1266,7 +1780,7 @@ $(document).ready(function() {
         }
 
         // Program Details
-        $('#preview_description').html(internshipDescEditor.root.innerHTML || '-');
+        $('#preview_description').html(opportunityDescEditor.root.innerHTML || '-');
         $('#preview_module').html(moduleDescEditor.root.innerHTML || '-');
         $('#preview_objective').html(objectiveEditor.root.innerHTML || '-');
         $('#preview_outcome').html(outcomeEditor.root.innerHTML || '-');
@@ -1275,9 +1789,13 @@ $(document).ready(function() {
     // Form Submission
     $('#internshipForm').on('submit', function(e) {
         e.preventDefault();
+
+        syncAdminDurationWeeksHours('duration');
+        syncAdminDurationWeeksHours('weeks');
+        syncAdminDurationWeeksHours('hours');
         
         // Update hidden fields with Quill content
-        $('#internship_description').val(internshipDescEditor.root.innerHTML);
+        $('#internship_description').val(opportunityDescEditor.root.innerHTML);
         $('#module_description').val(moduleDescEditor.root.innerHTML);
         $('#internship_objective').val(objectiveEditor.root.innerHTML);
         $('#internship_outcome').val(outcomeEditor.root.innerHTML);

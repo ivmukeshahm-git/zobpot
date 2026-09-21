@@ -3,7 +3,7 @@
         .select2-selection__clear {
             display: none !important;
         }
-        /* Select2 main box */
+        /* Select2 main box (single) */
         .select2-container--default .select2-selection--single {
             height: auto !important;
             min-height: 46px !important;
@@ -35,10 +35,110 @@
             right: 15px !important;
         }
 
+        /* Select2 multi (Subcategory) — match Category look */
+        .select2-container--default .select2-selection--multiple {
+            height: auto !important;
+            min-height: 46px !important;
+            border: 1px solid #E0E6F7 !important;
+            border-radius: 4px !important;
+            background-color: #ffffff !important;
+            padding: 6px 12px !important;
+            width: 100% !important;
+            font-size: 14px !important;
+            line-height: 22px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border: 1px solid #E0E6F7 !important;
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            padding: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            gap: 4px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+            color: #A0ABB8 !important;
+            margin-top: 4px !important;
+            margin-left: 3px !important;
+            font-size: 14px !important;
+            line-height: 22px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #F0F4FF !important;
+            border: 1px solid #E0E6F7 !important;
+            border-radius: 4px !important;
+            color: #05264E !important;
+            padding: 2px 8px !important;
+            margin: 2px 0 !important;
+            font-size: 13px !important;
+            line-height: 20px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #A0ABB8 !important;
+            margin-right: 4px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+            margin-top: 4px !important;
+            font-size: 14px !important;
+            color: #A0ABB8 !important;
+            min-height: 22px !important;
+        }
+
         /* Dropdown options */
         .select2-dropdown {
             border: 1px solid #E0E6F7 !important;
             border-radius: 4px !important;
+        }
+
+        .select2-results__options,
+        .select2-results__option,
+        .select2-selection__rendered {
+            list-style: none !important;
+            list-style-type: none !important;
+        }
+
+        .select2-results__options {
+            padding-left: 0 !important;
+            margin: 0 !important;
+        }
+
+        #internship_sub_category_id + .select2-container {
+            width: 100% !important;
+        }
+
+        .internship-other-row .other-toggle-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #05264e;
+            text-decoration: none;
+            border-bottom: 1px dashed #3c65f5;
+            line-height: 1.2;
+        }
+
+        .internship-other-row .other-toggle-link:hover {
+            color: #3c65f5;
+        }
+
+        .internship-other-row .other-field-hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .internship-other-row.is-other-mode .select-wrap {
+            display: none !important;
         }
 
         .card-grid-2 {
@@ -357,102 +457,308 @@
     
     
 <style>
-     .internship-card-simple {
-            background: #F8FAFF;
-            border-radius: 16px;
-            padding: 14px !important;
-            margin: 14px 0 !important;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            border: 1px solid #242a65;
-            transition: 0.3s ease;
-            cursor: pointer;
+/* ============================================
+   OPPORTUNITY CARDS — premium SaaS redesign
+   Scoped to .internship-card-simple only
+   ============================================ */
+.internship-card-simple {
+    --oc-primary: #2563EB;
+    --oc-text: #0F172A;
+    --oc-muted: #64748B;
+    --oc-border: #E5E7EB;
+    --oc-surface: #F8FAFC;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 0 !important;
+    margin: 0 0 8px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+    border: 1px solid var(--oc-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    height: 100%;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
 
-            /* 🔥 MAIN FIX — SAME HEIGHT FOR ALL CARDS */
-            height: 380px !important;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-        }
+.internship-card-simple:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.12);
+    border-color: #BFDBFE;
+}
 
-        .internship-card-simple:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(36, 42, 101, 0.12);
-            border-color: #242a65;
-        }
+.internship-card-simple .oc-card-top {
+    padding: 16px 16px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
 
-        /* Action Buttons Styles */
-        .action-buttons-container .btn {
-            transition: all 0.3s ease;
-        }
+.internship-card-simple .job-badge,
+.internship-card-simple .oc-mode-badge {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EFF6FF !important;
+    color: var(--oc-primary) !important;
+    border: 1px solid #BFDBFE;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: none !important;
+    letter-spacing: 0.01em;
+}
 
-        .action-buttons-container .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-        }
+.internship-card-simple .action-buttons-container {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    display: flex !important;
+    gap: 6px;
+    z-index: 10;
+    flex-shrink: 0;
+}
 
-        /* Filter Buttons Styles */
-        .btn-outline-primary.active,
-        .btn-outline-success.active,
-        .btn-outline-warning.active,
-        .btn-outline-danger.active {
-            color: white !important;
-        }
+.internship-card-simple .action-buttons-container .btn {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px !important;
+    border: 1px solid var(--oc-border) !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
 
-        .btn-outline-primary {
-            border-color: #3b7ddd;
-            color: #3b7ddd;
-        }
+.internship-card-simple .action-buttons-container .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08) !important;
+}
 
-        .btn-outline-primary:hover,
-        .btn-outline-primary.active {
-            background-color: #3b7ddd;
-            border-color: #3b7ddd;
-        }
+.internship-card-simple .oc-btn-edit { color: var(--oc-primary) !important; }
+.internship-card-simple .oc-btn-edit:hover { background: #EFF6FF !important; border-color: #BFDBFE !important; }
 
-        .btn-outline-success {
-            border-color: #10b981;
-            color: #10b981;
-        }
+.internship-card-simple .oc-btn-toggle-on { color: #059669 !important; }
+.internship-card-simple .oc-btn-toggle-on:hover { background: #ECFDF5 !important; border-color: #A7F3D0 !important; }
 
-        .btn-outline-success:hover,
-        .btn-outline-success.active {
-            background-color: #10b981;
-            border-color: #10b981;
-        }
+.internship-card-simple .oc-btn-toggle-off { color: #64748B !important; }
+.internship-card-simple .oc-btn-toggle-off:hover { background: #F1F5F9 !important; border-color: #CBD5E1 !important; }
 
-        .btn-outline-warning {
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
+.internship-card-simple .oc-btn-delete { color: #DC2626 !important; }
+.internship-card-simple .oc-btn-delete:hover { background: #FEF2F2 !important; border-color: #FECACA !important; }
 
-        .btn-outline-warning:hover,
-        .btn-outline-warning.active {
-            background-color: #f59e0b;
-            border-color: #f59e0b;
-        }
+.internship-card-simple .job-main,
+.internship-card-simple .oc-card-body {
+    padding: 14px 18px 8px !important;
+    flex: 1 1 auto;
+}
 
-        .btn-outline-info {
-            border-color: #06b6d4;
-            color: #06b6d4;
-        }
+.internship-card-simple .job-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--oc-text);
+    margin: 0 0 10px;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
-        .btn-outline-info:hover,
-        .btn-outline-info.active {
-            background-color: #06b6d4;
-            border-color: #06b6d4;
-        }
+.internship-card-simple .oc-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
 
-        .btn-outline-danger {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
+.internship-card-simple .badge,
+.internship-card-simple .oc-status {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid transparent;
+    letter-spacing: 0.01em;
+}
 
-        .btn-outline-danger:hover,
-        .btn-outline-danger.active {
-            background-color: #ef4444;
-            border-color: #ef4444;
-        }
+.internship-card-simple .badge.bg-success,
+.internship-card-simple .oc-status-approved {
+    background: #ECFDF5 !important;
+    color: #047857 !important;
+    border-color: #A7F3D0 !important;
+}
+
+.internship-card-simple .badge.bg-primary,
+.internship-card-simple .oc-status-active {
+    background: #EFF6FF !important;
+    color: #1D4ED8 !important;
+    border-color: #BFDBFE !important;
+}
+
+.internship-card-simple .badge.bg-secondary,
+.internship-card-simple .oc-status-closed {
+    background: #F1F5F9 !important;
+    color: #475569 !important;
+    border-color: #E2E8F0 !important;
+}
+
+.internship-card-simple .badge.bg-danger,
+.internship-card-simple .oc-status-rejected {
+    background: #FEF2F2 !important;
+    color: #B91C1C !important;
+    border-color: #FECACA !important;
+}
+
+.internship-card-simple .badge.bg-warning,
+.internship-card-simple .oc-status-pending {
+    background: #FFFBEB !important;
+    color: #B45309 !important;
+    border-color: #FDE68A !important;
+}
+
+.internship-card-simple .badge.bg-info,
+.internship-card-simple .oc-status-college {
+    background: #ECFEFF !important;
+    color: #0E7490 !important;
+    border-color: #A5F3FC !important;
+}
+
+.internship-card-simple .location {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 0;
+    color: var(--oc-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.internship-card-simple .location i {
+    color: var(--oc-primary);
+    margin-top: 2px;
+}
+
+.internship-card-simple .location span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.internship-card-simple .job-details,
+.internship-card-simple .oc-meta {
+    background: var(--oc-surface) !important;
+    border-top: 1px solid var(--oc-border);
+    padding: 12px 18px !important;
+    border-radius: 0 !important;
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 18px;
+    font-size: 13px;
+}
+
+.internship-card-simple .detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--oc-muted);
+    font-weight: 500;
+}
+
+.internship-card-simple .detail i {
+    color: var(--oc-primary);
+    width: 16px;
+    text-align: center;
+}
+
+.internship-card-simple .oc-card-footer {
+    padding: 12px 18px 16px;
+    background: #fff;
+}
+
+.internship-card-simple .view-btn,
+.internship-card-simple .oc-view-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
+    margin-top: 0 !important;
+    background: linear-gradient(135deg, #2563EB, #4F46E5) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none !important;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.internship-card-simple .view-btn:hover,
+.internship-card-simple .oc-view-btn:hover {
+    background: linear-gradient(135deg, #1D4ED8, #4338CA) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.32);
+    text-decoration: none !important;
+}
+
+/* Filter chips polish (Internship tab only) */
+#Internshiplist .d-flex.gap-3.mb-4 {
+    flex-wrap: wrap;
+    gap: 8px !important;
+}
+#Internshiplist .d-flex.gap-3.mb-4 .btn {
+    border-radius: 999px !important;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+}
+
+/* Action / filter shared hover (keep existing filter colors) */
+.action-buttons-container .btn {
+    transition: all 0.2s ease;
+}
+.btn-outline-primary.active,
+.btn-outline-success.active,
+.btn-outline-warning.active,
+.btn-outline-danger.active {
+    color: white !important;
+}
+.btn-outline-primary { border-color: #3b7ddd; color: #3b7ddd; }
+.btn-outline-primary:hover,
+.btn-outline-primary.active { background-color: #3b7ddd; border-color: #3b7ddd; }
+.btn-outline-success { border-color: #10b981; color: #10b981; }
+.btn-outline-success:hover,
+.btn-outline-success.active { background-color: #10b981; border-color: #10b981; }
+.btn-outline-warning { border-color: #f59e0b; color: #f59e0b; }
+.btn-outline-warning:hover,
+.btn-outline-warning.active { background-color: #f59e0b; border-color: #f59e0b; }
+.btn-outline-info { border-color: #06b6d4; color: #06b6d4; }
+.btn-outline-info:hover,
+.btn-outline-info.active { background-color: #06b6d4; border-color: #06b6d4; }
+.btn-outline-danger { border-color: #ef4444; color: #ef4444; }
+.btn-outline-danger:hover,
+.btn-outline-danger.active { background-color: #ef4444; border-color: #ef4444; }
+
+@media (max-width: 575.98px) {
+    .internship-card-simple { min-height: 0; }
+}
 </style>
 @endpush
 
@@ -508,7 +814,7 @@
                                         data-bs-toggle="tab" role="tab" aria-controls="tab-my-jobs"
                                         aria-selected="false">My Jobs</a></li>
                                         <li><a class="btn btn-border recruitment-icon mb-20" href="#tab-my-internships"
-                                        data-bs-toggle="tab" role="tab" aria-controls="tab-my-internships"
+                                        data-bs-toggle="tab" role="tab" aria-controls="tab-my-Internship"
                                         aria-selected="false">Internship</a></li>
                                 <li><a class="btn btn-border aboutus-icon mb-20 " href="#tab-my-profile"
                                         data-bs-toggle="tab" role="tab" aria-controls="tab-my-profile"
@@ -530,18 +836,24 @@
                         <div class="content-single">
                             <div class="tab-content">
                                 <div class="tab-pane fade" id="tab-my-internships" role="tabpanel"
-                                    aria-labelledby="tab-my-internships">
+                                    aria-labelledby="tab-my-Internship">
                                     <div id="Internshiplist">
                                         <div class="row mb-5">
                                             <div class="col-lg-6 col-md-6 col-5">
-                                                <h3 class="mt-0 color-brand-1 mb-50">My Internships</h3>
+                                                <h3 class="mt-0 color-brand-1 mb-50">My Internship</h3>
                                             </div>
                                             <div class="col-lg-6 col-md-6 col-7 text-right" style="text-align: right;">
+                                                @if(empty($hideCreateInternshipBtn))
                                                 <a class="btn btn-preview-icon btn-apply btn-apply-big"
                                                     style="padding: 14px 30px 14px 30px;" href="javascript:void(0);"
                                                     onclick="CreateInternships()"><i class="fa fa-plus"></i>&nbsp; Create
                                                     New
-                                                    Internships</a>
+                                                    Internship</a>
+                                                @else
+                                                <a class="btn btn-preview-icon btn-apply btn-apply-big"
+                                                    style="padding: 14px 30px 14px 30px; opacity: 0.65;" href="javascript:void(0);"
+                                                    onclick="showPlanLimitAlert('internship')"><i class="fa fa-lock"></i>&nbsp; Upgrade Plan</a>
+                                                @endif
                                             </div>
                                         </div>
 
@@ -550,7 +862,7 @@
                                             <div class="d-flex gap-3 mb-4">
                                                 <a href="?filter=all"
                                                     class="btn btn-outline-primary {{ $filter == 'all' ? 'active' : '' }}">
-                                                    <i class="fa fa-list"></i> All Internships
+                                                    <i class="fa fa-list"></i> All Internship
                                                 </a>
                                                 <a href="?filter=approved"
                                                     class="btn btn-outline-success {{ $filter == 'approved' ? 'active' : '' }}">
@@ -585,88 +897,77 @@
                                                                 style="cursor: default;"
                                                             @endif>
 
-                                                            <!-- Action Buttons Container -->
-                                                            <div class="action-buttons-container position-absolute" style="top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10;">
-                                                                
-                                                                <!-- Edit Button -->
-                                                                <a href="javascript:void(0);"
-                                                                    onclick="event.stopPropagation(); EditInternship({{ $internship->id }})"
-                                                                    class="btn btn-sm"
-                                                                    title="Edit Internship"
-                                                                    style="background: #3b7ddd; color: white; border-radius: 6px; padding: 6px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                                                    <i class="fa fa-pencil"></i>
-                                                                </a>
+                                                            <div class="oc-card-top">
+                                                                <div class="job-badge oc-mode-badge">
+                                                                    {{ $internship->mode }}
+                                                                </div>
 
-                                                                <!-- Active/Deactive Toggle Button -->
-                                                                @if ($internship->complete_status == 0)
+                                                                <div class="action-buttons-container">
                                                                     <a href="javascript:void(0);"
-                                                                        onclick="event.stopPropagation(); changeInternshipStatus({{ $internship->id }}, 1)"
-                                                                        title="Mark as Closed"
-                                                                        class="btn btn-sm"
-                                                                        style="background: #10b981; color: white; border-radius: 6px; padding: 6px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                                                        <i class="fa fa-toggle-on"></i>
+                                                                        onclick="event.stopPropagation(); EditInternship({{ $internship->id }})"
+                                                                        class="btn btn-sm oc-btn-edit"
+                                                                        title="Update Internship">
+                                                                        <i class="fa fa-pencil"></i>
                                                                     </a>
-                                                                @else
-                                                                    <a href="javascript:void(0);"
-                                                                        onclick="event.stopPropagation(); changeInternshipStatus({{ $internship->id }}, 0)"
-                                                                        title="Mark as Active"
-                                                                        class="btn btn-sm"
-                                                                        style="background: #6c757d; color: white; border-radius: 6px; padding: 6px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                                                        <i class="fa fa-toggle-off"></i>
-                                                                    </a>
-                                                                @endif
 
-                                                                <!-- Delete Button -->
-                                                                <a href="javascript:void(0);"
-                                                                    onclick="event.stopPropagation(); deleteInternship({{ $internship->id }})"
-                                                                    class="btn btn-sm"
-                                                                    title="Delete Internship"
-                                                                    style="background: #ef4444; color: white; border-radius: 6px; padding: 6px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                                                    <i class="fa fa-trash"></i>
-                                                                </a>
+                                                                    @if ($internship->complete_status == 0)
+                                                                        <a href="javascript:void(0);"
+                                                                            onclick="event.stopPropagation(); changeInternshipStatus({{ $internship->id }}, 1)"
+                                                                            title="Mark as Closed"
+                                                                            class="btn btn-sm oc-btn-toggle-on">
+                                                                            <i class="fa fa-toggle-on"></i>
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="javascript:void(0);"
+                                                                            onclick="event.stopPropagation(); changeInternshipStatus({{ $internship->id }}, 0)"
+                                                                            title="Mark as Active"
+                                                                            class="btn btn-sm oc-btn-toggle-off">
+                                                                            <i class="fa fa-toggle-off"></i>
+                                                                        </a>
+                                                                    @endif
+
+                                                                    <a href="javascript:void(0);"
+                                                                        onclick="event.stopPropagation(); deleteInternship({{ $internship->id }})"
+                                                                        class="btn btn-sm oc-btn-delete"
+                                                                        title="Remove Internship">
+                                                                        <i class="fa fa-trash"></i>
+                                                                    </a>
+                                                                </div>
                                                             </div>
 
-                                                            <!-- Internship Badge -->
-                                                            <div class="job-badge" style="left: 15px; right: auto;">
-                                                                {{ $internship->mode }}
-                                                            </div>
-
-                                                            <!-- Main Content -->
-                                                            <div class="job-main">
+                                                            <div class="job-main oc-card-body">
                                                                 <h3 class="job-title">{{ $internship->internship_title }}</h3>
 
-                                                                <!-- Status Badge -->
+                                                                <div class="oc-status-row">
                                                                 @if ($internship->approve_status == 1)
-                                                                    <div class="d-flex flex-wrap gap-1 mb-2">
-                                                                        <span class="badge bg-success rounded-pill">
+                                                                        <span class="badge bg-success rounded-pill oc-status-approved">
                                                                             <i class="fa fa-check-circle"></i> Approved
                                                                         </span>
                                                                         @if ($internship->complete_status == 0)
-                                                                            <span class="badge bg-primary rounded-pill">
+                                                                            <span class="badge bg-primary rounded-pill oc-status-active">
                                                                                 <i class="fa fa-toggle-on"></i> Active
                                                                             </span>
                                                                         @else
-                                                                            <span class="badge bg-secondary rounded-pill">
+                                                                            <span class="badge bg-secondary rounded-pill oc-status-closed">
                                                                                 <i class="fa fa-lock"></i> Closed
                                                                             </span>
                                                                         @endif
-                                                                    </div>
                                                                 @elseif($internship->approve_status == 2)
-                                                                    <span class="badge bg-danger rounded-pill mb-2">
+                                                                    <span class="badge bg-danger rounded-pill oc-status-rejected">
                                                                         <i class="fa fa-times-circle"></i> Rejected
                                                                     </span>
                                                                 @else
-                                                                    <span class="badge bg-warning rounded-pill mb-2">
+                                                                    <span class="badge bg-warning rounded-pill oc-status-pending">
                                                                         <i class="fa fa-clock-o"></i> Pending Approval
                                                                     </span>
                                                                 @endif
 
-                                                                {{-- College-side pending indicator (company submitted but college pending) --}}
                                                                 @if($internship->internship_type == 1 && $internship->company_complete_sts == 1 && $internship->college_complete_sts == 0 && $internship->complete_status == 0)
-                                                                    <span class="badge bg-info rounded-pill mb-2 ms-2">
+                                                                    <span class="badge bg-info rounded-pill oc-status-college">
                                                                         <i class="fa fa-flag"></i> College Pending
                                                                     </span>
                                                                 @endif
+                                                                </div>
 
                                                                 <div class="location">
                                                                     <i class="fa fa-map-marker"></i>
@@ -674,8 +975,7 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Details -->
-                                                            <div class="job-details">
+                                                            <div class="job-details oc-meta">
                                                                 <div class="detail">
                                                                     <i class="fa fa-users"></i>
                                                                     <span>{{ $internship->apply_count }} Applied</span>
@@ -686,12 +986,14 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Footer Button (pass internship id to history page) -->
+                                                            <div class="oc-card-footer">
                                                             <a
                                                                 href="{{ route('internship.application.history', ['slug' => $internship->slug]) }}"
-                                                                class="view-btn w-100 mt-2">
+                                                                    class="view-btn oc-view-btn w-100"
+                                                                    onclick="event.stopPropagation();">
                                                                 View Apply History
                                                         </a>
+                                                            </div>
 
                                                         </div>
                                                     </div>
@@ -699,7 +1001,7 @@
                                             @else
                                                 <div class="row col-12 col-lg-12 col-md-12">
                                                     <h4 style="text-align: center;background: #eee;padding: 23px;">
-                                                        No Internships Found
+                                                        No Internship Found
                                                     </h4>
                                                 </div>
                                             @endif
@@ -736,7 +1038,7 @@
                                     <div id="createInternship">
                                         <div class="row">
                                             <div class="col-lg-9">
-                                                <h3 class="mt-0 color-brand-1 mb-50">Create New Internship</h3>
+                                                <h3 class="mt-0 color-brand-1 mb-50">Create Internship</h3>
                                             </div>
                                             <div class="col-lg-3 text-right">
                                                 <a class="btn btn-preview-icon btn-apply btn-apply-big"
@@ -757,23 +1059,52 @@
                                                         class="form-control" placeholder="e.g. Web Development Intern" />
                                                 </div>
 
-                                                <div class="col-lg-6 mb-4">
-                                                    <label class="form-label mb-2">Category <span
+                                                <div class="col-lg-6 mb-4 internship-other-row" id="category-other-row">
+                                                    <label class="form-label mb-2">Internship Category <span
                                                             class="text-danger">*</span></label>
-                                                    <select id="category_id" name="category_id"
-                                                        class="form-control">
-                                                        <option value="">Select Category</option>
-                                                        @foreach($CategoryData as $category)
-                                                            <option value="{{ $category->category_id }}">{{ $category->category_nm }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                    <div class="select-wrap" id="category-select-wrap">
+                                                        <select id="category_id" name="category_id"
+                                                            class="form-control">
+                                                            <option value="">Select Category</option>
+                                                            @foreach($CategoryData as $category)
+                                                                <option value="{{ $category->category_id }}">{{ $category->category_nm }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div id="other-category-wrap" style="display:none;">
+                                                        <input type="text" id="other_category_name" name="other_category_name"
+                                                            class="form-control" placeholder="Enter category name" />
+                                                        <span class="other-field-hint">This will be sent to admin for approval.</span>
+                                                    </div>
+                                                    <a href="javascript:void(0);" id="toggle-other-category" class="other-toggle-link">Other</a>
+                                                    <input type="hidden" id="use_other_category" name="use_other_category" value="0" />
+                                                    <input type="hidden" id="category_request_id" name="category_request_id" value="" />
+                                                </div>
+
+                                                <div class="col-lg-6 mb-4 internship-other-row" id="subcategory-other-row">
+                                                    <label class="form-label mb-2">Specialization  <span
+                                                            class="text-danger">*</span></label>
+                                                    <div class="select-wrap" id="subcategory-select-wrap">
+                                                        <select id="internship_sub_category_id" name="sub_category_id[]"
+                                                            class="form-control select2" multiple="multiple"
+                                                            data-placeholder="Select Subcategory">
+                                                        </select>
+                                                    </div>
+                                                    <div id="other-subcategory-wrap" style="display:none;">
+                                                        <input type="text" id="other_subcategory_name" name="other_subcategory_name"
+                                                            class="form-control" placeholder="Enter subcategory name" />
+                                                        <span class="other-field-hint" id="other-subcategory-hint">This will be sent to admin for approval.</span>
+                                                    </div>
+                                                    <a href="javascript:void(0);" id="toggle-other-subcategory" class="other-toggle-link">Other</a>
+                                                    <input type="hidden" id="use_other_subcategory" name="use_other_subcategory" value="0" />
+                                                    <input type="hidden" id="subcategory_request_id" name="subcategory_request_id" value="" />
                                                 </div>
 
                                            
 
 
                                                 <div class="col-lg-6 mb-4">
-                                                    <label for="company_website" class="form-label mb-2">Company Website
+                                                    <label for="company_website" class="form-label mb-2">Official Website
                                                         (Optional)</label>
 
                                                     <input type="text" id="company_website" name="company_website"
@@ -782,7 +1113,7 @@
                                                 </div>
 
 
-                                                <!-- Internship Type -->
+                                                <!-- Program Type -->
                                                 <div class="col-lg-6 mb-4">
                                                     <label class="form-label mb-2">Mode <span
                                                             class="text-danger">*</span></label>
@@ -792,6 +1123,9 @@
                                                         <option value="Online">Online</option>
                                                         <option value="Offline">Offline</option>
                                                         <option value="Hybrid">Hybrid</option>
+                                                        <option value="Weekly">Weekly Internship</option>
+                                                        <option value="Part Time">Part Time Internship</option>
+                                                        <option value="Full Time">Full Time Internship</option>
                                                     </select>
                                                 </div>
 
@@ -803,27 +1137,72 @@
                                                 </div>
 
                                                 <!-- Duration & Dates -->
-                                                <div class="col-lg-6 mb-4">
+                                                <div class="col-lg-6 mb-4 internship-other-row" id="duration-other-row">
                                                     <label class="form-label mb-2">Duration <span
                                                             class="text-danger">*</span></label>
-                                                    <input type="text" id="duration" name="duration"
-                                                        class="form-control" placeholder="e.g. 3 Months, 6 Weeks" />
+                                                    <div class="select-wrap" id="duration-select-wrap">
+                                                        <select id="duration_select" class="form-control">
+                                                            <option value="">Select Duration</option>
+                                                            <option value="1 Month">1 Month</option>
+                                                            <option value="2 Months">2 Months</option>
+                                                            <option value="3 Months">3 Months</option>
+                                                            <option value="4 Months">4 Months</option>
+                                                            <option value="5 Months">5 Months</option>
+                                                            <option value="6 Months">6 Months</option>
+                                                        </select>
+                                                    </div>
+                                                    <div id="other-duration-wrap" style="display:none;">
+                                                        <input type="text" id="duration_other" class="form-control"
+                                                            placeholder="Enter custom duration" />
+                                                    </div>
+                                                    <a href="javascript:void(0);" id="toggle-other-duration" class="other-toggle-link">Other</a>
+                                                    <input type="hidden" name="duration" id="duration" value="" />
+                                                    <input type="hidden" id="use_other_duration" value="0" />
                                                 </div>
 
-                                                <div class="col-lg-6 mb-3">
-                                                    <label class="form-label fw-semibold">Total Weeks <span
+                                                <div class="col-lg-6 mb-4 internship-other-row" id="weeks-other-row">
+                                                    <label class="form-label mb-2">Total Weeks <span
                                                             class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="weeks"
-                                                        onkeypress="return isNumber(event)" name="weeks"
-                                                        placeholder="Enter total weeks" />
+                                                    <div class="select-wrap" id="weeks-select-wrap">
+                                                        <select id="weeks_select" class="form-control">
+                                                            <option value="">Select Weeks</option>
+                                                            <option value="4">4</option>
+                                                            <option value="8">8</option>
+                                                            <option value="12">12</option>
+                                                            <option value="16">16</option>
+                                                            <option value="20">20</option>
+                                                            <option value="24">24</option>
+                                                        </select>
+                                                    </div>
+                                                    <div id="other-weeks-wrap" style="display:none;">
+                                                        <input type="number" id="weeks_other" class="form-control"
+                                                            placeholder="Enter custom weeks" min="1" />
+                                                    </div>
+                                                    <a href="javascript:void(0);" id="toggle-other-weeks" class="other-toggle-link">Other</a>
+                                                    <input type="hidden" name="weeks" id="weeks" value="" />
+                                                    <input type="hidden" id="use_other_weeks" value="0" />
                                                 </div>
 
-                                                <div class="col-lg-6 mb-3">
-                                                    <label class="form-label fw-semibold">Total Hours <span
+                                                <div class="col-lg-6 mb-4 internship-other-row" id="hours-other-row">
+                                                    <label class="form-label mb-2">Total Hours <span
                                                             class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="hours"
-                                                        name="hours" placeholder="Enter total hours"
-                                                        onkeypress="return isNumber(event)" />
+                                                    <div class="select-wrap" id="hours-select-wrap">
+                                                        <select id="hours_select" class="form-control">
+                                                            <option value="">Select Hours</option>
+                                                            <option value="60">60</option>
+                                                            <option value="120">120</option>
+                                                            <option value="240">240</option>
+                                                            <option value="320">320</option>
+                                                            <option value="360">360</option>
+                                                        </select>
+                                                    </div>
+                                                    <div id="other-hours-wrap" style="display:none;">
+                                                        <input type="number" id="hours_other" class="form-control"
+                                                            placeholder="Enter custom hours" min="1" />
+                                                    </div>
+                                                    <a href="javascript:void(0);" id="toggle-other-hours" class="other-toggle-link">Other</a>
+                                                    <input type="hidden" name="hours" id="hours" value="" />
+                                                    <input type="hidden" id="use_other_hours" value="0" />
                                                 </div>
 
                                                 <div class="col-lg-6 mb-4">
@@ -874,9 +1253,18 @@
                                                         <option value="saturday">Saturday</option>
                                                         <option value="sunday">Sunday</option>
                                                     </select>
+                                                    <div class="form-check mt-2">
+                                                        <input class="form-check-input" type="checkbox" id="all_week_days">
+                                                        <label class="form-check-label" for="all_week_days">All Week</label>
+                                                    </div>
                                                 </div>
                                                 <div class="col-lg-12">
-                                                    <div id="timeSections" class="mt-3 row"></div>
+                                                    <div id="timeSectionFirst" class="mt-3 row"></div>
+                                                    <div class="form-check my-2 w-100" id="copy_batch_times_wrap" style="display:none;">
+                                                        <input class="form-check-input" type="checkbox" id="copy_batch_times">
+                                                        <label class="form-check-label" for="copy_batch_times">Copy start &amp; end time to all days</label>
+                                                    </div>
+                                                    <div id="timeSections" class="row"></div>
                                                 </div>
 
 
@@ -884,10 +1272,10 @@
                                                 <div class="col-lg-12">
                                                     <div id="feeSection" class="row">
                                                         <div class="col-lg-4 mb-4">
-                                                            <label class="form-label mb-2">Internship Fee (₹)</label>
+                                                            <label class="form-label mb-2">Enrollment Fee (₹)</label>
                                                             <input type="number" step="0.01" min="0"
                                                                 id="internship_fee" name="internship_fee"
-                                                                class="form-control" placeholder="Enter internship fee" />
+                                                                class="form-control" placeholder="Enter enrollment fee" />
                                                         </div>
 
                                                         <div class="col-lg-4 mb-4">
@@ -901,8 +1289,8 @@
                                                         <div class="col-lg-4 mb-4">
                                                             <label class="form-label mb-2">Last date of
                                                                 registration</label>
-                                                            <input type="date" id="late_register_last_date"
-                                                                name="late_register_last_date" class="form-control"
+                                                            <input type="date" id="last_registration_date"
+                                                                name="last_registration_date" class="form-control"
                                                                 placeholder="dd-mm-yyyy" />
                                                         </div>
 
@@ -966,7 +1354,7 @@
 
                                                 <!-- Responsibilities & Description -->
                                                 <div class="col-lg-12 mb-4">
-                                                    <label class="form-label mb-2">Internship Description <span
+                                                    <label class="form-label mb-2">Program Overview <span
                                                             class="text-danger">*</span></label>
                                                     <div id="full-editor-internship-description" style="height:200px; background:#fff;"></div>
                                                     <input type="hidden" name="internship_description" id="internship_description">
@@ -975,7 +1363,7 @@
                                          
 
                                                 <div class="col-lg-12 mb-4">
-                                                    <label class="form-label mb-2">Internship Objective <span
+                                                    <label class="form-label mb-2">Learning Objectives <span
                                                             class="text-danger">*</span></label>
                                                     <div id="full-editor-key-responsibilities" style="height:200px; background:#fff;"></div>
                                                     <input type="hidden" name="internship_objective" id="internship_objective">
@@ -989,7 +1377,7 @@
                                                 </div>
 
                                                 <div class="col-lg-12 mb-4">
-                                                    <label class="form-label mb-2">Internship Outcome <span
+                                                    <label class="form-label mb-2">Skills You'll Gain <span
                                                             class="text-danger">*</span></label>
                                                     <div id="editor-industry-outcome" style="height:200px; background:#fff;"></div>
                                                     <input type="hidden" name="internship_outcome" id="internship_outcome">
@@ -1023,7 +1411,7 @@
                                                 <input type="hidden" id="row_id" name="row_id">
 
                                                 <button type="button" id="saveInternshipBtn" class="btn btn-apply-big font-md font-bold">
-                                                    <i class='fa fa-save'></i> <span id="btnText">Save Internship</span>
+                                                    <i class='fa fa-save'></i> <span id="btnText">Publish Internship</span>
                                                 </button>
                                             </div>
                                         </form>
@@ -1372,6 +1760,12 @@
                                                     style="padding: 14px 30px 14px 30px;" href="javascript:void(0);"
                                                     onclick="CreateNewJob()"><i class="fa fa-plus"></i>&nbsp; Create New
                                                     Job</a>
+                                            </div>
+                                            @else
+                                            <div class="col-lg-3 col-md-6 col-7 text-right">
+                                                <a class="btn btn-preview-icon btn-apply btn-apply-big"
+                                                    style="padding: 14px 30px 14px 30px; opacity: 0.65;" href="javascript:void(0);"
+                                                    onclick="showPlanLimitAlert('job')"><i class="fa fa-lock"></i>&nbsp; Upgrade Plan</a>
                                             </div>
                                             @endif
                                         </div>
@@ -2057,40 +2451,71 @@
                                                         <th scope="col">Amount</th>
                                                         <th scope="col">Buy On</th>
                                                         <th scope="col">Expire On</th>
-                                                        <th scope="col">Current Active Plan</th>
+                                                        <th scope="col">Job Limit</th>
+                                                        <th scope="col">Opportunity Limit</th>
+                                                        <th scope="col">Status</th>
                                                         <th scope="col">Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($PlanHistoryData as $row)
+                                                    @forelse ($PlanHistoryData as $row)
                                                         <tr>
                                                             <th>{{ $loop->iteration }}</th>
                                                             <td>{{ $row->plan_name }}</td>
                                                             <td>₹ {{ $row->plan_price . '/' . $row->duration }}</td>
                                                             <td>{{ $row->purchase_date }}</td>
                                                             <td>{{ $row->expire_date }}</td>
-                                                            <td><span
-                                                                    class="badge bg-{{ $row->status == 'Active' ? 'success' : 'danger' }}">{{ $row->status }}</span>
+                                                            <td>
+                                                                @if($row->display_job_limit !== null)
+                                                                    @if($row->display_status === 'Active' && $row->display_job_used !== null)
+                                                                        {{ (int) $row->display_job_used }} / {{ (int) $row->display_job_limit }}
+                                                                    @else
+                                                                        {{ (int) $row->display_job_limit }}
+                                                                    @endif
+                                                                @else
+                                                                    Unlimited
+                                                                @endif
                                                             </td>
-                                                                {{-- <a class="btn  btn-apply btn-apply-big p-2"
-                                                                    href=""><i class="fa fa-list-alt"></i>
-                                                                </a> --}}
-                                                                <td>
-                                                                    <a href="javascript:void(0)"
+                                                            <td>
+                                                                @if($row->display_opportunity_limit !== null)
+                                                                    @if($row->display_status === 'Active' && $row->display_opportunity_used !== null)
+                                                                        {{ (int) $row->display_opportunity_used }} / {{ (int) $row->display_opportunity_limit }}
+                                                                    @else
+                                                                        {{ (int) $row->display_opportunity_limit }}
+                                                                    @endif
+                                                                @else
+                                                                    Unlimited
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if($row->display_status === 'Active')
+                                                                    <span class="badge bg-success">Active</span>
+                                                                @else
+                                                                    <span class="badge bg-danger">Expired</span>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                <a href="javascript:void(0)"
                                                                     class="btn btn-apply btn-apply-big p-2 view-plan"
                                                                     data-plan-name="{{ $row->plan_name }}"
                                                                     data-plan-price="{{ $row->plan_price }}"
                                                                     data-payment-id="{{ $row->payment_id ?? 'N/A' }}"
                                                                     data-order-id="{{ $row->order_id ?? 'N/A' }}"
-                                                                    data-status="{{ $row->status }}"
+                                                                    data-status="{{ $row->display_status }}"
                                                                     data-purchase-date="{{ \Carbon\Carbon::parse($row->purchase_date)->format('d M Y') }}"
                                                                     data-expire-date="{{ \Carbon\Carbon::parse($row->expire_date)->format('d M Y') }}"
-                                                                    data-duration="{{ $row->duration }}">
-                                                                        <i class="fa fa-list-alt"></i>
-                                                                    </a>
-                                                                </td>
+                                                                    data-duration="{{ $row->duration }}"
+                                                                    data-job-limit="{{ $row->display_job_limit !== null ? (($row->display_status === 'Active' && $row->display_job_used !== null) ? ((int)$row->display_job_used . ' / ' . (int)$row->display_job_limit) : (int)$row->display_job_limit) : 'Unlimited' }}"
+                                                                    data-opportunity-limit="{{ $row->display_opportunity_limit !== null ? (($row->display_status === 'Active' && $row->display_opportunity_used !== null) ? ((int)$row->display_opportunity_used . ' / ' . (int)$row->display_opportunity_limit) : (int)$row->display_opportunity_limit) : 'Unlimited' }}">
+                                                                    <i class="fa fa-list-alt"></i>
+                                                                </a>
+                                                            </td>
                                                         </tr>
-                                                    @endforeach
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="9" class="text-center text-muted py-4">No membership history found.</td>
+                                                        </tr>
+                                                    @endforelse
                                                 </tbody>
                                             </table>
                                         </div>
@@ -2148,6 +2573,14 @@
                     <th>Expire Date</th>
                     <td id="m_expire_date"></td>
                 </tr>
+                <tr>
+                    <th>Job Limit</th>
+                    <td id="m_job_limit"></td>
+                </tr>
+                <tr>
+                    <th>Opportunity Limit</th>
+                    <td id="m_opportunity_limit"></td>
+                </tr>
                 </table>
             </div>
 
@@ -2193,7 +2626,7 @@
 <script>
     
      // Quill editor variables (declare globally)
-        var quill, quillInternshipDesc, quillModuleDesc, quillObjective, quillOutcome;
+        var quill, quillOpportunityDesc, quillModuleDesc, quillObjective, quillOutcome;
         
         // Initialize Quill editors when document is ready
         $(document).ready(function() {
@@ -2205,11 +2638,11 @@
                 });
             }
             
-            // Initialize Quill editors for Internship form
+            // Initialize Quill editors for Opportunity form
             if ($('#full-editor-internship-description').length) {
-                quillInternshipDesc = new Quill('#full-editor-internship-description', {
+                quillOpportunityDesc = new Quill('#full-editor-internship-description', {
                     theme: 'snow',
-                    placeholder: 'Enter internship description here...',
+                    placeholder: 'Enter Internship description here...',
                     modules: {
                         toolbar: [
                             ['bold', 'italic', 'underline', 'link'],
@@ -2237,7 +2670,7 @@
             if ($('#full-editor-key-responsibilities').length) {
                 quillObjective = new Quill('#full-editor-key-responsibilities', {
                     theme: 'snow',
-                    placeholder: 'Enter internship objective here...',
+                    placeholder: 'Enter Internship objective here...',
                     modules: {
                         toolbar: [
                             ['bold', 'italic', 'underline', 'link'],
@@ -2251,7 +2684,7 @@
             if ($('#editor-industry-outcome').length) {
                 quillOutcome = new Quill('#editor-industry-outcome', {
                     theme: 'snow',
-                    placeholder: 'Enter internship outcome here...',
+                    placeholder: 'Enter Internship outcome here...',
                     modules: {
                         toolbar: [
                             ['bold', 'italic', 'underline', 'link'],
@@ -2271,27 +2704,27 @@
                 window.batchTimingObj = {};
             }
 
-            $('#batch_time').on('change', function() {
+            const companyWeekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-                const selectedDays = $(this).val() || [];
-                const timeSections = $('#timeSections');
-
-                $('.day-section').each(function() {
-                    if (!selectedDays.includes($(this).data('day'))) {
-                        $(this).remove();
-                    }
+            function syncAllWeekCheckbox() {
+                const selected = $('#batch_time').val() || [];
+                const allSelected = companyWeekDays.every(function(day) {
+                    return selected.indexOf(day) !== -1;
                 });
+                $('#all_week_days').prop('checked', allSelected && selected.length === companyWeekDays.length);
+            }
 
-                selectedDays.forEach(day => {
+            function getFirstDaySection() {
+                const selected = $('#batch_time').val() || [];
+                if (!selected.length) return null;
+                return $(`.day-section[data-day="${selected[0]}"]`);
+            }
 
-                    if (!$(`.day-section[data-day="${day}"]`).length) {
-
-                        const startVal = window.batchTimingObj?.[day]?.start ?? '';
-                        const endVal = window.batchTimingObj?.[day]?.end ?? '';
-
-                        timeSections.append(`
-                <div class="col-lg-6 col-md-6 mb-3 day-section" data-day="${day}">
-                       <div class="col-md-3 fw-bold text-capitalize">${day}</div>
+            function buildDaySectionHtml(day, startVal, endVal, fullWidth) {
+                const colClass = fullWidth ? 'col-12 mb-3 day-section' : 'col-lg-6 col-md-6 mb-3 day-section';
+                return `
+                <div class="${colClass}" data-day="${day}">
+                       <div class="fw-bold text-capitalize mb-1">${day}</div>
                     <div class="card p-3" style="border:1px solid #ccc;border-radius:8px;">
                         <div class="row align-items-center">
                             <div class="col-md-6">
@@ -2305,9 +2738,130 @@
                         </div>
                     </div>
                 </div>
-            `);
+            `;
+            }
+
+            function renderCompanyDaySections(selectedDays) {
+                const $firstWrap = $('#timeSectionFirst');
+                const $restWrap = $('#timeSections');
+                const existingValues = {};
+
+                $('.day-section').each(function() {
+                    const day = $(this).data('day');
+                    existingValues[day] = {
+                        start: $(this).find('.start-time').val() || '',
+                        end: $(this).find('.end-time').val() || ''
+                    };
+                });
+
+                $firstWrap.empty();
+                $restWrap.empty();
+
+                selectedDays.forEach(function(day, index) {
+                    const startVal = existingValues[day]?.start ?? window.batchTimingObj?.[day]?.start ?? '';
+                    const endVal = existingValues[day]?.end ?? window.batchTimingObj?.[day]?.end ?? '';
+                    if (!window.batchTimingObj[day]) window.batchTimingObj[day] = {};
+                    window.batchTimingObj[day].start = startVal;
+                    window.batchTimingObj[day].end = endVal;
+
+                    const html = buildDaySectionHtml(day, startVal, endVal, index === 0);
+                    if (index === 0) {
+                        $firstWrap.append(html);
+                    } else {
+                        $restWrap.append(html);
                     }
                 });
+            }
+
+            function copyCompanyBatchTimesToAll() {
+                const $first = getFirstDaySection();
+                if (!$first || !$first.length) return;
+                const startVal = $first.find('.start-time').val() || '';
+                const endVal = $first.find('.end-time').val() || '';
+                $('.day-section').each(function() {
+                    const day = $(this).data('day');
+                    const selected = $('#batch_time').val() || [];
+                    if (selected.length && day === selected[0]) return;
+                    $(this).find('.start-time').val(startVal);
+                    $(this).find('.end-time').val(endVal);
+                    if (!window.batchTimingObj[day]) window.batchTimingObj[day] = {};
+                    window.batchTimingObj[day].start = startVal;
+                    window.batchTimingObj[day].end = endVal;
+                });
+            }
+
+            function clearCompanyBatchTimesExceptFirst() {
+                const selected = $('#batch_time').val() || [];
+                const firstDay = selected.length ? selected[0] : null;
+                $('.day-section').each(function() {
+                    const day = $(this).data('day');
+                    if (firstDay && day === firstDay) return;
+                    $(this).find('.start-time').val('');
+                    $(this).find('.end-time').val('');
+                    if (!window.batchTimingObj[day]) window.batchTimingObj[day] = {};
+                    window.batchTimingObj[day].start = '';
+                    window.batchTimingObj[day].end = '';
+                });
+            }
+
+            function updateCopyTimesVisibility() {
+                const selected = $('#batch_time').val() || [];
+                const $first = getFirstDaySection();
+                const startVal = $first && $first.length ? ($first.find('.start-time').val() || '') : '';
+                const endVal = $first && $first.length ? ($first.find('.end-time').val() || '') : '';
+                const hasFirstDayTime = !!(startVal && endVal);
+                const $wrap = $('#copy_batch_times_wrap');
+
+                // Keep checkbox in its own full-width slot between first and other days
+                $wrap.insertAfter($('#timeSectionFirst'));
+
+                if (selected.length > 1 && hasFirstDayTime) {
+                    $wrap.show();
+                } else {
+                    $('#copy_batch_times').prop('checked', false);
+                    $wrap.hide();
+                }
+            }
+
+            $('#all_week_days').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#batch_time').val(companyWeekDays).trigger('change');
+                } else {
+                    $('#batch_time').val(null).trigger('change');
+                }
+            });
+
+            $('#copy_batch_times').on('change', function() {
+                if ($(this).is(':checked')) {
+                    copyCompanyBatchTimesToAll();
+                } else {
+                    clearCompanyBatchTimesExceptFirst();
+                }
+            });
+
+            $(document).on('change input', '#timeSectionFirst .start-time, #timeSectionFirst .end-time, #timeSections .start-time, #timeSections .end-time', function() {
+                const $section = $(this).closest('.day-section');
+                const day = $section.data('day');
+                if (!window.batchTimingObj[day]) window.batchTimingObj[day] = {};
+                window.batchTimingObj[day].start = $section.find('.start-time').val() || '';
+                window.batchTimingObj[day].end = $section.find('.end-time').val() || '';
+
+                updateCopyTimesVisibility();
+
+                const selected = $('#batch_time').val() || [];
+                if ($('#copy_batch_times').is(':checked') && selected.length && day === selected[0]) {
+                    copyCompanyBatchTimesToAll();
+                }
+            });
+
+            $('#batch_time').on('change', function() {
+                const selectedDays = $(this).val() || [];
+                renderCompanyDaySections(selectedDays);
+                syncAllWeekCheckbox();
+                updateCopyTimesVisibility();
+                if ($('#copy_batch_times').is(':checked')) {
+                    copyCompanyBatchTimesToAll();
+                }
             });
 
         });
@@ -2332,54 +2886,495 @@
                 $(this).next('.select2-container').removeClass('is-invalid');
                 $(this).next('.invalid-feedback').remove();
                 $(this).siblings('.invalid-feedback').remove();
+                const $parent = $(this).closest('.mb-4, .mb-3, .form-group, .col-lg-12, .col-lg-6, .col-lg-4');
+                $parent.find('> .invalid-feedback').remove();
             });
+
+            // Duration / Weeks / Hours — Other toggle (same pattern as Category)
+            function syncDurationWeeksHoursValue(field) {
+                if (field === 'duration') {
+                    if ($('#use_other_duration').val() === '1') {
+                        $('#duration').val(($('#duration_other').val() || '').trim());
+                    } else {
+                        $('#duration').val($('#duration_select').val() || '');
+                    }
+                } else if (field === 'weeks') {
+                    if ($('#use_other_weeks').val() === '1') {
+                        $('#weeks').val(($('#weeks_other').val() || '').trim());
+                    } else {
+                        $('#weeks').val($('#weeks_select').val() || '');
+                    }
+                } else if (field === 'hours') {
+                    if ($('#use_other_hours').val() === '1') {
+                        $('#hours').val(($('#hours_other').val() || '').trim());
+                    } else {
+                        $('#hours').val($('#hours_select').val() || '');
+                    }
+                }
+            }
+
+            window.setDurationOtherMode = function(enabled) {
+                $('#use_other_duration').val(enabled ? '1' : '0');
+                $('#duration-other-row').toggleClass('is-other-mode', enabled);
+                $('#other-duration-wrap').toggle(enabled);
+                $('#toggle-other-duration').text(enabled ? 'Select from list' : 'Other');
+                if (enabled) {
+                    $('#duration_select').val(null).trigger('change');
+                } else {
+                    $('#duration_other').val('');
+                }
+                syncDurationWeeksHoursValue('duration');
+            };
+
+            window.setWeeksOtherMode = function(enabled) {
+                $('#use_other_weeks').val(enabled ? '1' : '0');
+                $('#weeks-other-row').toggleClass('is-other-mode', enabled);
+                $('#other-weeks-wrap').toggle(enabled);
+                $('#toggle-other-weeks').text(enabled ? 'Select from list' : 'Other');
+                if (enabled) {
+                    $('#weeks_select').val(null).trigger('change');
+                } else {
+                    $('#weeks_other').val('');
+                }
+                syncDurationWeeksHoursValue('weeks');
+            };
+
+            window.setHoursOtherMode = function(enabled) {
+                $('#use_other_hours').val(enabled ? '1' : '0');
+                $('#hours-other-row').toggleClass('is-other-mode', enabled);
+                $('#other-hours-wrap').toggle(enabled);
+                $('#toggle-other-hours').text(enabled ? 'Select from list' : 'Other');
+                if (enabled) {
+                    $('#hours_select').val(null).trigger('change');
+                } else {
+                    $('#hours_other').val('');
+                }
+                syncDurationWeeksHoursValue('hours');
+            };
+
+            $('#toggle-other-duration').off('click').on('click', function() {
+                setDurationOtherMode($('#use_other_duration').val() !== '1');
+                if ($('#use_other_duration').val() === '1') {
+                    $('#duration_other').focus();
+                }
+            });
+            $('#toggle-other-weeks').off('click').on('click', function() {
+                setWeeksOtherMode($('#use_other_weeks').val() !== '1');
+                if ($('#use_other_weeks').val() === '1') {
+                    $('#weeks_other').focus();
+                }
+            });
+            $('#toggle-other-hours').off('click').on('click', function() {
+                setHoursOtherMode($('#use_other_hours').val() !== '1');
+                if ($('#use_other_hours').val() === '1') {
+                    $('#hours_other').focus();
+                }
+            });
+
+            $('#duration_select').on('change', function() { syncDurationWeeksHoursValue('duration'); });
+            $('#weeks_select').on('change', function() { syncDurationWeeksHoursValue('weeks'); });
+            $('#hours_select').on('change', function() { syncDurationWeeksHoursValue('hours'); });
+            $('#duration_other, #weeks_other, #hours_other').on('input change', function() {
+                const id = this.id;
+                if (id === 'duration_other') syncDurationWeeksHoursValue('duration');
+                if (id === 'weeks_other') syncDurationWeeksHoursValue('weeks');
+                if (id === 'hours_other') syncDurationWeeksHoursValue('hours');
+            });
+
+            window.setInternshipDurationValue = function(value) {
+                const options = ['1 Month', '2 Months', '3 Months', '4 Months', '5 Months', '6 Months'];
+                let matched = '';
+                const raw = (value || '').toString().trim();
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].toLowerCase() === raw.toLowerCase()) {
+                        matched = options[i];
+                        break;
+                    }
+                }
+                if (!matched && raw) {
+                    const m = raw.match(/^(\d+)\s*months?$/i);
+                    if (m) {
+                        const n = parseInt(m[1], 10);
+                        if (n >= 1 && n <= 6) {
+                            matched = n === 1 ? '1 Month' : (n + ' Months');
+                        }
+                    }
+                }
+                if (matched) {
+                    setDurationOtherMode(false);
+                    $('#duration_select').val(matched).trigger('change');
+                    $('#duration').val(matched);
+                } else if (raw) {
+                    setDurationOtherMode(true);
+                    $('#duration_other').val(raw);
+                    $('#duration').val(raw);
+                } else {
+                    setDurationOtherMode(false);
+                    $('#duration_select').val(null).trigger('change');
+                    $('#duration').val('');
+                }
+            };
+
+            window.setInternshipWeeksValue = function(value) {
+                const presets = ['4', '8', '12', '16', '20', '24'];
+                const strVal = value !== null && value !== undefined ? String(value) : '';
+                if (presets.indexOf(strVal) !== -1) {
+                    setWeeksOtherMode(false);
+                    $('#weeks_select').val(strVal).trigger('change');
+                    $('#weeks').val(strVal);
+                } else if (strVal !== '') {
+                    setWeeksOtherMode(true);
+                    $('#weeks_other').val(strVal);
+                    $('#weeks').val(strVal);
+                } else {
+                    setWeeksOtherMode(false);
+                    $('#weeks_select').val(null).trigger('change');
+                    $('#weeks').val('');
+                }
+            };
+
+            window.setInternshipHoursValue = function(value) {
+                const presets = ['60', '120', '240', '320', '360'];
+                const strVal = value !== null && value !== undefined ? String(value) : '';
+                if (presets.indexOf(strVal) !== -1) {
+                    setHoursOtherMode(false);
+                    $('#hours_select').val(strVal).trigger('change');
+                    $('#hours').val(strVal);
+                } else if (strVal !== '') {
+                    setHoursOtherMode(true);
+                    $('#hours_other').val(strVal);
+                    $('#hours').val(strVal);
+                } else {
+                    setHoursOtherMode(false);
+                    $('#hours_select').val(null).trigger('change');
+                    $('#hours').val('');
+                }
+            };
             
             // Clear Quill editor validation on text change (attach later when editors are ready)
             setTimeout(function() {
-                if (typeof quillInternshipDesc !== 'undefined' && quillInternshipDesc) {
-                    quillInternshipDesc.on('text-change', function() {
-                        $('#full-editor-internship-description').removeClass('border-danger');
+                if (typeof quillOpportunityDesc !== 'undefined' && quillOpportunityDesc) {
+                    quillOpportunityDesc.on('text-change', function() {
+                        $('#full-editor-internship-description').removeClass('border-danger is-invalid');
+                        $('#full-editor-internship-description').siblings('.invalid-feedback').remove();
                     });
                 }
                 if (typeof quillModuleDesc !== 'undefined' && quillModuleDesc) {
                     quillModuleDesc.on('text-change', function() {
-                        $('#editor-module-desc').removeClass('border-danger');
+                        $('#editor-module-desc').removeClass('border-danger is-invalid');
+                        $('#editor-module-desc').siblings('.invalid-feedback').remove();
                     });
                 }
                 if (typeof quillObjective !== 'undefined' && quillObjective) {
                     quillObjective.on('text-change', function() {
-                        $('#full-editor-key-responsibilities').removeClass('border-danger');
+                        $('#full-editor-key-responsibilities').removeClass('border-danger is-invalid');
+                        $('#full-editor-key-responsibilities').siblings('.invalid-feedback').remove();
                     });
                 }
                 if (typeof quillOutcome !== 'undefined' && quillOutcome) {
                     quillOutcome.on('text-change', function() {
-                        $('#editor-industry-outcome').removeClass('border-danger');
+                        $('#editor-industry-outcome').removeClass('border-danger is-invalid');
+                        $('#editor-industry-outcome').siblings('.invalid-feedback').remove();
                     });
                 }
             }, 1000);
+
+            function clearInternshipValidation() {
+                $('#internship-form .is-invalid').removeClass('is-invalid');
+                $('#internship-form .border-danger').removeClass('border-danger');
+                $('#internship-form .invalid-feedback').remove();
+                $('#internship-form .select2-container').removeClass('is-invalid');
+            }
+
+            function showInternshipFieldError($el, message) {
+                if (!$el || !$el.length) return;
+                $el.addClass('is-invalid');
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.next('.select2-container').addClass('is-invalid');
+                }
+                const $feedback = $('<div class="invalid-feedback d-block"></div>').text(message);
+                if ($el.next('.select2-container').length) {
+                    $el.next('.select2-container').after($feedback);
+                } else if ($el.is('div') || $el.hasClass('ql-container') || $el.attr('id') && $el.attr('id').indexOf('editor') !== -1) {
+                    $el.after($feedback);
+                    $el.addClass('border-danger');
+                } else {
+                    $el.after($feedback);
+                }
+            }
+
+            function isQuillEmpty(quill) {
+                if (!quill) return true;
+                const text = (quill.getText() || '').trim();
+                const html = (quill.root.innerHTML || '').replace(/<p><br><\/p>/gi, '').trim();
+                return text.length === 0 || html === '';
+            }
+
+            function getLocalTodayStr() {
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+            }
+
+            function validateInternshipForm() {
+                clearInternshipValidation();
+                let isValid = true;
+                let firstErrorEl = null;
+
+                function markError($el, message) {
+                    showInternshipFieldError($el, message);
+                    if (!firstErrorEl && $el && $el.length) {
+                        firstErrorEl = $el;
+                    }
+                    isValid = false;
+                }
+
+                const requiredTextFields = [
+                    { id: '#internship_title', msg: 'Please enter Internship title' },
+                    { id: '#location', msg: 'Please enter location' },
+                    { id: '#openings', msg: 'Please enter number of openings' },
+                    { id: '#start_date', msg: 'Please select start date' },
+                    { id: '#end_date', msg: 'Please select end date' },
+                    { id: '#application_deadline', msg: 'Please select application deadline' }
+                ];
+
+                requiredTextFields.forEach(function(field) {
+                    const $el = $(field.id);
+                    const val = ($el.val() || '').toString().trim();
+                    if (!val) {
+                        markError($el, field.msg);
+                    }
+                });
+
+                syncDurationWeeksHoursValue('duration');
+                syncDurationWeeksHoursValue('weeks');
+                syncDurationWeeksHoursValue('hours');
+
+                if (!$('#duration').val()) {
+                    markError(
+                        $('#use_other_duration').val() === '1' ? $('#duration_other') : $('#duration_select'),
+                        $('#use_other_duration').val() === '1' ? 'Please enter duration' : 'Please select duration'
+                    );
+                }
+                if (!$('#weeks').val()) {
+                    markError(
+                        $('#use_other_weeks').val() === '1' ? $('#weeks_other') : $('#weeks_select'),
+                        $('#use_other_weeks').val() === '1' ? 'Please enter total weeks' : 'Please select total weeks'
+                    );
+                }
+                if (!$('#hours').val()) {
+                    markError(
+                        $('#use_other_hours').val() === '1' ? $('#hours_other') : $('#hours_select'),
+                        $('#use_other_hours').val() === '1' ? 'Please enter total hours' : 'Please select total hours'
+                    );
+                }
+
+                if (!$('#use_other_category').val() || $('#use_other_category').val() === '0') {
+                    if (!$('#category_id').val()) {
+                        markError($('#category_id'), 'Please select a category');
+                    }
+                } else {
+                    const otherCategoryName = ($('#other_category_name').val() || '').trim();
+                    if (!otherCategoryName) {
+                        markError($('#other_category_name'), 'Please enter custom category name');
+                    }
+                }
+
+                const useOtherSub = $('#use_other_subcategory').val() === '1';
+                if (!useOtherSub) {
+                    const subCategoryVals = $('#internship_sub_category_id').val() || [];
+                    if (!subCategoryVals.length) {
+                        markError($('#internship_sub_category_id'), 'Please select at least one subcategory');
+                    }
+                } else {
+                    const otherSubName = ($('#other_subcategory_name').val() || '').trim();
+                    if (!otherSubName) {
+                        markError($('#other_subcategory_name'), 'Please enter custom subcategory name');
+                    }
+                    if (!$('#use_other_category').val() || $('#use_other_category').val() === '0') {
+                        if (!$('#category_id').val()) {
+                            markError($('#category_id'), 'Please select a category for the subcategory request');
+                        }
+                    }
+                }
+                if (!$('#internship_mode').val()) {
+                    markError($('#internship_mode'), 'Please select mode');
+                }
+
+                const weeks = parseInt($('#weeks').val(), 10);
+                if ($('#weeks').val() && (isNaN(weeks) || weeks < 1)) {
+                    markError($('#weeks'), 'Total weeks must be at least 1');
+                }
+                const hours = parseInt($('#hours').val(), 10);
+                if ($('#hours').val() && (isNaN(hours) || hours < 1)) {
+                    markError($('#hours'), 'Total hours must be at least 1');
+                }
+                const openings = parseInt($('#openings').val(), 10);
+                if ($('#openings').val() && (isNaN(openings) || openings < 1)) {
+                    markError($('#openings'), 'Openings must be at least 1');
+                }
+
+                const startDate = $('#start_date').val();
+                const endDate = $('#end_date').val();
+                const appDeadline = $('#application_deadline').val();
+                const lastRegDate = $('#last_registration_date').val();
+                const today = getLocalTodayStr();
+
+                if (startDate && endDate && endDate <= startDate) {
+                    markError($('#end_date'), 'End date must be after start date');
+                }
+
+                if (appDeadline) {
+                    if (appDeadline < today) {
+                        markError($('#application_deadline'), 'Application deadline cannot be before today');
+                    }
+                    if (startDate && appDeadline > startDate) {
+                        markError($('#application_deadline'), 'Application deadline must be on or before start date');
+                    }
+                }
+
+                if (lastRegDate) {
+                    if (appDeadline && lastRegDate < appDeadline) {
+                        markError($('#last_registration_date'), 'Last registration date must be on or after application deadline');
+                    }
+                    if (startDate && lastRegDate > startDate) {
+                        markError($('#last_registration_date'), 'Last registration date must be on or before start date');
+                    }
+                }
+
+                const selectedDays = $('#batch_time').val() || [];
+                if (!selectedDays.length) {
+                    markError($('#batch_time'), 'Please select at least one batch day');
+                } else {
+                    selectedDays.forEach(function(day) {
+                        const daySection = $(`.day-section[data-day="${day}"]`);
+                        if (!daySection.length) return;
+                        const $startTime = daySection.find('.start-time');
+                        const $endTime = daySection.find('.end-time');
+                        if (!$startTime.val()) {
+                            markError($startTime, 'Please select start time for ' + day);
+                        }
+                        if (!$endTime.val()) {
+                            markError($endTime, 'Please select end time for ' + day);
+                        }
+                        if ($startTime.val() && $endTime.val() && $endTime.val() <= $startTime.val()) {
+                            markError($endTime, 'End time must be after start time for ' + day);
+                        }
+                    });
+                }
+
+                if (typeof quillOpportunityDesc === 'undefined' || isQuillEmpty(quillOpportunityDesc)) {
+                    markError($('#full-editor-internship-description'), 'Please enter program overview');
+                }
+                if (typeof quillObjective === 'undefined' || isQuillEmpty(quillObjective)) {
+                    markError($('#full-editor-key-responsibilities'), 'Please enter learning objectives');
+                }
+                if (typeof quillModuleDesc === 'undefined' || isQuillEmpty(quillModuleDesc)) {
+                    markError($('#editor-module-desc'), 'Please enter module brief description');
+                }
+                if (typeof quillOutcome === 'undefined' || isQuillEmpty(quillOutcome)) {
+                    markError($('#editor-industry-outcome'), 'Please enter skills you\'ll gain');
+                }
+
+                if (!isValid && firstErrorEl) {
+                    $('html, body').animate({
+                        scrollTop: firstErrorEl.offset().top - 120
+                    }, 400);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validation Error',
+                        text: 'Please fill all required fields correctly.'
+                    });
+                }
+
+                return isValid;
+            }
             
             // Prevent form from submitting normally
-            $(document).on('submit', '#internship-form', function(e) {
+            $(document).off('submit.internshipForm', '#internship-form').on('submit.internshipForm', '#internship-form', function(e) {
                 console.log('⚠️ Form submit event triggered - preventing default');
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             });
+
+            window.internshipPublishing = false;
+
+            function setInternshipPublishLoading(isLoading) {
+                const $btn = $('#saveInternshipBtn');
+                const isEdit = $('#internship-form').data('is-edit');
+                if (isLoading) {
+                    $btn.prop('disabled', true).addClass('disabled');
+                    $btn.find('#btnText').text(isEdit ? 'Updating...' : 'Publishing...');
+                    $btn.find('i').removeClass('fa-save fa-edit').addClass('fa-spinner fa-spin');
+                    if (typeof LoaderShow === 'function') {
+                        LoaderShow();
+                    }
+                } else {
+                    $btn.prop('disabled', false).removeClass('disabled');
+                    $btn.find('#btnText').text(isEdit ? 'Update Internship' : 'Publish Internship');
+                    $btn.find('i').removeClass('fa-spinner fa-spin').addClass(isEdit ? 'fa-edit' : 'fa-save');
+                    if (typeof LoaderHide === 'function') {
+                        LoaderHide();
+                    }
+                }
+            }
             
             // Button click handler - use event delegation
-            $(document).on('click', '#saveInternshipBtn', function(e) {
+            $(document).off('click.saveInternship', '#saveInternshipBtn').on('click.saveInternship', '#saveInternshipBtn', function(e) {
                 console.log('🔥 BUTTON CLICKED!');
                 e.preventDefault();
                 e.stopPropagation();
 
-                
+                if (window.internshipPublishing) {
+                    return false;
+                }
+
+                if (!validateInternshipForm()) {
+                    return false;
+                }
+
+                syncDurationWeeksHoursValue('duration');
+                syncDurationWeeksHoursValue('weeks');
+                syncDurationWeeksHoursValue('hours');
+
+                window.internshipPublishing = true;
+                setInternshipPublishLoading(true);
+
+                // Re-enable disabled fields so values are included in FormData
+                $('#category_id, #internship_sub_category_id').prop('disabled', false);
+
                 // Get form data
                 const form = document.getElementById('internship-form');
+                if (!form) {
+                    console.error('Internship form #internship-form not found');
+                    window.internshipPublishing = false;
+                    setInternshipPublishLoading(false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Internship form not found. Please refresh the page.'
+                    });
+                    return false;
+                }
                 let formData = new FormData(form);
+
+                const useOtherCategory = $('#use_other_category').val() === '1';
+                const useOtherSubcategory = $('#use_other_subcategory').val() === '1';
+                formData.set('use_other_category', useOtherCategory ? '1' : '0');
+                formData.set('use_other_subcategory', useOtherSubcategory ? '1' : '0');
+                formData.set('other_category_name', useOtherCategory ? ($('#other_category_name').val() || '').trim() : '');
+                formData.set('other_subcategory_name', useOtherSubcategory ? ($('#other_subcategory_name').val() || '').trim() : '');
+                if (useOtherCategory) {
+                    formData.set('category_id', '');
+                }
+                if (useOtherSubcategory) {
+                    formData.delete('sub_category_id[]');
+                }
                 
                 // Get Quill content if available
-                if (typeof quillInternshipDesc !== 'undefined' && quillInternshipDesc) {
-                    formData.set('internship_description', quillInternshipDesc.root.innerHTML);
+                if (typeof quillOpportunityDesc !== 'undefined' && quillOpportunityDesc) {
+                    formData.set('internship_description', quillOpportunityDesc.root.innerHTML);
                 }
                 if (typeof quillModuleDesc !== 'undefined' && quillModuleDesc) {
                     formData.set('module_description', quillModuleDesc.root.innerHTML);
@@ -2426,9 +3421,9 @@
                 
                 if (isEdit && internshipId) {
                     url = "{{ url('company/internship/update') }}/" + internshipId;
-                    console.log('Updating internship:', internshipId);
+                    console.log('Updating Internship:', internshipId);
                 } else {
-                    console.log('Creating new internship');
+                    console.log('Creating new Internship');
                 }
                 
                 console.log('Making AJAX call to:', url);
@@ -2458,21 +3453,79 @@
                             setTimeout(function() {
                                 location.reload();
                             }, 1000);
+                        } else {
+                            window.internshipPublishing = false;
+                            setInternshipPublishLoading(false);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'An error occurred'
+                            });
                         }
                     },
                     error: function(xhr, status, error) {
+                        window.internshipPublishing = false;
+                        setInternshipPublishLoading(false);
                         console.log('❌ ERROR:', xhr.responseText);
                         
                         let errorMessage = 'An error occurred';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
+                        const res = xhr.responseJSON || {};
+
+                        if (res.errors) {
+                            clearInternshipValidation();
+                            let firstErrorEl = null;
+                            Object.keys(res.errors).forEach(function(field) {
+                                const messages = res.errors[field];
+                                const msg = Array.isArray(messages) ? messages[0] : messages;
+                                let $el = $('[name="' + field + '"]');
+                                if (!$el.length) {
+                                    $el = $('[name="' + field + '[]"]');
+                                }
+                                if (!$el.length && field === 'internship_description') {
+                                    $el = $('#full-editor-internship-description');
+                                } else if (!$el.length && field === 'module_description') {
+                                    $el = $('#editor-module-desc');
+                                } else if (!$el.length && field === 'internship_objective') {
+                                    $el = $('#full-editor-key-responsibilities');
+                                } else if (!$el.length && field === 'internship_outcome') {
+                                    $el = $('#editor-industry-outcome');
+                                }
+                                if ($el.length) {
+                                    showInternshipFieldError($el.first(), msg);
+                                    if (!firstErrorEl) firstErrorEl = $el.first();
+                                }
+                            });
+                            if (firstErrorEl) {
+                                $('html, body').animate({
+                                    scrollTop: firstErrorEl.offset().top - 120
+                                }, 400);
+                            }
+                            const firstKey = Object.keys(res.errors)[0];
+                            errorMessage = Array.isArray(res.errors[firstKey]) ? res.errors[firstKey][0] : res.errors[firstKey];
+                        } else if (res.message) {
+                            errorMessage = res.message;
                         }
-                        
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: errorMessage
-                        });
+
+                        if (res.upgrade_url) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Upgrade Plan Required',
+                                text: errorMessage,
+                                showCancelButton: true,
+                                confirmButtonText: 'Upgrade Plan',
+                                cancelButtonText: 'Close'
+                            }).then(function(result) {
+                                if (result.isConfirmed) {
+                                    window.location.href = res.upgrade_url;
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: errorMessage
+                            });
+                        }
                     }
                 });
                 
@@ -2480,9 +3533,9 @@
             });
 
          
-        }); // End of $(document).ready() for internship form
+        }); // End of $(document).ready() for opportunity form
 
-        // Initialize Select2 for Internship form fields
+        // Initialize Select2 for Opportunity form fields
         $(document).ready(function() {
             $('#batch_time').select2({
                 placeholder: "Select Batch Days",
@@ -2494,6 +3547,38 @@
                 placeholder: "Select Category",
                 allowClear: true,
                 width: '100%'
+            });
+
+            $('#internship_sub_category_id').select2({
+                placeholder: "Select Subcategory",
+                allowClear: true,
+                closeOnSelect: false,
+                width: '100%',
+                dropdownParent: $('#internship_sub_category_id').parent()
+            });
+
+            // Load subcategories when category changes (opportunity form)
+            $('#category_id').off('change.opportunitySub').on('change.opportunitySub', function () {
+                loadInternshipSubCategories($(this).val());
+            });
+
+            $('#toggle-other-category').on('click', function() {
+                const enable = $('#use_other_category').val() !== '1';
+                setCategoryOtherMode(enable);
+                if (enable) {
+                    $('#other_category_name').focus();
+                }
+            });
+
+            $('#toggle-other-subcategory').on('click', function() {
+                if ($('#use_other_category').val() === '1') {
+                    return;
+                }
+                const enable = $('#use_other_subcategory').val() !== '1';
+                setSubcategoryOtherMode(enable, false);
+                if (enable) {
+                    $('#other_subcategory_name').focus();
+                }
             });
 
             $('#company_id').select2({
@@ -2508,6 +3593,24 @@
                 width: '100%'
             });
 
+            $('#duration_select').select2({
+                placeholder: "Select Duration",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#weeks_select').select2({
+                placeholder: "Select Weeks",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#hours_select').select2({
+                placeholder: "Select Hours",
+                allowClear: true,
+                width: '100%'
+            });
+
             $('#perks').select2({
                 placeholder: "Select Perks & Benefits",
                 allowClear: true,
@@ -2515,6 +3618,34 @@
             });
         });
 
+        function loadInternshipSubCategories(categoryId, selectedIds) {
+            selectedIds = selectedIds || [];
+            var $subSelect = $('#internship_sub_category_id');
+            $subSelect.empty().trigger('change');
+
+            if (!categoryId) {
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('sub-category-action') }}",
+                type: "POST",
+                data: {
+                    category_id: categoryId,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (response) {
+                    if (response.status === 1 && response.data) {
+                        response.data.forEach(function (item) {
+                            var isSelected = selectedIds.map(String).indexOf(String(item.sub_category_id)) !== -1;
+                            var option = new Option(item.sub_category_nm, item.sub_category_id, isSelected, isSelected);
+                            $subSelect.append(option);
+                        });
+                        $subSelect.trigger('change');
+                    }
+                }
+            });
+        }
         // isNumber function for numeric inputs
         function isNumber(evt) {
             evt = (evt) ? evt : window.event;
@@ -2525,7 +3656,7 @@
             return true;
         }
 
-        // GST Calculation
+        // GST Calculation + date range constraints
         $(document).ready(function() {
             $('#internship_fee, #gst_percentage').on('input', function() {
                 const fee = parseFloat($('#internship_fee').val()) || 0;
@@ -2536,9 +3667,64 @@
                 $('#gst_amount').val(gstAmount.toFixed(2));
                 $('#total_fee').val(totalFee.toFixed(2));
             });
+
+            // Application Deadline: today → start date
+            // Last date of registration: application deadline → start date
+            window.updateInternshipDateConstraints = function() {
+                const pad = (n) => String(n).padStart(2, '0');
+                const now = new Date();
+                const today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+
+                const $start = $('#start_date');
+                const $deadline = $('#application_deadline');
+                const $lastReg = $('#last_registration_date');
+                const startDate = $start.val() || '';
+                const deadlineVal = $deadline.val() || '';
+
+                // Application Deadline: between today and start date
+                let deadlineMin = today;
+                if (deadlineVal && deadlineVal < today) {
+                    deadlineMin = deadlineVal; // keep existing past value valid on edit
+                }
+                $deadline.attr('min', deadlineMin);
+                if (startDate) {
+                    $deadline.attr('max', startDate);
+                    if (deadlineVal && deadlineVal > startDate) {
+                        $deadline.val('');
+                    }
+                } else {
+                    $deadline.removeAttr('max');
+                }
+
+                // Last registration: between application deadline and start date
+                const freshDeadline = $deadline.val() || '';
+                if (freshDeadline) {
+                    $lastReg.attr('min', freshDeadline);
+                } else {
+                    $lastReg.removeAttr('min');
+                }
+                if (startDate) {
+                    $lastReg.attr('max', startDate);
+                } else {
+                    $lastReg.removeAttr('max');
+                }
+                const lastRegVal = $lastReg.val() || '';
+                if (lastRegVal) {
+                    if (freshDeadline && lastRegVal < freshDeadline) {
+                        $lastReg.val('');
+                    } else if (startDate && lastRegVal > startDate) {
+                        $lastReg.val('');
+                    }
+                }
+            };
+
+            $('#start_date, #application_deadline').on('change input', function() {
+                window.updateInternshipDateConstraints();
+            });
+            window.updateInternshipDateConstraints();
         });
 
-        // Skills Input Handler for Internship
+        // Skills Input Handler for Opportunity
         let skillsArray = [];
         const skillInput = document.getElementById('skills');
         const skillContainer = document.getElementById('skill-input-container');
@@ -2637,7 +3823,13 @@
         }
 
         function CreateInternships() {
-            // Hide job list, show internship creation form
+            var canCreateInternship = {!! empty($hideCreateInternshipBtn) ? 'true' : 'false' !!};
+            if (!canCreateInternship) {
+                showPlanLimitAlert('internship');
+                return;
+            }
+
+            // Hide opportunity list, show opportunity creation form
             document.getElementById("Internshiplist").style.display = "none";
             document.getElementById("createInternship").style.display = "block";
             
@@ -2649,12 +3841,40 @@
                 $('#gst_amount').val('');
                 $('#total_fee').val('');
                 $('#internship_fee').val('');
+                $('#late_registration_fee').val('');
+                $('#last_registration_date').val('');
                 
                 // Clear Select2 fields
                 $('#category_id').val(null).trigger('change');
+                $('#internship_sub_category_id').empty().val(null).trigger('change');
+                $('#category_id').prop('disabled', false);
+                $('#internship_sub_category_id').prop('disabled', false);
+                $('#use_other_category, #use_other_subcategory').val('0');
+                $('#other_category_name, #other_subcategory_name').val('');
+                $('#category_request_id, #subcategory_request_id').val('');
+                $('#category-other-row, #subcategory-other-row').removeClass('is-other-mode');
+                $('#other-category-wrap, #other-subcategory-wrap').hide();
+                $('#toggle-other-category').text('Other');
+                $('#toggle-other-subcategory').text('Other').show();
+                $('#other-subcategory-hint').text('This will be sent to admin for approval.');
                 $('#internship_mode').val(null).trigger('change');
                 $('#batch_time').val(null).trigger('change');
                 $('#perks').val(null).trigger('change');
+                $('#all_week_days').prop('checked', false);
+                $('#copy_batch_times').prop('checked', false);
+                $('#copy_batch_times_wrap').hide();
+                if (typeof setDurationOtherMode === 'function') setDurationOtherMode(false);
+                if (typeof setWeeksOtherMode === 'function') setWeeksOtherMode(false);
+                if (typeof setHoursOtherMode === 'function') setHoursOtherMode(false);
+                $('#duration_select').val(null).trigger('change');
+                $('#weeks_select').val(null).trigger('change');
+                $('#hours_select').val(null).trigger('change');
+                $('#duration_other, #weeks_other, #hours_other').val('');
+                $('#duration, #weeks, #hours').val('');
+                $('#use_other_duration, #use_other_weeks, #use_other_hours').val('0');
+                $('#duration-other-row, #weeks-other-row, #hours-other-row').removeClass('is-other-mode');
+                $('#other-duration-wrap, #other-weeks-wrap, #other-hours-wrap').hide();
+                $('#toggle-other-duration, #toggle-other-weeks, #toggle-other-hours').text('Other');
                 
                 // Clear skills and eligibility arrays
                 skillsArray = [];
@@ -2668,8 +3888,8 @@
                 $('input[name="batch_days[]"]').prop('checked', false);
                 
                 // Clear Quill editors
-                if (typeof quillInternshipDesc !== 'undefined') {
-                    quillInternshipDesc.setText('');
+                if (typeof quillOpportunityDesc !== 'undefined') {
+                    quillOpportunityDesc.setText('');
                 }
                 if (typeof quillModuleDesc !== 'undefined') {
                     quillModuleDesc.setText('');
@@ -2682,6 +3902,7 @@
                 }
                 
                 // Clear time sections and timing object
+                $('#timeSectionFirst').empty();
                 $('#timeSections').empty();
                 window.batchTimingObj = {};
                 
@@ -2690,25 +3911,30 @@
                 $('#internship-form').removeData('is-edit');
                 
                 // Reset button text and icon
-                $('#saveInternshipBtn #btnText').text('Save Internship');
+                $('#saveInternshipBtn #btnText').text('Publish Internship');
                 $('#saveInternshipBtn i').removeClass('fa-edit').addClass('fa-save');
                 
                 // Reset flags
                 $("#flag").val("A");
                 $("#row_id").val("");
+
+                if (typeof window.updateInternshipDateConstraints === 'function') {
+                    window.updateInternshipDateConstraints();
+                }
             }, 100);
         }
 
-        function BackJobInternship() {
-            // Hide internship form, show internship list
+        window.BackJobInternship = function BackJobInternship() {
+            // Hide opportunity form, show opportunity list
             document.getElementById("createInternship").style.display = "none";
             document.getElementById("Internshiplist").style.display = "block";
         }
         
             // ==================== INTERNSHIP MANAGEMENT FUNCTIONS ====================
         
-        function EditInternship(internshipId) {
-            // Fetch internship data
+        // Explicitly attach to window for inline onclick handlers
+    window.EditInternship = function EditInternship(internshipId) {
+            // Fetch opportunity data
             $.ajax({
                 url: "{{ url('company/internship/edit') }}/" + internshipId,
                 type: "GET",
@@ -2718,16 +3944,51 @@
                         
                         // Populate form fields
                         $('#internship_title').val(internship.internship_title);
-                        $('#category_id').val(internship.category).trigger('change');
+                        $('#category_id').off('change.opportunitySub');
+                        $('#category_id').val(internship.category).trigger('change.select2');
+                        loadInternshipSubCategories(internship.category, internship.sub_categories || []);
+                        $('#category_id').on('change.opportunitySub', function () {
+                            loadInternshipSubCategories($(this).val());
+                        });
+
+                        // Handle "Other" category/subcategory from edit data
+                        if (internship.use_other_category) {
+                            $('#use_other_category').val('1');
+                            $('#other_category_name').val(internship.requested_category_name || '');
+                            setCategoryOtherMode(true);
+                        }
+                        if (internship.use_other_subcategory) {
+                            $('#use_other_subcategory').val('1');
+                            const subNames = (internship.requested_subcategory_names || []).join(', ');
+                            $('#other_subcategory_name').val(subNames);
+                            // If category is not in other mode, enable subcategory other mode
+                            if (!internship.use_other_category) {
+                                setSubcategoryOtherMode(true, false);
+                            }
+                        }
                         $('#company_website').val(internship.company_website);
                         $('#internship_mode').val(internship.mode).trigger('change');
                         $('#location').val(internship.location);
-                        $('#duration').val(internship.duration);
-                        $('#weeks').val(internship.total_weeks);
-                        $('#hours').val(internship.total_hours);
+                        if (typeof window.setInternshipDurationValue === 'function') {
+                            window.setInternshipDurationValue(internship.duration);
+                        } else {
+                            $('#duration').val(internship.duration);
+                        }
+                        if (typeof window.setInternshipWeeksValue === 'function') {
+                            window.setInternshipWeeksValue(internship.total_weeks);
+                        } else {
+                            $('#weeks').val(internship.total_weeks);
+                        }
+                        if (typeof window.setInternshipHoursValue === 'function') {
+                            window.setInternshipHoursValue(internship.total_hours);
+                        } else {
+                            $('#hours').val(internship.total_hours);
+                        }
                         $('#stipend').val(internship.stipend);
                         $('#openings').val(internship.openings);
                         $('#internship_fee').val(internship.registration_fees ?? 0);
+                        $('#late_registration_fee').val(internship.late_registration_fee ?? 0);
+                        $('#last_registration_date').val(internship.last_registration_date || internship.late_register_last_date || '');
                         $('#gst_percentage').val(internship.gst_percentage ?? 18);
                         $('#gst_amount').val(internship.gst_amount ?? 0);
                         $('#total_fee').val(internship.final_amount ?? 0);
@@ -2744,6 +4005,10 @@
                         if (internship.application_deadline) {
                             $('#application_deadline').val(internship.application_deadline);
                             console.log('Application Deadline set:', internship.application_deadline);
+                        }
+
+                        if (typeof window.updateInternshipDateConstraints === 'function') {
+                            window.updateInternshipDateConstraints();
                         }
                         
                         // Set batch days in select2 dropdown with timings
@@ -2843,7 +4108,7 @@
                                 console.log('No valid batch days to set');
                             }
                         } else {
-                            console.log('No batch_days in internship data');
+                            console.log('No batch_days in Internship data');
                         }
                         
                         // Set skills
@@ -2930,8 +4195,8 @@
                         }
                         
                         // Set Quill editor content
-                        if (typeof quillInternshipDesc !== 'undefined') {
-                            quillInternshipDesc.root.innerHTML = internship.internship_description || '';
+                        if (typeof quillOpportunityDesc !== 'undefined') {
+                            quillOpportunityDesc.root.innerHTML = internship.internship_description || '';
                         }
                         if (typeof quillModuleDesc !== 'undefined') {
                             quillModuleDesc.root.innerHTML = internship.module_brief_description || '';
@@ -2943,7 +4208,7 @@
                             quillOutcome.root.innerHTML = internship.internship_outcome || '';
                         }
                         
-                        // Store internship ID for update
+                        // Store opportunity ID for update
                         $('#internship-form').data('internship-id', internshipId);
                         $('#internship-form').data('is-edit', true);
                         
@@ -2960,7 +4225,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to load internship data'
+                        text: 'Failed to load Internship data'
                     });
                 }
             });
@@ -2968,8 +4233,8 @@
 
         function changeInternshipStatus(internshipId, status) {
             let msg = status == 0 ?
-                "Do you want to mark this internship as <b>Active</b>? It will be visible to candidates." :
-                "Do you want to mark this internship as <b>Closed</b>? It will no longer accept applications.";
+                "Do you want to mark this Internship as <b>Active</b>? It will be visible to candidates." :
+                "Do you want to mark this Internship as <b>Closed</b>? It will no longer accept applications.";
 
             Swal.fire({
                 title: "Confirm Status Change",
@@ -3046,12 +4311,52 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'Failed to delete internship'
+                                text: 'Failed to delete Internship'
                             });
                         }
                     });
                 }
             });
+        }
+
+        // Global functions for category/subcategory "Other" mode (must be global for EditInternship to call)
+        window.setCategoryOtherMode = function setCategoryOtherMode(enabled) {
+            $('#use_other_category').val(enabled ? '1' : '0');
+            $('#category-other-row').toggleClass('is-other-mode', enabled);
+            $('#other-category-wrap').toggle(enabled);
+            $('#toggle-other-category').text(enabled ? 'Select from list' : 'Other');
+            if (enabled) {
+                $('#category_id').val(null).trigger('change');
+                $('#category_id').prop('disabled', true);
+                setSubcategoryOtherMode(true, true);
+                $('#other-subcategory-hint').text('Category is custom, so enter a custom subcategory as well.');
+            } else {
+                $('#category_id').prop('disabled', false);
+                $('#other_category_name').val('');
+                $('#category_request_id').val('');
+                setSubcategoryOtherMode(false);
+                $('#other-subcategory-hint').text('This will be sent to admin for approval.');
+            }
+        }
+
+        window.setSubcategoryOtherMode = function setSubcategoryOtherMode(enabled, lockedByCategory) {
+            $('#use_other_subcategory').val(enabled ? '1' : '0');
+            $('#subcategory-other-row').toggleClass('is-other-mode', enabled);
+            $('#other-subcategory-wrap').toggle(enabled);
+            $('#toggle-other-subcategory').text(enabled ? 'Select from list' : 'Other');
+            if (lockedByCategory) {
+                $('#toggle-other-subcategory').hide();
+            } else {
+                $('#toggle-other-subcategory').show();
+            }
+            if (enabled) {
+                $('#internship_sub_category_id').val(null).trigger('change');
+                $('#internship_sub_category_id').prop('disabled', true);
+            } else {
+                $('#internship_sub_category_id').prop('disabled', false);
+                $('#other_subcategory_name').val('');
+                $('#subcategory_request_id').val('');
+            }
         }
 </script>
     <script>
@@ -3632,8 +4937,29 @@
                 },
                 error: function(xhr) {
                     LoaderHide();
-                    console.log(xhr.responseText);
-                    alert(response.message);
+                    var res = xhr.responseJSON || {};
+                    var msg = res.message || res.error || 'Something went wrong. Please try again.';
+                    var upgradeUrl = res.upgrade_url || '';
+                    if (upgradeUrl) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Upgrade Plan Required',
+                            text: msg,
+                            showCancelButton: true,
+                            confirmButtonText: 'Upgrade Plan',
+                            cancelButtonText: 'Close'
+                        }).then(function(result) {
+                            if (result.isConfirmed) {
+                                window.location.href = upgradeUrl;
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Unable to create job',
+                            text: msg,
+                        });
+                    }
                 }
             });
         });
@@ -5195,8 +6521,47 @@
 
 
 
+        function showPlanLimitAlert(type) {
+            var isJob = type === 'job';
+            var jobLimitData = {!! json_encode(isset($jobLimitCheck) && is_array($jobLimitCheck) ? $jobLimitCheck : ['allowed' => true, 'message' => null, 'limit' => null, 'used' => 0, 'upgrade_url' => null]) !!};
+            var internshipLimitData = {!! json_encode(isset($internshipLimitCheck) && is_array($internshipLimitCheck) ? $internshipLimitCheck : ['allowed' => true, 'message' => null, 'limit' => null, 'used' => 0, 'upgrade_url' => null]) !!};
+            var limitData = isJob ? jobLimitData : internshipLimitData;
+            var canPost = isJob
+                ? {!! !empty($canPostJob) ? 'true' : 'false' !!}
+                : {!! !empty($canPostInternship) ? 'true' : 'false' !!};
+            var upgradeUrl = limitData.upgrade_url || @json(route('pricing', ['user_id' => Auth::id() ?? 0]));
+
+            var msg = limitData.message;
+            if (!canPost) {
+                msg = isJob
+                    ? 'Your current plan does not include Job service. Please upgrade your plan to post jobs.'
+                    : 'Your current plan does not include Opportunity service. Please upgrade your plan to post opportunities.';
+            }
+            if (!msg) {
+                msg = 'Your plan create limit has been reached. Please upgrade your plan to continue.';
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Upgrade Plan Required',
+                text: msg,
+                showCancelButton: true,
+                confirmButtonText: 'Upgrade Plan',
+                cancelButtonText: 'Close'
+            }).then(function(result) {
+                if (result.isConfirmed && upgradeUrl) {
+                    window.location.href = upgradeUrl;
+                }
+            });
+        }
+
         function CreateNewJob() {
             // console.log("CreateNewJob called");
+            var canCreateJob = {!! empty($hideCreateJobBtn) ? 'true' : 'false' !!};
+            if (!canCreateJob) {
+                showPlanLimitAlert('job');
+                return;
+            }
             
             // Show form, hide list
             document.getElementById("joblist").style.display = "none";
@@ -5913,11 +7278,13 @@
         $('#m_duration').text($(this).data('duration'));
         $('#m_purchase_date').text($(this).data('purchase-date'));
         $('#m_expire_date').text($(this).data('expire-date'));
+        $('#m_job_limit').text($(this).data('job-limit') || '-');
+        $('#m_opportunity_limit').text($(this).data('opportunity-limit') || '-');
 
         let status = $(this).data('status');
         let badge = status === 'Active'
             ? '<span class="badge bg-success">Active</span>'
-            : '<span class="badge bg-secondary">Expired</span>';
+            : '<span class="badge bg-danger">Expired</span>';
 
         $('#m_status').html(badge);
 

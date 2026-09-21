@@ -17,6 +17,7 @@ class Internship extends Model
         'internship_title',
         'slug',
         'category',
+        'sub_categories',
         'company_id',
         'company_website',
         'mode',
@@ -29,6 +30,7 @@ class Internship extends Model
         'start_date',
         'end_date',
         'application_deadline',
+        'last_registration_date',
         'batch_days',
         'skills',
         'eligibility_criteria',
@@ -39,6 +41,7 @@ class Internship extends Model
         'general_instructions',
         'perks',
         'registration_fees',
+        'late_registration_fee',
         'gst_percentage',
         'gst_amount',
         'final_amount',
@@ -54,13 +57,15 @@ class Internship extends Model
     protected $casts = [
         'batch_days' => 'array',
         'perks' => 'array',
+        'sub_categories' => 'array',
         'stipend' => 'decimal:2',
         'registration_fees' => 'decimal:2',
+        'late_registration_fee' => 'decimal:2',
         'gst_percentage' => 'decimal:2',
         'gst_amount' => 'decimal:2',
         'final_amount' => 'decimal:2',
         'manage_task_status' => 'boolean',
-        'complete_status' => 'boolean',
+        'complete_status' => 'integer',
         'college_complete_sts' => 'integer',
         'company_complete_sts' => 'integer',
         'college_pending_flag' => 'integer',
@@ -68,6 +73,7 @@ class Internship extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'application_deadline' => 'date',
+        'last_registration_date' => 'date',
     ];
 
     // Relationship with User (Company)

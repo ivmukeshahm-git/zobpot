@@ -11,8 +11,8 @@
             color: #242a62 !important;
         }
         
-          /* New Internship Requests Section */
-        .internship-requests-card {
+          /* New Opportunity Requests Section */
+        .opportunity-requests-card {
             background: #fff;
             border-radius: 12px;
             padding: 25px;
@@ -161,7 +161,7 @@
             color: #dc3545;
         }
 
-        .internship-requests-card .table-hover tbody tr:hover {
+        .opportunity-requests-card .table-hover tbody tr:hover {
             background-color: #fff5f0;
         }
     </style>
@@ -1321,7 +1321,7 @@
                     ]
                 });
                 
-                 // Initialize DataTable for New Internship Requests
+                 // Initialize DataTable for New Opportunity Requests
                 var newInternshipRequestsTable = $('#NewInternshipRequestsTable').DataTable({
                     processing: true,
                     serverSide: true,
@@ -1355,308 +1355,25 @@
                 });
           
 
-            // Make functions global for DataTable buttons
-            window.openAcceptModal = function(internshipId) {
-                // Fetch internship details
-                $.ajax({
-                    url: '{{ url("admin/internship/details") }}/' + internshipId,
-                    method: 'GET',
-                    success: function(response) {
-                        if (response.success) {
-                            const data = response.data;
-                            
-                            // Populate modal with internship details
-                            $('#internshipTitle').text(data.internship_title || '-');
-                            $('#category').text(data.category_name || '-');
-                            $('#companyName').text(data.company_name || '-');
-                            $('#workMode').text(data.mode || '-');
-                            $('#location').text(data.location || '-');
-                            $('#duration').text(data.duration || '-');
-                            $('#startDate').text(data.formatted_start_date || '-');
-                            $('#endDate').text(data.formatted_end_date || '-');
-                            $('#stipend').text(data.stipend ? '₹' + data.stipend : 'Not specified');
-                            $('#openings').text((data.openings || 0) + ' Positions');
-                            
-                            // Set date input fields with raw date values
-                            if (data.start_date) {
-                                $('#modalStartDate').val(data.start_date);
-                            }
-                            if (data.end_date) {
-                                $('#modalEndDate').val(data.end_date);
-                            }
-                            
-                            // Set registration fees if available
-                            if (data.registration_fees) {
-                                $('#registrationFees').val(data.registration_fees);
-                            } else {
-                                $('#registrationFees').val(0);
-                            }
-                            
-                            // Trigger GST calculation (GST is fixed at 18%)
-                            $('#registrationFees').trigger('input');
-                            
-                            // Batch Days
-                            if (data.batch_days && Object.keys(data.batch_days).length > 0) {
-                                const days = Object.keys(data.batch_days).join(', ');
-                                $('#batchDays').text(days);
-                                
-                                let timeSlotsHtml = '';
-                                Object.keys(data.batch_days).forEach(day => {
-                                    const dayData = data.batch_days[day];
-                                    timeSlotsHtml += `${day}: ${dayData.start_time || '-'} - ${dayData.end_time || '-'}<br>`;
-                                });
-                                $('#timeSlots').html(timeSlotsHtml);
-                            } else {
-                                $('#batchDays').text('Not specified');
-                                $('#timeSlots').text('Not specified');
-                            }
-                            
-                            // Skills
-                            if (data.skills) {
-                                let skills = [];
-                                try {
-                                    // Try to parse as JSON array first
-                                    skills = JSON.parse(data.skills);
-                                } catch (e) {
-                                    // If not JSON, split by comma
-                                    skills = data.skills.split(',');
-                                }
-                                let skillsHtml = '';
-                                skills.forEach(skill => {
-                                    skillsHtml += `<span class="badge bg-primary me-1">${skill.trim()}</span>`;
-                                });
-                                $('#requiredSkills').html(skillsHtml);
-                            } else {
-                                $('#requiredSkills').text('Not specified');
-                            }
-                            
-                            // Eligibility Criteria
-                            if (data.eligibility_criteria) {
-                                let criteria = [];
-                                try {
-                                    // Try to parse as JSON array first
-                                    criteria = JSON.parse(data.eligibility_criteria);
-                                } catch (e) {
-                                    // If not JSON, split by comma
-                                    criteria = data.eligibility_criteria.split(',');
-                                }
-                                let criteriaHtml = '';
-                                criteria.forEach(c => {
-                                    criteriaHtml += `<span class="badge bg-info me-1">${c.trim()}</span>`;
-                                });
-                                $('#eligibilityCriteria').html(criteriaHtml);
-                            } else {
-                                $('#eligibilityCriteria').text('Not specified');
-                            }
-                            
-                            // Descriptions
-                            $('#internshipDescription').html(data.internship_description || '-');
-                            $('#moduleDescription').html(data.module_brief_description || '-');
-                            $('#internshipObjective').html(data.internship_objective || '-');
-                            $('#internshipOutcome').html(data.internship_outcome || '-');
-                            
-                            // Store internship ID for accept action
-                            $('#acceptInternshipModal').data('internship-id', internshipId);
-
-                            // Default: Associate with College + Enable Task Management
-                            $('#internshipType').val('1');
-                            $('#manageTaskStatus').prop('checked', true);
-                            
-                            // Show modal
-                            $('#acceptInternshipModal').modal('show');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: response.message || 'Failed to load internship details'
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Failed to load internship details'
-                        });
-                    }
-                });
+            // Compatibility wrappers for Dashboard buttons delegating to global handlers in layout.blade.php
+            window.openAcceptModalIndex = function(internshipId) {
+                if (typeof window.openAcceptModal === 'function') {
+                    window.openAcceptModal(internshipId);
+                } else if (typeof openAcceptModal === 'function') {
+                    openAcceptModal(internshipId);
+                }
             };
 
-            // Reject Internship from Dashboard (Global function)
-            window.rejectInternship = function(internshipId) {
-                Swal.fire({
-                    title: 'Reject Internship',
-                    html: `
-                        <p>Are you sure you want to reject this internship?</p>
-                        <textarea id="rejectionReasonIndex" class="form-control mt-3" rows="3" placeholder="Enter rejection reason (optional)"></textarea>
-                    `,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, reject it!',
-                    cancelButtonText: 'Cancel',
-                    preConfirm: () => {
-                        return {
-                            reason: document.getElementById('rejectionReasonIndex').value
-                        };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '{{ url("admin/internship/reject") }}/' + internshipId,
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: {
-                                rejection_reason: result.value.reason
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Rejected!',
-                                        text: response.message || 'Internship rejected successfully!',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    });
-                                    
-                                    // Reload table
-                                    if ($.fn.DataTable.isDataTable('#NewInternshipRequestsTable')) {
-                                        $('#NewInternshipRequestsTable').DataTable().ajax.reload();
-                                    }
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error!',
-                                        text: response.message || 'Failed to reject internship'
-                                    });
-                                }
-                            },
-                            error: function(xhr) {
-                                let errorMessage = 'Failed to reject internship';
-                                if (xhr.responseJSON && xhr.responseJSON.message) {
-                                    errorMessage = xhr.responseJSON.message;
-                                }
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: errorMessage
-                                });
-                            }
-                        });
-                    }
-                });
+            window.rejectOpportunity = function(internshipId) {
+                if (typeof window.rejectInternship === 'function') {
+                    window.rejectInternship(internshipId);
+                } else if (typeof rejectInternship === 'function') {
+                    rejectInternship(internshipId);
+                }
             };
 
-            // Accept Internship from Dashboard (Alias for backward compatibility)
-            function openAcceptModalIndex(internshipId) {
-                window.openAcceptModal(internshipId);
-            }
-
-            // Reject Internship from Dashboard (Alias for backward compatibility)
-            function rejectInternshipIndex(internshipId) {
-                window.rejectInternship(internshipId);
-            }
-
-            // Confirm Accept Internship (Global function for modal)
-            window.confirmAcceptInternship = function() {
-                const internshipId = $('#acceptInternshipModal').data('internship-id');
-                
-                if (!internshipId) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Internship ID not found'
-                    });
-                    return;
-                }
-
-                // Validate form
-                const form = document.getElementById('internshipConfigForm');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
-
-                const internshipType = parseInt($('#internshipType').val(), 10);
-                if (![1, 2].includes(internshipType)) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Validation Error',
-                        text: 'Please select internship type'
-                    });
-                    return;
-                }
-                
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you want to approve this internship with the configured fees?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, approve it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Collect form data
-                        const formData = {
-                            start_date: $('#modalStartDate').val(),
-                            end_date: $('#modalEndDate').val(),
-                            registration_fees: $('#registrationFees').val(),
-                            gst_percentage: 18,
-                            gst_amount: $('#gstAmount').val(),
-                            final_amount: $('#finalAmount').val(),
-                            internship_type: internshipType,
-                            manage_task_status: $('#manageTaskStatus').is(':checked') ? 1 : 0
-                        };
-
-                        $.ajax({
-                            url: '{{ url("admin/internship/accept") }}/' + internshipId,
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: formData,
-                            success: function(response) {
-                                if (response.success) {
-                                    $('#acceptInternshipModal').modal('hide');
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Approved!',
-                                        text: response.message || 'Internship approved successfully!',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    });
-                                    
-                                    // Reload table
-                                    if ($.fn.DataTable.isDataTable('#NewInternshipRequestsTable')) {
-                                        $('#NewInternshipRequestsTable').DataTable().ajax.reload();
-                                    }
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error!',
-                                        text: response.message || 'Failed to approve internship'
-                                    });
-                                }
-                            },
-                            error: function(xhr) {
-                                let errorMessage = 'Failed to approve internship';
-                                if (xhr.responseJSON && xhr.responseJSON.message) {
-                                    errorMessage = xhr.responseJSON.message;
-                                }
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: errorMessage
-                                });
-                            }
-                        });
-                    }
-                });
+            window.rejectInternshipIndex = function(internshipId) {
+                window.rejectOpportunity(internshipId);
             };
             
             
@@ -1672,26 +1389,48 @@
                     calculateGST();
                 });
 
-                // Function to calculate GST and total amount
+                // Function to calculate GST and total amount (includes late fee when applicable)
                 function calculateGST() {
                     const regFees = parseFloat($('#registrationFees').val()) || 0;
+                    const lateFeeConfigured = parseFloat($('#lateRegistrationFee').val()) || 0;
+                    const lastDate = $('#lastRegistrationDate').val();
                     const gstPercent = 18; // Fixed at 18%
-                    
-                    // Calculate GST amount
-                    const gstAmount = (regFees * gstPercent) / 100;
-                    
-                    // Calculate final amount
-                    const finalAmount = regFees + gstAmount;
-                    
-                    // Update fields
+
+                    let isLate = false;
+                    if (lastDate) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const deadline = new Date(lastDate + 'T00:00:00');
+                        isLate = !isNaN(deadline.getTime()) && today > deadline;
+                    }
+
+                    const appliedLateFee = isLate ? lateFeeConfigured : 0;
+                    const subtotal = regFees + appliedLateFee;
+                    const gstAmount = (subtotal * gstPercent) / 100;
+                    const finalAmount = subtotal + gstAmount;
+
+                    $('#gstPercentage').val(gstPercent);
                     $('#gstAmount').val(gstAmount.toFixed(2));
                     $('#finalAmount').val(finalAmount.toFixed(2));
-                    
-                    // Update summary box
-                    $('#summaryRegFees').text(regFees.toFixed(2));
-                    $('#summaryGst').text(gstAmount.toFixed(2));
-                    $('#summaryTotal').text(finalAmount.toFixed(2));
+
+                    if ($('#summaryRegFees').length) {
+                        $('#summaryRegFees').text(regFees.toFixed(2));
+                        $('#summaryLateFee').text(appliedLateFee.toFixed(2));
+                        $('#summaryGstPct').text(gstPercent);
+                        $('#summaryGst').text(gstAmount.toFixed(2));
+                        $('#summaryTotal').text(finalAmount.toFixed(2));
+                        if (appliedLateFee > 0) {
+                            $('#summaryLateWrap').show();
+                        } else {
+                            $('#summaryLateWrap').hide();
+                        }
+                    }
                 }
+
+                // Recalculate on fee/date changes
+                $('#registrationFees, #lateRegistrationFee, #lastRegistrationDate').on('input change', function() {
+                    calculateGST();
+                });
 
                 // Initial calculation on page load
                 calculateGST();

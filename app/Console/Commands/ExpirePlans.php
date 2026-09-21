@@ -20,7 +20,7 @@ class ExpirePlans extends Command
      *
      * @var string
      */
-    protected $description = 'Expire plan history rows and clear users active_plan_id when needed (status=0 for inactive)';
+    protected $description = 'Expire plan history rows and clear users active_plan_id / plan_service when needed (status=0 for inactive)';
 
     /**
      * Execute the console command.
@@ -54,10 +54,15 @@ class ExpirePlans extends Command
                 })
                 ->update([
                     'active_plan_id' => 0,
+                    'plan_service' => null,
+                    'plan_job_used' => 0,
+                    'plan_internship_used' => 0,
+                    'plan_job_limit' => null,
+                    'plan_opportunity_limit' => null,
                     'updated_at' => now(),
                 ]);
 
-            $this->info("Users cleared (active_plan_id reset): $cleared");
+            $this->info("Users cleared (active_plan_id + plan_service + usage/limits reset): $cleared");
 
             DB::commit();
             return Command::SUCCESS;

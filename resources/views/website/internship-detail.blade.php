@@ -412,6 +412,26 @@
             cursor: not-allowed;
         }
 
+        .zp-plan-limit-msg {
+            margin: 10px 0 0;
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.45;
+            color: #842029;
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .zp-plan-limit-msg .zp-plan-limit-usage {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c1b21;
+        }
+
         /* Applied count row */
         .zp-applied-count {
             display: flex;
@@ -848,6 +868,14 @@
                                                 <span class="zp-htag-dot">&bull;</span>
                                                 <span class="zp-htag">{{ $internship->location }}</span>
                                             @endif
+                                            @if($internship->stipend > 0)
+                                                <span class="zp-htag-dot">&bull;</span>
+                                                <span class="zp-htag" style="color:#2e7d32;">Stipend ₹{{ number_format($internship->stipend) }}/Month</span>
+                                            @endif
+                                            @if((float) ($internship->registration_fees ?? 0) > 0)
+                                                <span class="zp-htag-dot">&bull;</span>
+                                                <span class="zp-htag" style="color:#1d4ed8;">Course Fee ₹{{ number_format((float) $internship->registration_fees) }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="zp-header-right">
@@ -986,24 +1014,38 @@
                                     <div class="zp-info-tile">
                                         <div class="zp-tile-icon"><i class="fa fa-calendar"></i></div>
                                         <div class="zp-tile-body">
-                                            <span class="zp-tile-label">Internship Duration</span>
+                                            <span class="zp-tile-label">Program Duration</span>
                                             <div class="zp-tile-value">{{ $internship->duration }}</div>
                                         </div>
                                     </div>
 
-                                    {{-- <div class="zp-info-tile">
+                                    <div class="zp-info-tile">
                                         <div class="zp-tile-icon" style="background:#fff3e0;color:#e65100;"><i class="fa fa-money"></i></div>
                                         <div class="zp-tile-body">
-                                            <span class="zp-tile-label">Internship Type</span>
+                                            <span class="zp-tile-label">Stipend</span>
                                             <div class="zp-tile-value">
                                                 @if($internship->stipend > 0)
-                                                    Paid &mdash; &#8377;{{ number_format($internship->stipend) }}/mo
+                                                    &#8377;{{ number_format($internship->stipend) }}/Month
                                                 @else
                                                     Unpaid
                                                 @endif
                                             </div>
                                         </div>
-                                    </div> --}}
+                                    </div>
+
+                                    <div class="zp-info-tile">
+                                        <div class="zp-tile-icon" style="background:#e3f2fd;color:#1565c0;"><i class="fa fa-credit-card"></i></div>
+                                        <div class="zp-tile-body">
+                                            <span class="zp-tile-label">Course Fee</span>
+                                            <div class="zp-tile-value">
+                                                @if((float) ($internship->registration_fees ?? 0) > 0)
+                                                    &#8377;{{ number_format((float) $internship->registration_fees) }}
+                                                @else
+                                                    Free
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="zp-info-tile">
                                         <div class="zp-tile-icon" style="background:#e8f5e9;color:#2e7d32;"><i class="fa fa-list-alt"></i></div>
@@ -1021,9 +1063,9 @@
                                     <div class="zp-info-tile">
                                         <div class="zp-tile-icon" style="background:#e3f2fd;color:#0277bd;"><i class="fa fa-clock-o"></i></div>
                                         <div class="zp-tile-body">
-                                            <span class="zp-tile-label">Internship Type/Timing</span>
+                                            <span class="zp-tile-label">Program Mode</span>
                                             <div class="zp-tile-value">
-                                                Internship Type: {{ $internship->mode }}<br>
+                                                Program Mode: {{ $internship->mode }}<br>
                                                 @if(!empty($batchDays) && is_array($batchDays))
                                                     @php $bt = collect($batchDays)->pluck('day')->filter()->join(', '); @endphp
                                                     @if($bt)Batch Days: {{ $bt }}@endif
@@ -1072,7 +1114,7 @@
                                         }
                                     @endphp
                                     <div class="zp-info-tile">
-                                        <div class="zp-tile-icon" style="background:#e8eaf6;color:#283593;"><i class="fa fa-code"></i></div>
+                                        <div class="zp-tile-icon" style="background:#e8eaf6;color:#283593;"><i class="fa fa-lightbulb-o"></i></div>
                                         <div class="zp-tile-body">
                                             <span class="zp-tile-label">Skills Required</span>
                                             <div class="zp-tile-value">
@@ -1107,11 +1149,11 @@
                         </div>
 
                      
-                        {{-- ---- Related Internships ---- --}}
+                        {{-- ---- Related Internship ---- --}}
                         @if($recentInternships && $recentInternships->count() > 0)
                         <div class="zp-main-card">
                             <div class="zp-section">
-                                <h3 class="zp-section-title">Related Internships</h3>
+                                <h3 class="zp-section-title">Related Internship</h3>
                                 <div class="row g-3">
                                     @foreach($recentInternships as $recent)
                                     @php
@@ -1149,6 +1191,9 @@
                                                     <span class="zp-rel-tag green"><i class="fa fa-rupee" style="margin-right:3px;"></i>{{ number_format($recent->stipend) }}/mo</span>
                                                 @else
                                                     <span class="zp-rel-tag">Unpaid</span>
+                                                @endif
+                                                @if((float) ($recent->registration_fees ?? 0) > 0)
+                                                    <span class="zp-rel-tag" style="background:#eff6ff;color:#1d4ed8;"><i class="fa fa-credit-card" style="margin-right:4px;"></i>Fee ₹{{ number_format((float) $recent->registration_fees) }}</span>
                                                 @endif
                                                 @if($rDays !== null)
                                                     @if($rDays > 0)
@@ -1235,7 +1280,7 @@
                                         @if(Auth::user()->profile_type == 'Company')
                                             {{-- Company account: cannot apply --}}
                                             <button class="quick-apply-btn company-block" disabled
-                                                    title="Company accounts cannot apply to internships">
+                                                    title="Company accounts cannot apply to Internships">
                                                 <i class="fa fa-building"></i> Companies Can't Apply
                                             </button>
                                         @elseif(!empty($alreadyApplied) && $alreadyApplied)
@@ -1253,6 +1298,17 @@
                                             <button class="quick-apply-btn" disabled>
                                                 <i class="fa fa-users"></i> Positions Filled
                                             </button>
+                                        @elseif(empty($canApplyInternship) || empty($internshipApplyLimitCheck['allowed']))
+                                            <button class="quick-apply-btn" type="button"
+                                                onclick="showCandidatePlanLimitAlert(@json(($internshipApplyLimitCheck['message'] ?? null) ?: 'Your plan opportunity apply limit has been reached.'), @json(($internshipApplyLimitCheck['upgrade_url'] ?? null) ?: route('pricing', ['user_id' => Auth::id() ?? 0])))">
+                                                <i class="fa fa-lock"></i> Upgrade Plan
+                                            </button>
+                                            <p class="zp-plan-limit-msg">
+                                                {{ ($internshipApplyLimitCheck['message'] ?? null) ?: 'Your plan opportunity apply limit has been reached. Please upgrade your plan to continue.' }}
+                                                @if(isset($internshipApplyLimitCheck['limit']) && $internshipApplyLimitCheck['limit'] !== null)
+                                                    <span class="zp-plan-limit-usage">(Used {{ (int) ($internshipApplyLimitCheck['used'] ?? 0) }}/{{ (int) $internshipApplyLimitCheck['limit'] }})</span>
+                                                @endif
+                                            </p>
                                         @else
                                             {{-- Employee / candidate: Quick Apply --}}
                                             
@@ -1403,6 +1459,7 @@
                                 <input type="text" class="form-control mt-2" id="collegeOther" name="college_other"
                                        placeholder="Enter College Name"
                                        style="border:2px solid #e0e0e0; border-radius:10px; padding:12px 16px; font-size:14px; display:none;">
+                                <button type="button" id="collegeUseList" class="btn btn-link p-0" style="display:none; margin-top:6px;">Choose from list</button>
                             </div>
                         </div>
                         <div class="row">
@@ -1472,7 +1529,7 @@
     </div>
 
     {{-- ======================================================
-         BILLING MODAL (unchanged)
+         BILLING MODAL (same design + late fee calculation only)
          ====================================================== --}}
     <div class="modal fade" id="billingModal" tabindex="-1" aria-labelledby="billingModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1483,36 +1540,55 @@
                         <h5 class="modal-title" id="billingModalLabel" style="font-size:22px; font-weight:700; margin:0; color:#fff;">
                             <i class="fa fa-credit-card"></i> Payment Details
                         </h5>
-                        <p style="margin:5px 0 0; font-size:13px; opacity:.9; color:#fff;">Complete your internship registration</p>
+                        <p style="margin:5px 0 0; font-size:13px; opacity:.9; color:#fff;">Complete your Internship registration</p>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="padding:30px;">
-                    <div class="billing-summary"
-                         style="background:linear-gradient(135deg,#242a64 0%,#3a4290 100%); border-radius:12px; padding:25px; margin-bottom:25px; color:white;">
-                        <h6 style="font-size:16px; font-weight:700; margin-bottom:15px; color:#fff; display:flex; align-items:center; gap:8px;">
-                            <i class="fa fa-shopping-cart"></i> Order Summary
-                        </h6>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                            <span>Internship Program</span>
-                            <span id="billing-title" style="font-weight:600;">{{ $internship->internship_title }}</span>
+                    <div style="background:#fff; border:1px solid #eef0f5; border-radius:12px; padding:25px; margin-bottom:25px; box-shadow:0 2px 10px rgba(0,0,0,.04);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                            <h6 style="font-size:16px; font-weight:700; margin:0; color:#242a64; display:flex; align-items:center; gap:8px;">
+                                <i class="fa fa-shopping-cart"></i> Order Summary
+                            </h6>
+                            <span id="billing-reg-badge"
+                                  style="font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; background:{{ !empty($paymentCalc['is_late_registration']) ? '#dc3545' : '#28a745' }}; color:#fff;">
+                                {{ !empty($paymentCalc['is_late_registration']) ? 'Late Registration Applied' : 'Regular Registration' }}
+                            </span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
+                            <span>Career Program</span>
+                            <span id="billing-title" style="font-weight:600; color:#212529;">{{ $internship->internship_title }}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
                             <span>Duration</span>
-                            <span id="billing-duration" style="font-weight:600;">{{ $internship->duration }}</span>
+                            <span id="billing-duration" style="font-weight:600; color:#212529;">{{ $internship->duration }}</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
                             <span>Registration Fee</span>
-                            <span id="billing-reg-fee" style="font-weight:600;">₹{{ number_format($internship->registration_fees, 2) }}</span>
+                            <span id="billing-reg-fee" style="font-weight:600; color:#212529;">₹{{ number_format($paymentCalc['registration_fee'], 2) }}</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                            <span>GST (<span id="billing-gst-pct">{{ $internship->gst_percentage }}</span>%)</span>
-                            <span id="billing-gst-amt" style="font-weight:600;">₹{{ number_format($internship->gst_amount, 2) }}</span>
+
+                        {{-- Late fee rows: only shown when late registration applies --}}
+                        <div id="billing-late-fee-row"
+                             style="display:{{ !empty($paymentCalc['is_late_registration']) && (float) $paymentCalc['late_registration_fee'] > 0 ? 'flex' : 'none' }}; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
+                            <span>Late Registration Fee</span>
+                            <span id="billing-late-fee" style="font-weight:600; color:#212529;">₹{{ number_format($paymentCalc['late_registration_fee'], 2) }}</span>
                         </div>
-                        <hr style="border-color:rgba(255,255,255,.3); margin:15px 0;">
-                        <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700;">
+                        <div id="billing-subtotal-row"
+                             style="display:{{ !empty($paymentCalc['is_late_registration']) ? 'flex' : 'none' }}; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
+                            <span>Subtotal</span>
+                            <span id="billing-subtotal" style="font-weight:600; color:#212529;">₹{{ number_format($paymentCalc['subtotal'], 2) }}</span>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#495057;">
+                            <span>GST (<span id="billing-gst-pct">{{ $paymentCalc['gst_percentage'] }}</span>%)</span>
+                            <span id="billing-gst-amt" style="font-weight:600; color:#212529;">₹{{ number_format($paymentCalc['gst_amount'], 2) }}</span>
+                        </div>
+                        <hr style="border-color:#e9ecef; margin:15px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; color:#242a64;">
                             <span>Total Amount</span>
-                            <span id="billing-total">₹{{ number_format($internship->final_amount, 2) }}</span>
+                            <span id="billing-total">₹{{ number_format($paymentCalc['total_amount'], 2) }}</span>
                         </div>
                     </div>
                     <form id="billingForm">
@@ -1571,20 +1647,22 @@
                     </button>
                     <button type="button" class="btn btn-success" id="submitPayment"
                             style="background:linear-gradient(135deg,#242a64 0%,#3a4290 100%); padding:12px 24px; border-radius:10px; font-weight:600; font-size:14px; border:none;">
-                        <i class="fa fa-check"></i> Pay <span id="billing-pay-amount">₹{{ number_format($internship->final_amount, 2) }}</span>
+                        <i class="fa fa-check"></i> Pay <span id="billing-pay-amount">₹{{ number_format($paymentCalc['total_amount'], 2) }}</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        /* ── PHP → JS internship data ── */
+        /* ── PHP → JS opportunity data ── */
         var INTERNSHIP_ID   = {{ $internship->id }};
         var INTERNSHIP_TYPE = {{ $internship->internship_type ?? 0 }};
         // 0 = Default, 1 = With College (college form first), 2 = With Industry (direct payment)
 
         var CSRF_TOKEN = '{{ csrf_token() }}';
+        var LAST_BILLING_AMOUNT = {{ (float) ($paymentCalc['total_amount'] ?? 0) }};
 
         /* ── Details Read More / Read Less ── */
         (function () {
@@ -1623,9 +1701,87 @@
         }
         
         
+        function formatMoney(value) {
+            var num = parseFloat(value);
+            if (isNaN(num)) num = 0;
+            return '₹' + num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function applyBillingPaymentData(data) {
+            if (!data) return;
+
+            if (data.internship_title) {
+                document.getElementById('billing-title').textContent = data.internship_title;
+            }
+            if (data.duration) {
+                document.getElementById('billing-duration').textContent = data.duration;
+            }
+
+            var isLate = !!data.is_late_registration;
+            var lateFee = parseFloat(String(data.late_registration_fee || '0').replace(/,/g, '')) || 0;
+
+            document.getElementById('billing-reg-fee').textContent = '₹' + (data.registration_fee || data.registration_fees || '0.00');
+            document.getElementById('billing-late-fee').textContent = '₹' + (data.late_registration_fee || '0.00');
+            document.getElementById('billing-subtotal').textContent = '₹' + (data.subtotal || '0.00');
+            document.getElementById('billing-gst-pct').textContent = data.gst_percentage || 0;
+            document.getElementById('billing-gst-amt').textContent = '₹' + (data.gst_amount || '0.00');
+            document.getElementById('billing-total').textContent = '₹' + (data.total_amount || data.final_amount || '0.00');
+            document.getElementById('billing-pay-amount').textContent = '₹' + (data.total_amount || data.final_amount || '0.00');
+
+            if (typeof data.final_amount_raw !== 'undefined' && data.final_amount_raw !== null) {
+                LAST_BILLING_AMOUNT = parseFloat(data.final_amount_raw);
+            } else {
+                LAST_BILLING_AMOUNT = parseFloat(String(data.total_amount || data.final_amount || '0').replace(/,/g, '')) || 0;
+            }
+
+            var lateRow = document.getElementById('billing-late-fee-row');
+            var subtotalRow = document.getElementById('billing-subtotal-row');
+            var badge = document.getElementById('billing-reg-badge');
+
+            if (isLate && lateFee > 0) {
+                lateRow.style.display = 'flex';
+            } else {
+                lateRow.style.display = 'none';
+            }
+
+            if (isLate) {
+                subtotalRow.style.display = 'flex';
+                badge.style.background = '#dc3545';
+                badge.textContent = 'Late Registration Applied';
+            } else {
+                subtotalRow.style.display = 'none';
+                badge.style.background = '#28a745';
+                badge.textContent = 'Regular Registration';
+            }
+        }
+
+        function refreshBillingSummary(callback) {
+            fetch('{{ route("internship.payment.data") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN
+                },
+                body: JSON.stringify({ internship_id: INTERNSHIP_ID })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.success && res.data) {
+                    applyBillingPaymentData(res.data);
+                }
+                if (typeof callback === 'function') callback();
+            })
+            .catch(function () {
+                if (typeof callback === 'function') callback();
+            });
+        }
+
         function openBillingModal(){
-            var billingModal = new bootstrap.Modal(document.getElementById('billingModal'));
-            billingModal.show();
+            refreshBillingSummary(function () {
+                var billingModal = new bootstrap.Modal(document.getElementById('billingModal'));
+                billingModal.show();
+            });
         }
 
         /* ── Back button: billing → college info (only for type 1) ── */
@@ -1667,8 +1823,7 @@
                         submitCollegeBtn.innerHTML = '<i class="fa fa-arrow-right"></i> Continue to Payment';
                         if (res.success) {
                             bootstrap.Modal.getInstance(document.getElementById('collegeInfoModal')).hide();
-                            var billingModal = new bootstrap.Modal(document.getElementById('billingModal'));
-                            billingModal.show();
+                            openBillingModal();
                         } else {
                             alert(res.message || 'Could not save college info. Please try again.');
                         }
@@ -1688,6 +1843,8 @@
                     submitPaymentBtn.disabled = true;
                     submitPaymentBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing…';
 
+                    /*
+                    // Mukeshbhai old code - internship apply payment bypass (no Razorpay)
                     fetch('{{ route("internship.application.create") }}', {
                         method: 'POST',
                         headers: {
@@ -1699,10 +1856,9 @@
                     .then(function (r) { return r.json(); })
                     .then(function (res) {
                         submitPaymentBtn.disabled = false;
-                        submitPaymentBtn.innerHTML = '<i class="fa fa-check"></i> Pay <span id="billing-pay-amount">{{ number_format($internship->final_amount, 2) }}</span>';
+                        submitPaymentBtn.innerHTML = '<i class="fa fa-check"></i> Pay <span id="billing-pay-amount">₹{{ number_format($paymentCalc['total_amount'], 2) }}</span>';
                         if (res.success) {
                             bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            /* Mark button as applied */
                             var applyBtn = document.getElementById('quickApplyBtn');
                             if (applyBtn) {
                                 applyBtn.className = 'quick-apply-btn applied';
@@ -1712,33 +1868,182 @@
                             }
                             showToast('success', 'Application submitted successfully!');
                         } else if (res.message === 'already_applied') {
-                            bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            showToast('info', 'You have already applied for this internship.');
-                        } else if (res.message === 'no_openings') {
-                            bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            showToast('info', 'All positions for this internship are filled.');
-                        } else if (res.message === 'college_info_required') {
-                            bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            showToast('info', 'Please complete your college and degree details before applying.');
-                            openApplyModal();
-                        } else if (res.message === 'internship_not_available') {
-                            bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            showToast('info', 'This internship is not available for applications yet.');
-                        } else if (res.message === 'internship_closed') {
-                            bootstrap.Modal.getInstance(document.getElementById('billingModal')).hide();
-                            showToast('info', 'This internship is closed and no longer accepting applications.');
-                        } else {
-                            alert(res.message || 'Payment failed. Please try again.');
+                            ...
                         }
+                    });
+                    */
+
+                    // Raj new code - dynamic Razorpay
+                    fetch('{{ route("internship.razorpay.create-order") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': CSRF_TOKEN
+                        },
+                        body: JSON.stringify({
+                            internship_id: INTERNSHIP_ID,
+                            amount: LAST_BILLING_AMOUNT
+                        })
+                    })
+                    .then(function (r) { return r.json().then(function (data) { return { status: r.status, data: data }; }); })
+                    .then(function (result) {
+                        var res = result.data || {};
+                        if (!res.success) {
+                            resetPayButton(submitPaymentBtn);
+                            handleInternshipApplyError(res);
+                            return;
+                        }
+
+                        var options = {
+                            "key": res.key,
+                            "amount": res.amount,
+                            "currency": res.currency || 'INR',
+                            "name": res.name || 'ZobPot',
+                            "description": res.description || '',
+                            "order_id": res.order_id,
+                            "prefill": {
+                                "name": (res.prefill && res.prefill.name) ? res.prefill.name : '',
+                                "email": (res.prefill && res.prefill.email) ? res.prefill.email : '',
+                                "contact": (res.prefill && res.prefill.contact) ? res.prefill.contact : ''
+                            },
+                            "theme": {
+                                "color": (res.theme && res.theme.color) ? res.theme.color : '#242a62'
+                            },
+                            "handler": function (response) {
+                                fetch('{{ route("internship.razorpay.verify") }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': CSRF_TOKEN
+                                    },
+                                    body: JSON.stringify({
+                                        internship_id: INTERNSHIP_ID,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature
+                                    })
+                                })
+                                .then(function (r) { return r.json(); })
+                                .then(function (verifyRes) {
+                                    resetPayButton(submitPaymentBtn);
+                                    if (verifyRes.success) {
+                                        var billingInst = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                                        if (billingInst) billingInst.hide();
+                                        var applyBtn = document.getElementById('quickApplyBtn');
+                                        if (applyBtn) {
+                                            applyBtn.className = 'quick-apply-btn applied';
+                                            applyBtn.disabled = true;
+                                            applyBtn.innerHTML = '<i class="fa fa-check-circle"></i> Applied Successfully';
+                                            applyBtn.onclick = null;
+                                        }
+                                        showToast('success', 'Application submitted successfully!');
+                                    } else {
+                                        handleInternshipApplyError(verifyRes);
+                                    }
+                                })
+                                .catch(function () {
+                                    resetPayButton(submitPaymentBtn);
+                                    alert('Network error. Please try again.');
+                                });
+                            },
+                            "modal": {
+                                "ondismiss": function () {
+                                    resetPayButton(submitPaymentBtn);
+                                }
+                            }
+                        };
+
+                        var rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function () {
+                            resetPayButton(submitPaymentBtn);
+                            alert('Payment failed. Please try again.');
+                        });
+                        rzp.open();
                     })
                     .catch(function () {
-                        submitPaymentBtn.disabled = false;
-                        submitPaymentBtn.innerHTML = '<i class="fa fa-check"></i> Pay';
+                        resetPayButton(submitPaymentBtn);
                         alert('Network error. Please try again.');
                     });
                 });
             }
         });
+
+        function resetPayButton(btn) {
+            if (!btn) return;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-check"></i> Pay <span id="billing-pay-amount">₹' + (LAST_BILLING_AMOUNT ? LAST_BILLING_AMOUNT.toFixed(2) : '0.00') + '</span>';
+        }
+
+        function handleInternshipApplyError(res) {
+            if (!res) {
+                alert('Payment failed. Please try again.');
+                return;
+            }
+            if (res.message === 'already_applied') {
+                var billingInst = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst) billingInst.hide();
+                showToast('info', 'You have already applied for this Internship.');
+            } else if (res.message === 'no_openings') {
+                var billingInst2 = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst2) billingInst2.hide();
+                showToast('info', 'All positions for this Internship are filled.');
+            } else if (res.message === 'college_info_required') {
+                var billingInst3 = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst3) billingInst3.hide();
+                showToast('info', 'Please complete your college and degree details before applying.');
+                openApplyModal();
+            } else if (res.message === 'internship_not_available') {
+                var billingInst4 = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst4) billingInst4.hide();
+                showToast('info', 'This Internship is not available for applications yet.');
+            } else if (res.message === 'internship_closed') {
+                var billingInst5 = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst5) billingInst5.hide();
+                showToast('info', 'This Internship is closed and no longer accepting applications.');
+            } else if (res.message === 'plan_service_required') {
+                var billingInst6 = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInst6) billingInst6.hide();
+                showCandidatePlanLimitAlert(res.error || 'Your current plan does not include Internship service.', res.upgrade_url || '');
+            } else if (res.message === 'plan_service_limit_reached') {
+                var billingInstLimit = bootstrap.Modal.getInstance(document.getElementById('billingModal'));
+                if (billingInstLimit) billingInstLimit.hide();
+                showCandidatePlanLimitAlert(res.error || 'Your plan service limit has been reached. Please upgrade your plan.', res.upgrade_url || '');
+            } else if (res.message === 'login_required') {
+                alert('Please login to apply.');
+            } else if (res.message === 'invalid_amount' || res.message === 'amount_mismatch') {
+                alert(res.error || 'Payment amount is invalid. Please refresh and try again.');
+            } else if (res.message === 'payment_create_failed' || res.message === 'payment_verify_failed' || res.message === 'order_create_failed') {
+                alert((res.error || 'Payment could not be completed. Please try again.') + (res.debug ? ('\n\n' + res.debug) : ''));
+            } else {
+                alert(res.error || res.message || 'Payment failed. Please try again.');
+            }
+        }
+
+        /* ── Plan limit → Upgrade Plan alert ── */
+        function showCandidatePlanLimitAlert(message, upgradeUrl) {
+            if (typeof Swal === 'undefined') {
+                if (upgradeUrl && confirm(message || 'Plan limit reached. Upgrade now?')) {
+                    window.location.href = upgradeUrl;
+                } else {
+                    alert(message || 'Plan limit reached. Please upgrade your plan.');
+                }
+                return;
+            }
+            Swal.fire({
+                icon: 'warning',
+                title: 'Upgrade Plan Required',
+                text: message || 'Your plan limit has been reached. Please upgrade your plan.',
+                showCancelButton: true,
+                confirmButtonText: 'Upgrade Plan',
+                cancelButtonText: 'Close'
+            }).then(function(result) {
+                if (result.isConfirmed && upgradeUrl) {
+                    window.location.href = upgradeUrl;
+                }
+            });
+        }
 
         /* ── Simple toast helper ── */
         function showToast(type, message) {
@@ -1778,9 +2083,9 @@
             });
         }
 
-        /* ── Share internship ── */
+        /* ── Share opportunity ── */
         function shareInternship(slug) {
-            var url = window.location.origin + '/internship-detail/' + slug;
+            var url = window.location.origin + '/opportunity-detail/' + slug;
             if (navigator.share) {
                 navigator.share({ title: document.title, url: url });
             } else if (navigator.clipboard) {
@@ -1793,199 +2098,285 @@
         }
 
         /* ══════════════════════════════════════════
-           COLLEGE INFO MODAL — dynamic dropdowns
+           COLLEGE INFO MODAL — dynamic dropdowns + Other
            ══════════════════════════════════════════ */
+
+        function resetSelectOptions(selectEl, placeholderText) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            selectEl.add(new Option(placeholderText, ''));
+            selectEl.value = '';
+            selectEl.style.display = '';
+            selectEl.required = true;
+        }
+
+        function enableOtherMode(selectEl, otherInput, useListBtn) {
+            if (!selectEl) return;
+            selectEl.style.display = 'none';
+            selectEl.required = false;
+            if (otherInput) {
+                otherInput.style.display = '';
+                otherInput.required = true;
+                otherInput.value = otherInput.value || '';
+            }
+            if (useListBtn) {
+                useListBtn.style.display = '';
+            }
+        }
+
+        function enableListMode(selectEl, otherInput, useListBtn) {
+            if (!selectEl) return;
+            selectEl.style.display = '';
+            selectEl.required = true;
+            if (selectEl.value === 'other') {
+                selectEl.value = '';
+            }
+            if (otherInput) {
+                otherInput.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+            if (useListBtn) {
+                useListBtn.style.display = 'none';
+            }
+        }
+
+        function addOtherOption(selectEl) {
+            if (!selectEl) return;
+            var exists = Array.prototype.some.call(selectEl.options, function (opt) {
+                return opt.value === 'other';
+            });
+            if (!exists) {
+                selectEl.add(new Option('Other (not listed)', 'other'));
+            }
+        }
 
         function loadUniversities() {
             var sel = document.getElementById('university');
-            if (sel.options.length > 1) return; // already loaded
+            if (!sel || sel.options.length > 1) return;
             fetch('{{ route("get.universities") }}')
                 .then(function (r) { return r.json(); })
                 .then(function (list) {
-                    list.forEach(function (u) {
-                        var opt = new Option(u.university_name, u.id);
-                        sel.add(opt);
+                    (list || []).forEach(function (u) {
+                        sel.add(new Option(u.university_name, u.id));
                     });
-                    var other = new Option('Other (not listed)', 'other');
-                    sel.add(other);
+                    addOtherOption(sel);
                 });
         }
 
-        document.addEventListener('change', function (e) {
-            /* University → load colleges */
-            if (e.target && e.target.id === 'university') {
-                var val = e.target.value;
-                var otherInput  = document.getElementById('universityOther');
-                var useListBtn  = document.getElementById('universityUseList');
-                var collegesSel = document.getElementById('college');
-                var collegeOther = document.getElementById('collegeOther');
-
-                if (val === 'other') {
-                    otherInput.style.display = '';
-                    useListBtn.style.display = '';
-                    e.target.style.display = 'none';
-                } else {
-                    otherInput.style.display = 'none';
-                    useListBtn.style.display = 'none';
-                }
-
-                /* Reset colleges */
-                while (collegesSel.options.length > 1) collegesSel.remove(1);
-                collegeOther.style.display = 'none';
-
-                if (val && val !== 'other') {
-                    fetch('{{ route("get.colleges.by.university") }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-                        body: JSON.stringify({ university_id: val })
-                    })
-                    .then(function (r) { return r.json(); })
-                    .then(function (list) {
-                        list.forEach(function (c) {
-                            var opt = new Option(c.college_name, c.id);
-                            collegesSel.add(opt);
-                        });
-                        collegesSel.add(new Option('Other (not listed)', 'other'));
-                    });
-                }
-            }
-
-            /* College → show "other" input */
-            if (e.target && e.target.id === 'college') {
-                var collegeOther = document.getElementById('collegeOther');
-                collegeOther.style.display = e.target.value === 'other' ? '' : 'none';
-            }
-
-            /* Degree Level → load degrees */
-            if (e.target && e.target.id === 'degreeLevel') {
-                var val = e.target.value;
-                var dlOther     = document.getElementById('degreeLevelOther');
-                var dlUseList   = document.getElementById('degreeLevelUseList');
-                var degreeSel   = document.getElementById('degree');
-                var degreeOther = document.getElementById('degreeOther');
-                var majorSel    = document.getElementById('major');
-
-                if (val === 'other') {
-                    dlOther.style.display = '';
-                    dlUseList.style.display = '';
-                    e.target.style.display = 'none';
-                } else {
-                    dlOther.style.display = 'none';
-                    dlUseList.style.display = 'none';
-                }
-
-                while (degreeSel.options.length > 1) degreeSel.remove(1);
-                degreeOther.style.display = 'none';
-                while (majorSel.options.length > 1) majorSel.remove(1);
-
-                if (val && val !== 'other') {
-                    fetch('{{ route("get.degrees.by.level") }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-                        body: JSON.stringify({ degree_level_id: val })
-                    })
-                    .then(function (r) { return r.json(); })
-                    .then(function (list) {
-                        list.forEach(function (d) {
-                            degreeSel.add(new Option(d.degree_name, d.degree_id));
-                        });
-                        degreeSel.add(new Option('Other (not listed)', 'other'));
-                    });
-                }
-            }
-
-            /* Degree → load majors */
-            if (e.target && e.target.id === 'degree') {
-                var val = e.target.value;
-                var dOther   = document.getElementById('degreeOther');
-                var dUseList = document.getElementById('degreeUseList');
-                var majorSel = document.getElementById('major');
-                var mOther   = document.getElementById('majorOther');
-
-                if (val === 'other') {
-                    dOther.style.display = '';
-                    dUseList.style.display = '';
-                    e.target.style.display = 'none';
-                } else {
-                    dOther.style.display = 'none';
-                    dUseList.style.display = 'none';
-                }
-
-                while (majorSel.options.length > 1) majorSel.remove(1);
-                mOther.style.display = 'none';
-
-                if (val && val !== 'other') {
-                    fetch('{{ route("get.majors.by.degree") }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-                        body: JSON.stringify({ degree_id: val })
-                    })
-                    .then(function (r) { return r.json(); })
-                    .then(function (list) {
-                        list.forEach(function (m) {
-                            majorSel.add(new Option(m.major_name, m.major_id));
-                        });
-                        majorSel.add(new Option('Other (not listed)', 'other'));
-                    });
-                }
-            }
-
-            /* Major → show "other" input */
-            if (e.target && e.target.id === 'major') {
-                var mOther   = document.getElementById('majorOther');
-                var mUseList = document.getElementById('majorUseList');
-                if (e.target.value === 'other') {
-                    mOther.style.display = '';
-                    mUseList.style.display = '';
-                    e.target.style.display = 'none';
-                } else {
-                    mOther.style.display = 'none';
-                    mUseList.style.display = 'none';
-                }
-            }
-        });
-
-        /* "Choose from list" buttons */
-        document.addEventListener('click', function (e) {
-            if (e.target && e.target.id === 'universityUseList') {
-                document.getElementById('university').style.display = '';
-                document.getElementById('university').value = '';
-                document.getElementById('universityOther').style.display = 'none';
-                e.target.style.display = 'none';
-            }
-            if (e.target && e.target.id === 'degreeLevelUseList') {
-                document.getElementById('degreeLevel').style.display = '';
-                document.getElementById('degreeLevel').value = '';
-                document.getElementById('degreeLevelOther').style.display = 'none';
-                e.target.style.display = 'none';
-            }
-            if (e.target && e.target.id === 'degreeUseList') {
-                document.getElementById('degree').style.display = '';
-                document.getElementById('degree').value = '';
-                document.getElementById('degreeOther').style.display = 'none';
-                e.target.style.display = 'none';
-            }
-            if (e.target && e.target.id === 'majorUseList') {
-                document.getElementById('major').style.display = '';
-                document.getElementById('major').value = '';
-                document.getElementById('majorOther').style.display = 'none';
-                e.target.style.display = 'none';
-            }
-        });
-
-        /* Load degree levels list */
         function loadDegreeLevels() {
             var sel = document.getElementById('degreeLevel');
-            if (sel.options.length > 1) return;
+            if (!sel || sel.options.length > 1) return;
             fetch('{{ route("get.degree.levels") }}')
                 .then(function (r) { return r.json(); })
                 .then(function (list) {
-                    list.forEach(function (dl) {
+                    (list || []).forEach(function (dl) {
                         sel.add(new Option(dl.degree_level_name, dl.degree_level_id));
                     });
-                    sel.add(new Option('Other (not listed)', 'other'));
+                    addOtherOption(sel);
                 });
         }
+
+        function loadCollegesByUniversity(universityId) {
+            var collegesSel = document.getElementById('college');
+            var collegeOther = document.getElementById('collegeOther');
+            var collegeUseList = document.getElementById('collegeUseList');
+
+            resetSelectOptions(collegesSel, 'Select College');
+            enableListMode(collegesSel, collegeOther, collegeUseList);
+
+            if (!universityId) return;
+
+            // If university is Other, still allow College Other
+            if (universityId === 'other') {
+                addOtherOption(collegesSel);
+                return;
+            }
+
+            fetch('{{ route("get.colleges.by.university") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+                body: JSON.stringify({ university_id: universityId })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                (list || []).forEach(function (c) {
+                    collegesSel.add(new Option(c.college_name, c.id));
+                });
+                addOtherOption(collegesSel);
+            });
+        }
+
+        function loadDegreesByLevel(degreeLevelId) {
+            var degreeSel = document.getElementById('degree');
+            var degreeOther = document.getElementById('degreeOther');
+            var degreeUseList = document.getElementById('degreeUseList');
+            var majorSel = document.getElementById('major');
+            var majorOther = document.getElementById('majorOther');
+            var majorUseList = document.getElementById('majorUseList');
+
+            resetSelectOptions(degreeSel, 'Select Degree');
+            enableListMode(degreeSel, degreeOther, degreeUseList);
+            resetSelectOptions(majorSel, 'Select Major');
+            enableListMode(majorSel, majorOther, majorUseList);
+
+            if (!degreeLevelId) return;
+
+            if (degreeLevelId === 'other') {
+                addOtherOption(degreeSel);
+                return;
+            }
+
+            fetch('{{ route("get.degrees.by.level") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+                body: JSON.stringify({ degree_level_id: degreeLevelId })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                (list || []).forEach(function (d) {
+                    degreeSel.add(new Option(d.degree_name, d.degree_id));
+                });
+                addOtherOption(degreeSel);
+            });
+        }
+
+        function loadMajorsByDegree(degreeId) {
+            var majorSel = document.getElementById('major');
+            var majorOther = document.getElementById('majorOther');
+            var majorUseList = document.getElementById('majorUseList');
+
+            resetSelectOptions(majorSel, 'Select Major');
+            enableListMode(majorSel, majorOther, majorUseList);
+
+            if (!degreeId) return;
+
+            if (degreeId === 'other') {
+                addOtherOption(majorSel);
+                return;
+            }
+
+            fetch('{{ route("get.majors.by.degree") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+                body: JSON.stringify({ degree_id: degreeId })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                (list || []).forEach(function (m) {
+                    majorSel.add(new Option(m.major_name, m.major_id));
+                });
+                addOtherOption(majorSel);
+            });
+        }
+
+        document.addEventListener('change', function (e) {
+            if (!e.target) return;
+
+            if (e.target.id === 'university') {
+                var val = e.target.value;
+                var otherInput = document.getElementById('universityOther');
+                var useListBtn = document.getElementById('universityUseList');
+
+                if (val === 'other') {
+                    enableOtherMode(e.target, otherInput, useListBtn);
+                } else {
+                    enableListMode(e.target, otherInput, useListBtn);
+                    e.target.value = val;
+                }
+
+                loadCollegesByUniversity(val);
+            }
+
+            if (e.target.id === 'college') {
+                var collegeOther = document.getElementById('collegeOther');
+                var collegeUseList = document.getElementById('collegeUseList');
+                if (e.target.value === 'other') {
+                    enableOtherMode(e.target, collegeOther, collegeUseList);
+                } else {
+                    enableListMode(e.target, collegeOther, collegeUseList);
+                    e.target.value = e.target.value;
+                }
+            }
+
+            if (e.target.id === 'degreeLevel') {
+                var val = e.target.value;
+                var dlOther = document.getElementById('degreeLevelOther');
+                var dlUseList = document.getElementById('degreeLevelUseList');
+
+                if (val === 'other') {
+                    enableOtherMode(e.target, dlOther, dlUseList);
+                } else {
+                    enableListMode(e.target, dlOther, dlUseList);
+                    e.target.value = val;
+                }
+
+                loadDegreesByLevel(val);
+            }
+
+            if (e.target.id === 'degree') {
+                var val = e.target.value;
+                var dOther = document.getElementById('degreeOther');
+                var dUseList = document.getElementById('degreeUseList');
+
+                if (val === 'other') {
+                    enableOtherMode(e.target, dOther, dUseList);
+                } else {
+                    enableListMode(e.target, dOther, dUseList);
+                    e.target.value = val;
+                }
+
+                loadMajorsByDegree(val);
+            }
+
+            if (e.target.id === 'major') {
+                var mOther = document.getElementById('majorOther');
+                var mUseList = document.getElementById('majorUseList');
+                if (e.target.value === 'other') {
+                    enableOtherMode(e.target, mOther, mUseList);
+                } else {
+                    enableListMode(e.target, mOther, mUseList);
+                    e.target.value = e.target.value;
+                }
+            }
+        });
+
+        /* "Choose from list" buttons — restore only that field */
+        document.addEventListener('click', function (e) {
+            if (!e.target) return;
+
+            if (e.target.id === 'universityUseList') {
+                var uni = document.getElementById('university');
+                enableListMode(uni, document.getElementById('universityOther'), e.target);
+                loadCollegesByUniversity('');
+            }
+
+            if (e.target.id === 'collegeUseList') {
+                var college = document.getElementById('college');
+                enableListMode(college, document.getElementById('collegeOther'), e.target);
+                // Keep existing college options; just leave Other available
+                addOtherOption(college);
+            }
+
+            if (e.target.id === 'degreeLevelUseList') {
+                var dl = document.getElementById('degreeLevel');
+                enableListMode(dl, document.getElementById('degreeLevelOther'), e.target);
+                loadDegreesByLevel('');
+            }
+
+            if (e.target.id === 'degreeUseList') {
+                var degree = document.getElementById('degree');
+                enableListMode(degree, document.getElementById('degreeOther'), e.target);
+                loadMajorsByDegree('');
+                addOtherOption(degree);
+            }
+
+            if (e.target.id === 'majorUseList') {
+                var major = document.getElementById('major');
+                enableListMode(major, document.getElementById('majorOther'), e.target);
+                addOtherOption(major);
+            }
+        });
     </script>
 @endsection
 

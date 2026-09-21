@@ -49,6 +49,7 @@
     }
 
     /* Card Styles */
+    .opportunity-history-card,
     .internship-history-card {
         background: white;
         border-radius: 14px;
@@ -60,6 +61,7 @@
         display: flex;
         flex-direction: column;
     }
+    .opportunity-history-card:hover,
     .internship-history-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 30px rgba(36, 42, 98, 0.18);
@@ -208,6 +210,20 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if(auth()->guard('college')->check() || auth()->guard('college_staff')->check())
+    @component('admin.layout.partials.college-page-banner', [
+        'emoji' => '🕒',
+        'title' => 'College Marks History',
+        'subtitle' => 'View submitted college marks for completed opportunities.',
+        'illustration' => 'history',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Marks History'],
+        ],
+    ])
+        <span class="cards-count-badge" id="totalCount">{{ count($cards) }} Opportunity(s)</span>
+    @endcomponent
+    @else
     <!-- Page Header -->
     <div class="history-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -216,12 +232,13 @@
                     <i class="bx bx-history"></i> College Marks History
                 </h4>
                 <p style="color: rgba(255,255,255,0.7); margin: 5px 0 0 0; font-size: 14px;">
-                    View submitted college marks for completed internships
+                    View submitted college marks for completed programs
                 </p>
             </div>
             <span class="cards-count-badge" id="totalCount">{{ count($cards) }} Internship(s)</span>
         </div>
     </div>
+    @endif
 
     <!-- Filter Section -->
     <div class="filter-card">
@@ -302,8 +319,8 @@
         <div class="col-12">
             <div class="no-results-box">
                 <i class="bx bx-info-circle"></i>
-                <h5>No Completed Internships Found</h5>
-                <p>There are no internships with submitted college marks yet.</p>
+                <h5>No Completed Programs Found</h5>
+                <p>There are no opportunities with submitted college marks yet.</p>
             </div>
         </div>
         @endforelse
@@ -380,7 +397,7 @@ $(document).ready(function() {
             return;
         }
         $('#paginationWrapper').show();
-        $('#paginationInfo').text('Showing ' + showingFrom + ' – ' + showingTo + ' of ' + filteredCards.length + ' internships');
+        $('#paginationInfo').text('Showing ' + showingFrom + ' – ' + showingTo + ' of ' + filteredCards.length + ' opportunities');
 
         // Build page buttons
         let btns = '';

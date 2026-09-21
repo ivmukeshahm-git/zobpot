@@ -73,6 +73,35 @@
             overflow: hidden; word-break: break-word;
         }
 
+        /* ── SUBCATEGORY SLIDER (text only, no icon/image) ── */
+        .subcat-slider-wrapper { position: relative; margin: -8px 0 24px; padding: 0 38px; }
+        .subcat-slider-wrapper.no-arrows { padding: 0 4px; }
+        .subcat-slider-wrapper .slider-arrow { display: none; }
+        .subcat-slider-wrapper.has-overflow .slider-arrow { display: flex; }
+        .subcat-scroll {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding: 6px 4px 12px; scrollbar-width: none; scroll-behavior: smooth;
+        }
+        .subcat-scroll::-webkit-scrollbar { display: none; }
+        .subcat-item {
+            display: flex; align-items: center; justify-content: center;
+            min-width: 110px; max-width: 180px;
+            background: var(--white);
+            border: 1.5px solid var(--border); border-radius: 14px;
+            padding: 12px 14px; text-align: center;
+            text-decoration: none !important; color: var(--text) !important;
+            transition: all .22s ease; cursor: pointer; flex-shrink: 0;
+        }
+        .subcat-item:hover, .subcat-item.active {
+            border-color: var(--primary); background: var(--primary-light);
+            transform: translateY(-2px); box-shadow: var(--shadow-md);
+        }
+        .subcat-label {
+            font-size: 12px; font-weight: 700; line-height: 1.35; color: inherit;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; word-break: break-word;
+        }
+
         /* Slider arrows */
         .slider-arrow {
             position: absolute; top: 50%; transform: translateY(-60%);
@@ -107,6 +136,16 @@
             font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s;
         }
         .zp-search-btn:hover { background: var(--primary-d); }
+        .zp-reset-btn {
+            background: var(--white); color: var(--primary);
+            border: 1.5px solid var(--primary); border-radius: 10px;
+            padding: 9px 20px; font-size: 13px; font-weight: 700;
+            cursor: pointer; white-space: nowrap; text-decoration: none !important;
+            transition: all .2s; display: inline-flex; align-items: center;
+        }
+        .zp-reset-btn:hover {
+            background: var(--primary-light); color: var(--primary);
+        }
 
         /* ── FILTER BAR ── */
         .filter-bar {
@@ -308,6 +347,8 @@
             .filter-bar::-webkit-scrollbar { display: none; }
             .cat-item { min-width: 95px; padding: 12px 8px; }
             .cat-slider-wrapper { padding: 0 30px; }
+            .subcat-slider-wrapper { padding: 0 30px; }
+            .subcat-item { min-width: 90px; padding: 10px 12px; }
         }
     </style>
 
@@ -317,8 +358,15 @@
 
                 {{-- ── PAGE HEADER ── --}}
                 <div class="page-header">
-                    <h1 class="page-heading">{{ $internships->total() }} Internships in India for Students</h1>
-                    <p class="page-subheading">Latest internships and opportunities in India.</p>
+                    <h1 class="page-heading">
+                        {{ $internships->total() }} Skill Based Internship Available
+                        @if(request('location'))
+                            In {{ request('location') }}
+                        @elseif(request('search'))
+                            In {{ request('search') }}
+                        @endif
+                    </h1>
+                    <p class="page-subheading">From Classroom Knowledge to Career-Ready Skills.</p>
                 </div>
 
                 {{-- ── CATEGORY SLIDER WITH ARROWS ── --}}
@@ -330,7 +378,7 @@
                                 $isActive = request('category') == $cat->category_id;
                             @endphp
                             <a class="cat-item {{ $isActive ? 'active' : '' }}"
-                               href="{{ route('internship') }}?category={{ $cat->category_id }}"
+                               href="{{ route('internship', array_filter(['category' => $cat->category_id, 'mode' => request('mode'), 'search' => request('search'), 'sort_by' => request('sort_by'), 'education' => request('education')])) }}"
                                data-category-id="{{ $cat->category_id }}">
                                 <div class="cat-icon">
                                     @if(!empty($cat->image) && file_exists(public_path('uploads/category_img/' . $cat->image)))
@@ -348,12 +396,62 @@
                     <button class="slider-arrow next" id="sliderNext" aria-label="Next">&#8250;</button>
                 </div>
 
+                {{-- ── SUBCATEGORY SLIDER (shown when category selected) ── --}}
+                @if(request('category'))
+                    <div class="subcat-slider-wrapper no-arrows" id="subcatSliderWrapper">
+                        <button class="slider-arrow prev" id="subSliderPrev" aria-label="Previous" type="button">&#8249;</button>
+                        <div class="subcat-scroll" id="subCatScroll">
+                            @php
+                                $subAllActive = !request('sub_category');
+                                $subBaseParams = array_filter([
+                                    'category' => request('category'),
+                                    'mode' => request('mode'),
+                                    'search' => request('search'),
+                                    'sort_by' => request('sort_by'),
+                                    'education' => request('education'),
+                                ]);
+                            @endphp
+                            <a class="subcat-item {{ $subAllActive ? 'active' : '' }}"
+                               href="{{ route('internship', $subBaseParams) }}">
+                                <span class="subcat-label">All</span>
+                            </a>
+                            @foreach($subCategories as $subCat)
+                                @php
+                                    $isSubActive = (string) request('sub_category') === (string) $subCat->sub_category_id;
+                                @endphp
+                                <a class="subcat-item {{ $isSubActive ? 'active' : '' }}"
+                                   href="{{ route('internship', array_merge($subBaseParams, ['sub_category' => $subCat->sub_category_id])) }}"
+                                   data-sub-category-id="{{ $subCat->sub_category_id }}">
+                                    <span class="subcat-label">{{ $subCat->sub_category_nm }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                        <button class="slider-arrow next" id="subSliderNext" aria-label="Next" type="button">&#8250;</button>
+                    </div>
+                @endif
+
                 {{-- ── SEARCH BOX ── --}}
                 <div class="zp-search-box">
                     <i class="fa fa-search"></i>
                     <form action="{{ route('internship') }}" method="GET" style="display:flex;flex:1;align-items:center;gap:10px;">
+                        @if(request('category'))
+                            <input type="hidden" name="category" value="{{ request('category') }}">
+                        @endif
+                        @if(request('sub_category'))
+                            <input type="hidden" name="sub_category" value="{{ request('sub_category') }}">
+                        @endif
+                        @if(request('mode'))
+                            <input type="hidden" name="mode" value="{{ request('mode') }}">
+                        @endif
+                        @if(request('sort_by'))
+                            <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+                        @endif
+                        @if(request('education'))
+                            <input type="hidden" name="education" value="{{ request('education') }}">
+                        @endif
                         <input type="text" name="search" placeholder="Search by title, skills, or location..." value="{{ request('search') }}">
                         <button type="submit" class="zp-search-btn">Search</button>
+                        <a href="{{ route('internship') }}" class="zp-reset-btn">Reset</a>
                     </form>
                 </div>
 
@@ -364,7 +462,9 @@
                     @php
                         $activeCount = (request('mode') ? 1 : 0)
                                      + (request('category') ? 1 : 0)
+                                     + (request('sub_category') ? 1 : 0)
                                      + (request('search') ? 1 : 0)
+                                     + (request('education') ? 1 : 0)
                                      + (request('near_lat') ? 1 : 0);
                     @endphp
                     <button class="filter-pill {{ $activeCount > 0 ? 'active' : '' }}" onclick="clearAllFilters()">
@@ -374,18 +474,21 @@
                         @endif
                     </button>
 
-                    {{-- Type dropdown --}}
+                    {{-- Mode dropdown --}}
                     <div class="filter-dropdown" id="dd-type">
                         <button class="filter-pill {{ request('mode') ? 'active' : '' }}" onclick="toggleDropdown('dd-type')">
                             @if(request('mode') == 'Online') Work from Home
                             @elseif(request('mode') == 'Offline') In Office
+                            @elseif(request('mode') == 'Weekly') Weekly Internship
+                            @elseif(request('mode') == 'Part Time') Part Time Internship
+                            @elseif(request('mode') == 'Full Time') Full Time Internship
                             @elseif(request('mode')) {{ request('mode') }}
-                            @else Type
+                            @else Mode
                             @endif
                             <i class="fa fa-chevron-down"></i>
                         </button>
                         <div class="filter-dropdown-menu">
-                            <div class="filter-dropdown-item {{ !request('mode') ? 'active' : '' }}" onclick="filterByMode('')">All Types</div>
+                            <div class="filter-dropdown-item {{ !request('mode') ? 'active' : '' }}" onclick="filterByMode('')">All Modes</div>
                             <div class="filter-dropdown-item {{ request('mode')=='Online' ? 'active' : '' }}" onclick="filterByMode('Online')">
                                 <i class="fa fa-home"></i> Work from Home
                             </div>
@@ -394,6 +497,15 @@
                             </div>
                             <div class="filter-dropdown-item {{ request('mode')=='Hybrid' ? 'active' : '' }}" onclick="filterByMode('Hybrid')">
                                 <i class="fa fa-exchange"></i> Hybrid
+                            </div>
+                            <div class="filter-dropdown-item {{ request('mode')=='Weekly' ? 'active' : '' }}" onclick="filterByMode('Weekly')">
+                                <i class="fa fa-calendar-check-o"></i> Weekly Internship
+                            </div>
+                            <div class="filter-dropdown-item {{ request('mode')=='Part Time' ? 'active' : '' }}" onclick="filterByMode('Part Time')">
+                                <i class="fa fa-clock-o"></i> Part Time Internship
+                            </div>
+                            <div class="filter-dropdown-item {{ request('mode')=='Full Time' ? 'active' : '' }}" onclick="filterByMode('Full Time')">
+                                <i class="fa fa-briefcase"></i> Full Time Internship
                             </div>
                         </div>
                     </div>
@@ -437,6 +549,25 @@
                         </div>
                     </div>
 
+                    {{-- Education / Eligibility dropdown --}}
+                    <div class="filter-dropdown" id="dd-education">
+                        <button class="filter-pill {{ request('education') ? 'active' : '' }}" onclick="toggleDropdown('dd-education')">
+                            {{ request('education') ? \Illuminate\Support\Str::limit(request('education'), 22) : 'Education' }}
+                            <i class="fa fa-chevron-down"></i>
+                        </button>
+                        <div class="filter-dropdown-menu">
+                            <div class="filter-dropdown-item {{ !request('education') ? 'active' : '' }}" onclick="filterByEducation('')">All Education</div>
+                            @forelse(($eligibilityOptions ?? []) as $eligibility)
+                                <div class="filter-dropdown-item {{ request('education') == $eligibility ? 'active' : '' }}"
+                                     onclick="filterByEducation({{ json_encode($eligibility) }})">
+                                    {{ $eligibility }}
+                                </div>
+                            @empty
+                                <div class="filter-dropdown-item" style="cursor:default;color:#9ca3af;">No eligibility found</div>
+                            @endforelse
+                        </div>
+                    </div>
+
                 </div>{{-- /filter-bar --}}
 
                 <div class="row">
@@ -464,8 +595,15 @@
                                     $companyName     = $item->company ? $item->company->name : 'Company';
                                     $companyInitials = strtoupper(substr($companyName, 0, 2));
                                     $isWishlisted    = in_array($item->id, $wishlistIds ?? []);
-                                    $modeLabel       = $item->mode == 'Online' ? 'Work from Home'
-                                                      : ($item->mode == 'Offline' ? 'In Office' : $item->mode);
+                                    $modeLabels = [
+                                        'Online' => 'Work from Home',
+                                        'Offline' => 'In Office',
+                                        'Hybrid' => 'Hybrid',
+                                        'Weekly' => 'Weekly Internship',
+                                        'Part Time' => 'Part Time Internship',
+                                        'Full Time' => 'Full Time Internship',
+                                    ];
+                                    $modeLabel = $modeLabels[$item->mode] ?? $item->mode;
                                 @endphp
 
                                 <div class="job-card"
@@ -506,10 +644,14 @@
                                                 @if($item->jobCategory)
                                                     <span class="job-tag">{{ \Illuminate\Support\Str::limit($item->jobCategory->category_nm, 22) }}</span>
                                                 @endif
-                                                <span class="job-tag">{{ $modeLabel }}</span>
                                                 @if($item->stipend > 0)
                                                     <span class="job-tag" style="color:var(--success);border-color:#bbf7d0;background:#f0fdf4;">
-                                                        ₹{{ number_format($item->stipend) }}/mo
+                                                        Stipend ₹{{ number_format($item->stipend) }}/Month
+                                                    </span>
+                                                @endif
+                                                @if((float) ($item->registration_fees ?? 0) > 0)
+                                                    <span class="job-tag" style="color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;">
+                                                        Course Fee ₹{{ number_format((float) $item->registration_fees) }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -572,7 +714,7 @@
                         @else
                             <div class="empty-state">
                                 <i class="fa fa-search"></i>
-                                <p>No internships found matching your criteria.<br>
+                                <p>No Internships found matching your criteria.<br>
                                    Try adjusting filters or search terms.</p>
                             </div>
                         @endif
@@ -639,6 +781,48 @@
             }
         })();
 
+        /* ── Subcategory Slider Arrows (only when content overflows) ── */
+        (function () {
+            const wrapper = document.getElementById('subcatSliderWrapper');
+            const scroll  = document.getElementById('subCatScroll');
+            const prev    = document.getElementById('subSliderPrev');
+            const next    = document.getElementById('subSliderNext');
+            if (!wrapper || !scroll) return;
+
+            const step = 220;
+
+            function updateSubcatArrows() {
+                const hasOverflow = scroll.scrollWidth > (scroll.clientWidth + 2);
+                wrapper.classList.toggle('has-overflow', hasOverflow);
+                wrapper.classList.toggle('no-arrows', !hasOverflow);
+                if (!hasOverflow) return;
+
+                const atStart = scroll.scrollLeft <= 2;
+                const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 2;
+                if (prev) prev.style.opacity = atStart ? '0.35' : '1';
+                if (next) next.style.opacity = atEnd ? '0.35' : '1';
+            }
+
+            if (prev) prev.addEventListener('click', function () {
+                scroll.scrollBy({ left: -step, behavior: 'smooth' });
+            });
+            if (next) next.addEventListener('click', function () {
+                scroll.scrollBy({ left: step, behavior: 'smooth' });
+            });
+
+            scroll.addEventListener('scroll', updateSubcatArrows);
+            window.addEventListener('resize', updateSubcatArrows);
+
+            const activeItem = document.querySelector('.subcat-item.active');
+            if (activeItem) {
+                scroll.scrollTo({ left: Math.max(0, activeItem.offsetLeft - 60), behavior: 'smooth' });
+            }
+
+            // After layout / fonts
+            setTimeout(updateSubcatArrows, 0);
+            setTimeout(updateSubcatArrows, 150);
+        })();
+
         /* ── Filter Dropdowns ── */
         function toggleDropdown(id) {
             document.querySelectorAll('.filter-dropdown').forEach(d => {
@@ -663,12 +847,25 @@
         function filterByCategory(cat) {
             const url = new URL(window.location.href);
             cat ? url.searchParams.set('category', cat) : url.searchParams.delete('category');
+            url.searchParams.delete('sub_category');
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+        function filterBySubCategory(subCat) {
+            const url = new URL(window.location.href);
+            subCat ? url.searchParams.set('sub_category', subCat) : url.searchParams.delete('sub_category');
             url.searchParams.delete('page');
             window.location.href = url.toString();
         }
         function sortBy(val) {
             const url = new URL(window.location.href);
             val ? url.searchParams.set('sort_by', val) : url.searchParams.delete('sort_by');
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+        function filterByEducation(val) {
+            const url = new URL(window.location.href);
+            val ? url.searchParams.set('education', val) : url.searchParams.delete('education');
             url.searchParams.delete('page');
             window.location.href = url.toString();
         }
@@ -711,7 +908,7 @@
         function shareInternship(slug) {
             const url = '{{ url("/internship-detail") }}/' + slug;
             if (navigator.share) {
-                navigator.share({ title: 'Internship Opportunity', url }).catch(() => {});
+                navigator.share({ title: 'Internship Internship', url }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
             }
@@ -720,7 +917,7 @@
         /* ── Wishlist Toggle ── */
         function toggleWishlist(id) {
             @guest
-                alert('Please login to save internships');
+                alert('Please login to save Internships');
                 window.location.href = '{{ route("login") }}';
                 return;
             @endguest

@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col-lg-6">
                     <h5 class="card-title">Assigned Internships (Super Admin)</h5>
-                    <p class="text-muted">This page shows internship applications that have been assigned to staff.</p>
+                    <p class="text-muted">This page shows candidate applications that have been assigned to staff.</p>
                 </div>
             </div>
         </div>
@@ -18,7 +18,7 @@
                     <tr>
                         <th>Sr. NO.</th>
                         <th>Student Name</th>
-                        <th>Internship</th>
+                        <th>Opportunity</th>
                         <th>Assigned To</th>
                         <th>Assigned Date</th>
                         <th>Action</th>

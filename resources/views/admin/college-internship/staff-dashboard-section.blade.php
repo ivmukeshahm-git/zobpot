@@ -1,6 +1,6 @@
-{{-- College Staff Internship Dashboard Section – included in admin/index for Staff with college_id --}}
+{{-- College Staff Opportunity Dashboard Section – included in admin/index for Staff with college_id --}}
 <style>
-    .staff-internship-section { margin-top: 30px; }
+    .staff-opportunity-section { margin-top: 30px; }
     .staff-section-card {
         /* background: #fff; border-radius: 12px; border: 2px solid #242a62; */
         overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08);
@@ -16,7 +16,7 @@
     <div class="staff-section-card">
         <div class="staff-section-header">
             <i class="bx bx-briefcase-alt-2" style="font-size:24px;"></i>
-            <h5>My Assigned Internships</h5>
+            <h5>My Assigned Opportunities</h5>
         </div>
         <div style="padding: 25px;">
             <div class="table-responsive">
@@ -24,7 +24,7 @@
                     <thead >
                         <tr>
                             <th>Sr. No</th>
-                            <th>Internship Title</th>
+                            <th>Opportunity Title</th>
                             <th>Company</th>
                             <th>Duration</th>
                             <th>Category</th>
@@ -65,7 +65,7 @@ $(function(){
             { data: 'action', orderable: false, searchable: false }
         ],
         order: [[1,'asc']],
-        language: { emptyTable: "No internships assigned to you yet." }
+        language: { emptyTable: "No opportunities assigned to you yet." }
     });
 });
 </script>

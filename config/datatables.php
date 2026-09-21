@@ -1,127 +1,160 @@
 <?php
 
+use Illuminate\Support\Str;
+
 return [
+
     /*
-     * DataTables search options.
-     */
-    'search' => [
-        /*
-         * Smart search will enclose search keyword with wildcard string "%keyword%".
-         * SQL: column LIKE "%keyword%"
-         */
-        'smart' => true,
+    |--------------------------------------------------------------------------
+    | Default Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which of the database connections below you wish
+    | to use as your default connection for all database work. Of course
+    | you may use many connections at once using the Database library.
+    |
+    */
 
-        /*
-         * Multi-term search will explode search keyword using spaces resulting into multiple term search.
-         */
-        'multi_term' => true,
+    'default' => env('DB_CONNECTION', 'mysql'),
 
-        /*
-         * Case insensitive will search the keyword in lower case format.
-         * SQL: LOWER(column) LIKE LOWER(keyword)
-         */
-        'case_insensitive' => true,
+    /*
+    |--------------------------------------------------------------------------
+    | Database Connections
+    |--------------------------------------------------------------------------
+    |
+    | Here are each of the database connections setup for your application.
+    | Of course, examples of configuring each database platform that is
+    | supported by Laravel is shown below to make development simple.
+    |
+    |
+    | All database work in Laravel is done through the PHP PDO facilities
+    | so make sure you have the driver for your particular database of
+    | choice installed on your machine before you begin development.
+    |
+    */
 
-        /*
-         * Wild card will add "%" in between every characters of the keyword.
-         * SQL: column LIKE "%k%e%y%w%o%r%d%"
-         */
-        'use_wildcards' => false,
+    'connections' => [
 
-        /*
-         * Perform a search which starts with the given keyword.
-         * SQL: column LIKE "keyword%"
-         */
-        'starts_with' => false,
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'url' => env('DATABASE_URL'),
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+        ],
+
+        'mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            /*
+             | Hostinger (and some shared hosts) rate-limit NEW MySQL connections.
+             | Random SQLSTATE[HY000][2002] Operation not permitted is fixed by
+             | reusing persistent PDO connections. Set DB_PERSISTENT=true in .env.
+             */
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => filter_var(
+                    env('DB_PERSISTENT', env('APP_ENV') === 'production'),
+                    FILTER_VALIDATE_BOOLEAN
+                ) ? true : null,
+            ]) : [],
+        ],
+
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
+        'sqlsrv' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
     ],
 
     /*
-     * DataTables internal index id response column name.
-     */
-    'index_column' => 'DT_RowIndex',
+    |--------------------------------------------------------------------------
+    | Migration Repository Table
+    |--------------------------------------------------------------------------
+    |
+    | This table keeps track of all the migrations that have already run for
+    | your application. Using this information, we can determine which of
+    | the migrations on disk haven't actually been run in the database.
+    |
+    */
+
+    'migrations' => 'migrations',
 
     /*
-     * List of available builders for DataTables.
-     * This is where you can register your custom dataTables builder.
-     */
-    'engines' => [
-        'eloquent' => Yajra\DataTables\EloquentDataTable::class,
-        'query' => Yajra\DataTables\QueryDataTable::class,
-        'collection' => Yajra\DataTables\CollectionDataTable::class,
-        'resource' => Yajra\DataTables\ApiResourceDataTable::class,
+    |--------------------------------------------------------------------------
+    | Redis Databases
+    |--------------------------------------------------------------------------
+    |
+    | Redis is an open source, fast, and advanced key-value store that also
+    | provides a richer body of commands than a typical key-value system
+    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    |
+    */
+
+    'redis' => [
+
+        'client' => env('REDIS_CLIENT', 'phpredis'),
+
+        'options' => [
+            'cluster' => env('REDIS_CLUSTER', 'redis'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+        ],
+
+        'default' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_DB', '0'),
+        ],
+
+        'cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_CACHE_DB', '1'),
+        ],
+
     ],
 
-    /*
-     * DataTables accepted builder to engine mapping.
-     * This is where you can override which engine a builder should use
-     * Note, only change this if you know what you are doing!
-     */
-    'builders' => [
-        //Illuminate\Database\Eloquent\Relations\Relation::class => 'eloquent',
-        //Illuminate\Database\Eloquent\Builder::class            => 'eloquent',
-        //Illuminate\Database\Query\Builder::class               => 'query',
-        //Illuminate\Support\Collection::class                   => 'collection',
-    ],
-
-    /*
-     * Nulls last sql pattern for PostgreSQL & Oracle.
-     * For MySQL, use 'CASE WHEN :column IS NULL THEN 1 ELSE 0 END, :column :direction'
-     */
-    'nulls_last_sql' => ':column :direction NULLS LAST',
-
-    /*
-     * User friendly message to be displayed on user if error occurs.
-     * Possible values:
-     * null             - The exception message will be used on error response.
-     * 'throw'          - Throws a \Yajra\DataTables\Exceptions\Exception. Use your custom error handler if needed.
-     * 'custom message' - Any friendly message to be displayed to the user. You can also use translation key.
-     */
-    'error' => env('DATATABLES_ERROR', null),
-
-    /*
-     * Default columns definition of dataTable utility functions.
-     */
-    'columns' => [
-        /*
-         * List of columns hidden/removed on json response.
-         */
-        'excess' => ['rn', 'row_num'],
-
-        /*
-         * List of columns to be escaped. If set to *, all columns are escape.
-         * Note: You can set the value to empty array to disable XSS protection.
-         */
-        'escape' => '*',
-
-        /*
-         * List of columns that are allowed to display html content.
-         * Note: Adding columns to list will make us available to XSS attacks.
-         */
-        'raw' => ['action'],
-
-        /*
-         * List of columns are forbidden from being searched/sorted.
-         */
-        'blacklist' => ['password', 'remember_token'],
-
-        /*
-         * List of columns that are only allowed fo search/sort.
-         * If set to *, all columns are allowed.
-         */
-        'whitelist' => '*',
-    ],
-
-    /*
-     * JsonResponse header and options config.
-     */
-    'json' => [
-        'header' => [],
-        'options' => 0,
-    ],
-
-    /*
-     * Default condition to determine if a parameter is a callback or not.
-     * Callbacks needs to start by those terms, or they will be cast to string.
-     */
-    'callback' => ['$', '$.', 'function'],
 ];

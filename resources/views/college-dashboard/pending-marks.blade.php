@@ -5,7 +5,7 @@
 
     <div class="d-flex align-items-center mb-4">
         <h4 class="fw-bold mb-0" style="color:#242a62;">
-            <i class="bx bx-time me-2" style="color:#FFC107;"></i> Pending Marks — Internships Awaiting College Evaluation
+            <i class="bx bx-time me-2" style="color:#FFC107;"></i> Pending Marks — Opportunities Awaiting College Evaluation
         </h4>
         <a href="{{ route('admin.college.dashboard') }}" class="btn btn-sm btn-secondary ms-auto">
             <i class="bx bx-arrow-back"></i> Back to Dashboard
@@ -15,7 +15,7 @@
     <div class="card">
         <div class="card-header p-4">
             <h5 class="card-title mb-0">
-                <i class="bx bx-list-ul"></i> Internships Flagged for College Marks Entry
+                <i class="bx bx-list-ul"></i> Opportunities Flagged for College Marks Entry
             </h5>
         </div>
         <hr class="my-1">
@@ -24,7 +24,7 @@
                 <thead>
                     <tr>
                         <th>Sr. No.</th>
-                        <th>Internship Title</th>
+                        <th>Opportunity Title</th>
                         <th>Company</th>
                         <th>Duration</th>
                         <th>Start Date</th>
@@ -64,7 +64,7 @@ $(function(){
         ],
         order: [[4, 'asc']],
         pageLength: 25,
-        language: { emptyTable: "No internships are currently flagged for college marks entry." }
+        language: { emptyTable: "No opportunities are currently flagged for college marks entry." }
     });
 });
 </script>

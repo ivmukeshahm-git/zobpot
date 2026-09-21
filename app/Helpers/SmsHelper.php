@@ -30,22 +30,22 @@ class SmsHelper
         // $message = "Your www.zobpot.com registration verification code is " . $otp . " Team Zobpot";
 
 
-        $response = Http::withOptions([
-            'verify' => false, // disable SSL verification
-        ])->get("https://bulksms.ivinfotech.in/api/smsapi", [
-                    'key' => $apiKey,
-                    'route' => $route,
-                    'sender' => $sender,
-                    'number' => $number,
-                    'sms' => $message,
-                    'templateid' => $templateId,
-                ]);
-        file_put_contents(
-            storage_path('logs/custom-log.log'),
-            print_r($response->json(), true) . "Your log text here" . PHP_EOL,
-            FILE_APPEND
-        );
-        return $response->json(); // or ->body() depending on API response
+        try {
+            $response = Http::withOptions([
+                'verify' => false, // disable SSL verification
+            ])->timeout(5)->get("https://bulksms.ivinfotech.in/api/smsapi", [
+                'key' => $apiKey,
+                'route' => $route,
+                'sender' => $sender,
+                'number' => $number,
+                'sms' => $message,
+                'templateid' => $templateId,
+            ]);
+            return $response->json();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SMS sending failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public static function PaymentGateway()

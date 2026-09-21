@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use App\Models\Internship;
 use App\Models\User;
 use App\Models\JobCategory;
+use App\Models\Jobsubcategory;
+use App\Models\CategorySubcategoryRequest;
 use App\Models\InternshipTask;
 use App\Models\InternshipApplication;
 use App\Models\InternshipMark;
@@ -145,16 +147,18 @@ class InternshipController extends Controller
         $validator = Validator::make($request->all(), [
             'internship_title' => 'required|string|max:255',
             'category_id' => 'required|integer',
+            'sub_category_id' => 'required|array|min:1',
+            'sub_category_id.*' => 'integer|exists:tbl_sub_category,sub_category_id',
             'company_id' => 'required|integer',
             'company_website' => 'nullable|url|max:255',
-            'internship_mode' => 'required|in:Online,Offline,Hybrid',
+            'internship_mode' => 'required|in:Online,Offline,Hybrid,Weekly,Part Time,Full Time',
             'location' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
             'weeks' => 'required|integer|min:1',
             'hours' => 'required|integer|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'application_deadline' => 'required|date',
+            'application_deadline' => 'required|date|after_or_equal:today|before_or_equal:start_date',
             'batch_days' => 'nullable|array',
             'stipend' => 'nullable|numeric|min:0',
             'openings' => 'required|integer|min:1',
@@ -189,6 +193,7 @@ class InternshipController extends Controller
                 'internship_title' => $request->internship_title,
                 'slug' => $slug,
                 'category' => $request->category_id,
+                'sub_categories' => array_values(array_filter(array_map('intval', (array) $request->input('sub_category_id', [])))),
                 'company_id' => $request->company_id,
                 'company_website' => $request->company_website,
                 'mode' => $request->internship_mode,
@@ -202,8 +207,8 @@ class InternshipController extends Controller
                 'openings' => $request->openings,
                 'application_deadline' => $request->application_deadline,
                 'batch_days' => $request->batch_days ?? [],
-                'skills' => $request->required_skills,
-                'eligibility_criteria' => $request->required_eligibility_criteria,
+                'skills' => $this->normalizeTagList($request->required_skills),
+                'eligibility_criteria' => $this->normalizeTagList($request->required_eligibility_criteria),
                 'perks' => $request->perks ?? [],
                 'internship_description' => $request->internship_description,
                 'module_brief_description' => $request->module_description,
@@ -545,12 +550,110 @@ class InternshipController extends Controller
         try {
             $internship = Internship::with(['company', 'jobCategory'])->findOrFail($id);
 
+            // Resolve subcategory names
+            $subCategoryIds = is_array($internship->sub_categories) ? array_map('intval', $internship->sub_categories) : [];
+            $subCategoryNames = [];
+            $subcategoryIsRequested = false;
+            if (!empty($subCategoryIds)) {
+                $subCategoryNames = Jobsubcategory::whereIn('sub_category_id', $subCategoryIds)
+                    ->pluck('sub_category_nm')
+                    ->toArray();
+            }
+
+            // Resolve category name
+            $categoryName = $internship->jobCategory ? $internship->jobCategory->category_nm : null;
+            $categoryIsRequested = false;
+
+            // Fall back to requested (Other) category/subcategory names from requests table
+            $categoryRequest = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                ->where('request_type', 'category')
+                ->orderByDesc('id')
+                ->first();
+
+            if (!$categoryName && $categoryRequest) {
+                $categoryName = $categoryRequest->requested_name;
+                $categoryIsRequested = true;
+            }
+
+            if (empty($subCategoryNames)) {
+                $requestedSubNames = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                    ->where('request_type', 'subcategory')
+                    ->orderByDesc('id')
+                    ->pluck('requested_name')
+                    ->toArray();
+                if (!empty($requestedSubNames)) {
+                    $subCategoryNames = $requestedSubNames;
+                    $subcategoryIsRequested = true;
+                }
+            }
+
+            // Approval checks — category/subcategory must exist in master tables
+            $categoryApproved = $internship->category > 0
+                && $internship->jobCategory
+                && JobCategory::where('category_id', $internship->category)->exists();
+
+            $existingSubIds = !empty($subCategoryIds)
+                ? Jobsubcategory::whereIn('sub_category_id', $subCategoryIds)->pluck('sub_category_id')->map(fn ($v) => (int) $v)->toArray()
+                : [];
+            $subcategoriesApproved = !empty($subCategoryIds)
+                && count(array_diff($subCategoryIds, $existingSubIds)) === 0;
+
+            // Related subcategory request statuses for this internship
+            $subcategoryRequestStatus = null;
+            $subcategoryRequests = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                ->where('request_type', 'subcategory')
+                ->orderByDesc('id')
+                ->get();
+            if ($subcategoryRequests->isNotEmpty()) {
+                if ($subcategoryRequests->contains(fn ($r) => $r->status == CategorySubcategoryRequest::STATUS_REJECTED)) {
+                    $subcategoryRequestStatus = 'rejected';
+                } elseif ($subcategoryRequests->contains(fn ($r) => $r->status == CategorySubcategoryRequest::STATUS_PENDING)) {
+                    $subcategoryRequestStatus = 'pending';
+                } else {
+                    $subcategoryRequestStatus = 'approved';
+                }
+            }
+
+            // Request status for category
+            $categoryRequestStatus = null;
+            if ($categoryRequest) {
+                $categoryRequestStatus = $categoryRequest->status == CategorySubcategoryRequest::STATUS_PENDING
+                    ? 'pending'
+                    : ($categoryRequest->status == CategorySubcategoryRequest::STATUS_APPROVED ? 'approved' : 'rejected');
+            }
+
+            // Master lists for admin re-selection (used when requests were rejected)
+            $categories = JobCategory::orderBy('category_nm', 'asc')
+                ->get(['category_id', 'category_nm'])
+                ->map(fn ($c) => ['id' => $c->category_id, 'name' => $c->category_nm]);
+
+            $subcategories = Jobsubcategory::orderBy('sub_category_nm', 'asc')
+                ->get(['sub_category_id', 'category_id', 'sub_category_nm'])
+                ->map(fn ($s) => [
+                    'id' => $s->sub_category_id,
+                    'category_id' => $s->category_id,
+                    'name' => $s->sub_category_nm,
+                ]);
+
             return response()->json([
                 'success' => true,
                 'data' => [
                     'id' => $internship->id,
                     'internship_title' => $internship->internship_title,
-                    'category_name' => $internship->jobCategory ? $internship->jobCategory->category_nm : 'N/A',
+                    'category_name' => $categoryName
+                        ? $categoryName . ($categoryIsRequested ? ' (Requested)' : '')
+                        : 'N/A',
+                    'category_id' => (int) $internship->category,
+                    'subcategory_names' => !empty($subCategoryNames)
+                        ? implode(', ', $subCategoryNames) . ($subcategoryIsRequested ? ' (Requested)' : '')
+                        : 'N/A',
+                    'sub_categories' => $subCategoryIds,
+                    'category_approved' => $categoryApproved,
+                    'subcategories_approved' => $subcategoriesApproved,
+                    'category_request_status' => $categoryRequestStatus,
+                    'subcategory_request_status' => $subcategoryRequestStatus,
+                    'categories' => $categories,
+                    'subcategories' => $subcategories,
                     'company_name' => $internship->company ? $internship->company->name : 'N/A',
                     'company_website' => $internship->company_website,
                     'mode' => $internship->mode,
@@ -563,6 +666,7 @@ class InternshipController extends Controller
                     'formatted_start_date' => $internship->start_date ? $internship->start_date->format('M d, Y') : 'N/A',
                     'formatted_end_date' => $internship->end_date ? $internship->end_date->format('M d, Y') : 'N/A',
                     'formatted_deadline' => $internship->application_deadline ? $internship->application_deadline->format('M d, Y') : 'N/A',
+                    'application_deadline' => $internship->application_deadline ? $internship->application_deadline->format('Y-m-d') : null,
                     'stipend' => $internship->stipend,
                     'openings' => $internship->openings,
                     'batch_days' => $internship->batch_days,
@@ -573,9 +677,20 @@ class InternshipController extends Controller
                     'internship_objective' => $internship->internship_objective,
                     'internship_outcome' => $internship->internship_outcome,
                     'registration_fees' => $internship->registration_fees,
+                    'late_registration_fee' => $internship->late_registration_fee ?? 0,
+                    'last_registration_date' => $internship->last_registration_date
+                        ? $internship->last_registration_date->format('Y-m-d')
+                        : null,
+                    'late_register_last_date' => $internship->last_registration_date
+                        ? $internship->last_registration_date->format('Y-m-d')
+                        : null,
+                    'formatted_last_registration_date' => $internship->last_registration_date
+                        ? $internship->last_registration_date->format('M d, Y')
+                        : 'N/A',
                     'gst_percentage' => $internship->gst_percentage,
                     'gst_amount' => $internship->gst_amount,
                     'final_amount' => $internship->final_amount,
+                    'payment_preview' => app(\App\Services\InternshipPaymentService::class)->calculatePayment($internship),
                 ]
             ]);
         } catch (\Exception $e) {
@@ -632,8 +747,9 @@ class InternshipController extends Controller
                 ->addColumn('action', function ($row) use ($internshipType, $companyCompleted, $collegeCompleted) {
                     $userId = $row->user ? $row->user->id : null;
                     $url = $userId ? url('admin/candidate-profile/' . $userId) : '#';
-                    $buttons = '<div class="d-flex flex-wrap gap-1">'
-                        . '<a href="' . $url . '" class="btn btn-sm btn-info">View</a>';
+                    $buttons = '<div class="d-flex flex-wrap gap-1 justify-content-center align-items-center">'
+                        . '<a href="' . $url . '" class="btn btn-sm btn-view-profile" title="View Profile" target="_blank">'
+                        . '<i class="bx bx-show"></i></a>';
 
                     if ($companyCompleted) {
                         $companyUrl = route('admin.internship.certificate.preview', [
@@ -641,7 +757,7 @@ class InternshipController extends Controller
                             'type' => 'company',
                         ]);
                         $buttons .= '<a href="' . $companyUrl . '" class="btn btn-sm btn-success" target="_blank" title="Company Certificate">'
-                            . '<i class="bx bx-certification"></i> Company Certificate</a>';
+                            . '<i class="bx bx-certification"></i></a>';
                     }
 
                     if ($collegeCompleted && $internshipType === 1) {
@@ -650,13 +766,25 @@ class InternshipController extends Controller
                             'type' => 'college',
                         ]);
                         $buttons .= '<a href="' . $collegeUrl . '" class="btn btn-sm btn-warning" target="_blank" title="College Certificate">'
-                            . '<i class="bx bx-certification"></i> College Certificate</a>';
+                            . '<i class="bx bx-certification"></i></a>';
                     }
 
                     $buttons .= '</div>';
                     return $buttons;
                 })
                 ->rawColumns(['action'])
+                ->only([
+                    'DT_RowIndex',
+                    'student_name',
+                    'email',
+                    'phone',
+                    'university_name',
+                    'college_name',
+                    'degree_name',
+                    'semester',
+                    'enrollment_date',
+                    'action',
+                ])
                 ->make(true);
         }
 
@@ -674,11 +802,16 @@ class InternshipController extends Controller
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date|after_or_equal:start_date',
                 'registration_fees' => 'nullable|numeric|min:0',
+                'last_registration_date' => 'nullable|date|before_or_equal:start_date',
+                'late_registration_fee' => 'nullable|numeric|min:0',
                 'gst_percentage' => 'nullable|numeric|min:0|max:100',
                 'gst_amount' => 'nullable|numeric|min:0',
                 'final_amount' => 'nullable|numeric|min:0',
                 'manage_task_status' => 'nullable|boolean',
                 'internship_type' => 'required|integer|in:1,2',
+                'category_id' => 'nullable|integer|exists:tbl_job_category,category_id',
+                'sub_category_ids' => 'nullable|array',
+                'sub_category_ids.*' => 'integer|exists:tbl_sub_category,sub_category_id',
             ]);
 
             if ($validator->fails()) {
@@ -690,7 +823,50 @@ class InternshipController extends Controller
             }
 
             $internship = Internship::findOrFail($id);
-            
+
+            // Admin re-selected category/subcategory (used when original request was rejected)
+            if ($request->filled('category_id')) {
+                $updateCategory = ['category' => (int) $request->input('category_id')];
+
+                if ($request->has('sub_category_ids')) {
+                    $selectedSubIds = array_values(array_unique(array_map('intval', (array) $request->input('sub_category_ids', []))));
+                    // Only keep subcategories that belong to the selected category
+                    $validSubIds = Jobsubcategory::where('category_id', (int) $request->input('category_id'))
+                        ->whereIn('sub_category_id', $selectedSubIds)
+                        ->pluck('sub_category_id')
+                        ->map(fn ($v) => (int) $v)
+                        ->toArray();
+                    $updateCategory['sub_categories'] = $validSubIds;
+                }
+
+                $internship->update($updateCategory);
+                $internship->refresh();
+            }
+
+            // Last registration must be on/after application deadline when both are present
+            if ($request->filled('last_registration_date')) {
+                $lastReg = \Carbon\Carbon::parse($request->input('last_registration_date'))->startOfDay();
+                $appDeadline = $internship->application_deadline
+                    ? \Carbon\Carbon::parse($internship->application_deadline)->startOfDay()
+                    : null;
+                $startDate = $request->filled('start_date')
+                    ? \Carbon\Carbon::parse($request->input('start_date'))->startOfDay()
+                    : ($internship->start_date ? \Carbon\Carbon::parse($internship->start_date)->startOfDay() : null);
+
+                if ($appDeadline && $lastReg->lt($appDeadline)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Last date of registration must be on or after the application deadline.',
+                    ], 422);
+                }
+                if ($startDate && $lastReg->gt($startDate)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Last date of registration must be on or before the start date.',
+                    ], 422);
+                }
+            }
+
             // Prepare update data — always persist type/status so they cannot stay at 0
             $updateData = [
                 'approve_status' => 1,
@@ -707,8 +883,17 @@ class InternshipController extends Controller
                 $updateData['end_date'] = $request->end_date;
             }
             if ($request->has('registration_fees')) {
-                $updateData['registration_fees'] = $request->registration_fees;
+                $updateData['registration_fees'] = (float) $request->registration_fees;
             }
+
+            // Always persist late registration config from admin approve modal
+            $updateData['last_registration_date'] = $request->filled('last_registration_date')
+                ? $request->input('last_registration_date')
+                : null;
+            $updateData['late_registration_fee'] = $request->filled('late_registration_fee')
+                ? (float) $request->input('late_registration_fee')
+                : 0;
+
             if ($request->has('gst_percentage')) {
                 $updateData['gst_percentage'] = $request->gst_percentage;
             }
@@ -718,7 +903,7 @@ class InternshipController extends Controller
             if ($request->has('final_amount')) {
                 $updateData['final_amount'] = $request->final_amount;
             }
-            
+
             // Update internship
             $internship->update($updateData);
 
@@ -873,13 +1058,13 @@ class InternshipController extends Controller
     /**
      * Show the form for editing an internship
      */
-    public function edit($id)
+public function edit($id)
     {
         $internship = Internship::findOrFail($id);
-        
+
         // Get companies (users with role = 'company')
         $companies = User::where('role', 'User')
-        ->where('profile_type', 'Company')
+            ->where('profile_type', 'Company')
             ->where('active_status', 1)
             ->select('id', 'name')
             ->orderBy('name', 'asc')
@@ -890,27 +1075,57 @@ class InternshipController extends Controller
             ->orderBy('category_nm', 'asc')
             ->get();
 
-        return view('admin.internship.edit', compact('internship', 'companies', 'categories'));
+        // If category = 0 (Other was used), fetch requested category/subcategory names
+        $requestedCategoryName = null;
+        $requestedSubcategoryNames = [];
+        if ($internship->category == 0 || empty($internship->sub_categories)) {
+            $categoryRequest = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                ->where('request_type', 'category')
+                ->orderByDesc('id')
+                ->first();
+            $subcategoryRequests = CategorySubcategoryRequest::where('internship_id', $internship->id)
+                ->where('request_type', 'subcategory')
+                ->orderByDesc('id')
+                ->get();
+
+            $requestedCategoryName = $categoryRequest ? $categoryRequest->requested_name : null;
+            $requestedSubcategoryNames = $subcategoryRequests ? $subcategoryRequests->pluck('requested_name')->toArray() : [];
+        }
+
+        return view('admin.internship.edit', compact(
+            'internship',
+            'companies',
+            'categories',
+            'requestedCategoryName',
+            'requestedSubcategoryNames'
+        ));
     }
 
-    /**
+/**
      * Update an internship
      */
     public function update(Request $request, $id)
     {
+        $useOtherCategory = $request->boolean('use_other_category');
+        $useOtherSubcategory = $request->boolean('use_other_subcategory');
+
         $validator = Validator::make($request->all(), [
             'internship_title' => 'required|string|max:255',
-            'category_id' => 'required|integer',
+            'category_id' => $useOtherCategory ? 'nullable|integer' : 'required|integer',
+            'sub_category_id' => $useOtherSubcategory ? 'nullable|array' : 'required|array|min:1',
+            'sub_category_id.*' => 'integer|exists:tbl_sub_category,sub_category_id',
+            'other_category_name' => $useOtherCategory ? 'required|string|max:255' : 'nullable|string',
+            'other_subcategory_name' => $useOtherSubcategory ? 'required|string|max:255' : 'nullable|string',
             'company_id' => 'required|integer',
             'company_website' => 'nullable|url|max:255',
-            'internship_mode' => 'required|in:Online,Offline,Hybrid',
+            'internship_mode' => 'required|in:Online,Offline,Hybrid,Weekly,Part Time,Full Time',
             'location' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
             'weeks' => 'required|integer|min:1',
             'hours' => 'required|integer|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'application_deadline' => 'required|date',
+            'application_deadline' => 'required|date|before_or_equal:start_date',
             'batch_days' => 'nullable|array',
             'stipend' => 'nullable|numeric|min:0',
             'openings' => 'required|integer|min:1',
@@ -924,25 +1139,29 @@ class InternshipController extends Controller
 
         try {
             $internship = Internship::findOrFail($id);
-            
+
             // Generate unique slug if title changed
             $slug = $internship->slug;
             if ($request->internship_title !== $internship->internship_title) {
                 $slug = Str::slug($request->internship_title);
                 $originalSlug = $slug;
                 $counter = 1;
-                
+
                 // Include soft-deleted rows — unique index still applies to them
                 while (Internship::withTrashed()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
                     $slug = $originalSlug . '-' . $counter;
                     $counter++;
                 }
             }
-            
+
+            $categoryId = $useOtherCategory ? 0 : (int) $request->category_id;
+            $subCategoryIds = $useOtherSubcategory ? [] : array_values(array_filter(array_map('intval', (array) $request->input('sub_category_id', []))));
+
             $internship->update([
                 'internship_title' => $request->internship_title,
                 'slug' => $slug,
-                'category' => $request->category_id,
+                'category' => $categoryId,
+                'sub_categories' => $subCategoryIds,
                 'company_id' => $request->company_id,
                 'company_website' => $request->company_website,
                 'mode' => $request->internship_mode,
@@ -956,8 +1175,8 @@ class InternshipController extends Controller
                 'openings' => $request->openings,
                 'application_deadline' => $request->application_deadline,
                 'batch_days' => $request->batch_days ?? [],
-                'skills' => $request->required_skills,
-                'eligibility_criteria' => $request->required_eligibility_criteria,
+                'skills' => $this->normalizeTagList($request->required_skills),
+                'eligibility_criteria' => $this->normalizeTagList($request->required_eligibility_criteria),
                 'perks' => $request->perks ?? [],
                 'internship_description' => $request->internship_description,
                 'module_brief_description' => $request->module_description,
@@ -966,6 +1185,46 @@ class InternshipController extends Controller
             ]);
 
             StaffActivityController::insertActivity(Auth::id(), "Updated internship: {$request->internship_title}");
+
+            // Handle "Other" category/subcategory requests
+            if ($useOtherCategory) {
+                $otherCategoryName = $request->input('other_category_name');
+                // Remove existing pending category request for this internship
+                CategorySubcategoryRequest::where('internship_id', $id)
+                    ->where('request_type', 'category')
+                    ->where('status', CategorySubcategoryRequest::STATUS_PENDING)
+                    ->delete();
+                // Create new request
+                CategorySubcategoryRequest::create([
+                    'request_type' => 'category',
+                    'requested_name' => $otherCategoryName,
+                    'user_id' => $internship->company_id,
+                    'internship_id' => $id,
+                    'status' => CategorySubcategoryRequest::STATUS_PENDING,
+                ]);
+            }
+
+            if ($useOtherSubcategory) {
+                $otherSubNames = array_map('trim', explode(',', $request->input('other_subcategory_name')));
+                $otherSubNames = array_filter($otherSubNames);
+                // Remove existing pending subcategory requests for this internship
+                CategorySubcategoryRequest::where('internship_id', $id)
+                    ->where('request_type', 'subcategory')
+                    ->where('status', CategorySubcategoryRequest::STATUS_PENDING)
+                    ->delete();
+                // Create new requests
+                foreach ($otherSubNames as $subName) {
+                    if ($subName !== '') {
+                        CategorySubcategoryRequest::create([
+                            'request_type' => 'subcategory',
+                            'requested_name' => $subName,
+                            'user_id' => $internship->company_id,
+                            'internship_id' => $id,
+                            'status' => CategorySubcategoryRequest::STATUS_PENDING,
+                        ]);
+                    }
+                }
+            }
 
             // Check if we need to return to modal
             if ($request->has('return_to_modal')) {
@@ -1039,36 +1298,33 @@ class InternshipController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => 'Please enter instructions content before saving.',
                     'errors' => $validator->errors()
                 ], 422);
             }
 
             $internship = Internship::findOrFail($id);
-            
+
             $internship->update([
                 'general_instructions' => $request->general_instructions
             ]);
 
-            StaffActivityController::insertActivity(Auth::id(), "Updated general instructions for internship: {$internship->internship_title}");
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Instructions updated successfully!'
-                ]);
+            try {
+                StaffActivityController::insertActivity(Auth::id(), "Updated general instructions for internship: {$internship->internship_title}");
+            } catch (\Throwable $e) {
+                // Do not block instructions update if activity logging fails
+                \Log::warning('Staff activity log failed for updateInstructions: ' . $e->getMessage());
             }
 
-            return redirect()->back()->with('success', 'Instructions updated successfully!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Instructions updated successfully!'
+            ]);
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update instructions: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Failed to update instructions: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update instructions: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -1326,9 +1582,13 @@ class InternshipController extends Controller
                 'data' => [
                     'id' => $payment->id,
                     'transaction_id' => $payment->transaction_id,
+                    'registration_fee' => $payment->registration_fee ?? max(0, (float) $payment->total_amount - (float) $payment->gst_amount),
+                    'late_registration_fee' => $payment->late_registration_fee ?? 0,
+                    'subtotal' => $payment->subtotal ?? max(0, (float) $payment->total_amount - (float) $payment->gst_amount),
                     'total_amount' => $payment->total_amount,
                     'gst_amount' => $payment->gst_amount,
                     'gst_percentage' => $payment->gst_percentage,
+                    'is_late_registration' => (bool) ($payment->is_late_registration ?? false),
                     'payment_mode' => $payment->payment_mode,
                     'payment_status' => $payment->payment_status,
                     'paid_on' => $payment->paid_on,
@@ -1687,10 +1947,20 @@ class InternshipController extends Controller
      */
     public function certificates()
     {
-        // Log activity
         $this->logActivity('Accessed certificate management page');
-        
-        return view('admin.internship.certificates');
+
+        $internships = Internship::with(['company'])
+            ->withCount('internshipApplications')
+            ->where('approve_status', 1)
+            ->where(function ($q) {
+                $q->where('company_complete_sts', 1)
+                    ->orWhere('college_complete_sts', 1)
+                    ->orWhere('complete_status', 1);
+            })
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return view('admin.internship.certificates', compact('internships'));
     }
 
     /**
@@ -1699,78 +1969,72 @@ class InternshipController extends Controller
     public function getCertificateStudents($id)
     {
         try {
-            // In production, fetch actual data from database
-            // $internship = DB::table('internships')->where('id', $id)->first();
-            
-            // $students = DB::table('internship_enrollments')
-            //     ->join('users', 'internship_enrollments.student_id', '=', 'users.id')
-            //     ->join('certificates', 'internship_enrollments.id', '=', 'certificates.enrollment_id')
-            //     ->where('internship_enrollments.internship_id', $id)
-            //     ->where('internship_enrollments.status', 'completed')
-            //     ->select(
-            //         'users.id',
-            //         'users.name',
-            //         'users.email',
-            //         'users.university',
-            //         'certificates.certificate_number',
-            //         'certificates.issue_date',
-            //         'certificates.download_count',
-            //         'internship_enrollments.completion_date'
-            //     )
-            //     ->get();
+            $internship = Internship::with('company')->findOrFail($id);
+            $internshipType = (int) ($internship->internship_type ?? 0);
+            $companyCompleted = (int) $internship->company_complete_sts === 1;
+            $collegeCompleted = (int) $internship->college_complete_sts === 1;
 
-            // $statistics = [
-            //     'total_students' => $students->count(),
-            //     'certificates_generated' => $students->count(),
-            //     'total_downloads' => $students->sum('download_count')
-            // ];
+            $applications = InternshipApplication::with(['user.college.university'])
+                ->where('internship_id', $internship->id)
+                ->orderBy('applied_on', 'desc')
+                ->get();
 
-            // Sample data for demonstration
-            $students = [
-                [
-                    'id' => 1,
-                    'name' => 'Rahul Sharma',
-                    'email' => 'rahul@example.com',
-                    'university' => 'Gujarat University',
-                    'certificate_number' => 'CERT-2026-001',
-                    'completion_date' => '10 Jan 2026',
-                    'download_count' => 5
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Priya Patel',
-                    'email' => 'priya@example.com',
-                    'university' => 'Mumbai University',
-                    'certificate_number' => 'CERT-2026-002',
-                    'completion_date' => '10 Jan 2026',
-                    'download_count' => 3
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Amit Kumar',
-                    'email' => 'amit@example.com',
-                    'university' => 'Delhi University',
-                    'certificate_number' => 'CERT-2026-003',
-                    'completion_date' => '10 Jan 2026',
-                    'download_count' => 8
-                ]
-            ];
+            $students = $applications->map(function ($app) use ($internship, $internshipType, $companyCompleted, $collegeCompleted) {
+                $user = $app->user;
+                $university = 'N/A';
+                if ($user && $user->college && $user->college->university) {
+                    $university = $user->college->university->university_name;
+                }
 
-            $statistics = [
-                'total_students' => 25,
-                'certificates_generated' => 25,
-                'total_downloads' => 187
-            ];
+                $showCompany = $companyCompleted;
+                $showCollege = $collegeCompleted && $internshipType === 1;
 
-            // Log activity
+                return [
+                    'application_id' => $app->id,
+                    'user_id' => $user->id ?? null,
+                    'name' => $user->name ?? 'N/A',
+                    'email' => $user->email ?? 'N/A',
+                    'university' => $university,
+                    'completion_date' => $app->applied_on
+                        ? $app->applied_on->format('d M Y')
+                        : ($internship->end_date ? $internship->end_date->format('d M Y') : 'N/A'),
+                    'show_company_certificate' => $showCompany,
+                    'show_college_certificate' => $showCollege,
+                    'company_certificate_url' => $showCompany
+                        ? route('admin.internship.certificate.preview', [
+                            'applicationId' => $app->id,
+                            'type' => 'company',
+                        ])
+                        : null,
+                    'college_certificate_url' => $showCollege
+                        ? route('admin.internship.certificate.preview', [
+                            'applicationId' => $app->id,
+                            'type' => 'college',
+                        ])
+                        : null,
+                    'profile_url' => !empty($user->id) ? url('admin/candidate-profile/' . $user->id) : null,
+                ];
+            })->values();
+
             $this->logActivity('Viewed certificates for internship ID: ' . $id);
 
             return response()->json([
                 'success' => true,
+                'internship' => [
+                    'id' => $internship->id,
+                    'title' => $internship->internship_title,
+                    'company' => optional($internship->company)->name,
+                    'internship_type' => $internshipType,
+                    'company_complete' => $companyCompleted,
+                    'college_complete' => $collegeCompleted,
+                ],
                 'students' => $students,
-                'statistics' => $statistics
+                'statistics' => [
+                    'total_students' => $students->count(),
+                    'company_certificates' => $students->where('show_company_certificate', true)->count(),
+                    'college_certificates' => $students->where('show_college_certificate', true)->count(),
+                ],
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2125,6 +2389,7 @@ class InternshipController extends Controller
 
         return [
             'type' => $type,
+            'certSettings' => \App\Models\CertificateSetting::forType($type),
             'certificate_no' => $certificateNo,
             'issue_date' => $issueDate,
             'student_name' => $student->name ?? 'N/A',
@@ -2215,6 +2480,20 @@ class InternshipController extends Controller
 
         $user = Auth::user();
         if ($user && $user->role === 'User') {
+            // Company accounts may download certificates for applicants of their own internships
+            if (($user->profile_type ?? '') === 'Company') {
+                $internship = $application->relationLoaded('internship')
+                    ? $application->internship
+                    : Internship::find($application->internship_id);
+
+                if (!$internship || (int) $internship->company_id !== (int) $user->id) {
+                    abort(403, 'You are not authorized to view this certificate.');
+                }
+
+                return;
+            }
+
+            // Student accounts may only access their own certificates
             if ((int) $application->user_id !== (int) $user->id) {
                 abort(403, 'You are not authorized to view this certificate.');
             }
@@ -2542,21 +2821,57 @@ class InternshipController extends Controller
                 return response()->json(['success' => false, 'message' => 'No students enrolled in this internship'], 422);
             }
 
-            // Validate every student has at least one mark row saved
+            // Validate every student has grade configured + marks saved
             // (only required for type 1 — type 2 is feedback-only)
             $missingStudents = [];
+            $noGradeStudents = [];
             if ($internship->internship_type != 2) {
                 foreach ($studentIds as $studentId) {
+                    $student = User::find($studentId);
+                    $studentName = $student ? $student->name : "ID: $studentId";
+                    $collegeId = $student ? $student->college_id : null;
+                    $degreeId = $student ? $student->degree_id : null;
+
+                    $criteriaCount = 0;
+                    if ($collegeId) {
+                        $grade = Grade::where('college_id', $collegeId)
+                            ->when($degreeId, fn ($q) => $q->where('course_id', $degreeId))
+                            ->first();
+
+                        if ($grade) {
+                            $section = GradeSection::where('grade_id', $grade->id)
+                                ->where('title', 'Industry Marks')
+                                ->first();
+                            if ($section) {
+                                $criteriaCount = GradeCriterion::where('section_id', $section->id)
+                                    ->whereNull('deleted_at')
+                                    ->count();
+                            }
+                        }
+                    }
+
+                    if ($criteriaCount === 0) {
+                        $noGradeStudents[] = $studentName;
+                        continue;
+                    }
+
                     $savedCount = InternshipMark::where('internship_id', $internship->id)
                         ->where('student_id', $studentId)
-                        ->where('marks', '>', 0)
+                        ->whereNotNull('marks')
                         ->count();
 
-                    if ($savedCount === 0) {
-                        $student = User::find($studentId);
-                        $missingStudents[] = $student ? $student->name : "ID: $studentId";
+                    if ($savedCount < $criteriaCount) {
+                        $missingStudents[] = $studentName;
                     }
                 }
+            }
+
+            if (!empty($noGradeStudents)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Grade is not configured for students: ' . implode(', ', array_slice($noGradeStudents, 0, 5))
+                        . '. Please configure Industry Marks in Manage Grade.'
+                ], 422);
             }
 
             if (!empty($missingStudents)) {
@@ -2851,6 +3166,11 @@ class InternshipController extends Controller
         }
 
         try {
+            $internship = Internship::findOrFail($request->internship_id);
+            if ((int) $internship->college_complete_sts === 1 || (int) $internship->complete_status === 1) {
+                return response()->json(['success' => false, 'message' => 'College marks cannot be modified after submission.'], 422);
+            }
+
             if ($request->marks > $request->max_marks) {
                 return response()->json(['success' => false, 'message' => "Marks cannot exceed {$request->max_marks}"], 422);
             }
@@ -2891,6 +3211,10 @@ class InternshipController extends Controller
         }
 
         try {
+            $internship = Internship::findOrFail($request->internship_id);
+            if ((int) $internship->college_complete_sts === 1 || (int) $internship->complete_status === 1) {
+                return response()->json(['success' => false, 'message' => 'College feedback cannot be modified after submission.'], 422);
+            }
             InternshipApplication::where('internship_id', $request->internship_id)
                 ->where('user_id', $request->student_id)
                 ->update(['college_feedback' => $request->feedback]);
@@ -2948,54 +3272,12 @@ class InternshipController extends Controller
                     ->pluck('id');
             }
 
-            // If no criteria configured for this college+course, skip marks validation
+            // Block submit when College Marks grade/criteria are not configured
             if ($collegeCriteriaIds->isEmpty()) {
-                // Only validate feedback
-                $feedbackMap = InternshipApplication::where('internship_id', $internship->id)
-                    ->whereIn('user_id', $studentIds)
-                    ->pluck('college_feedback', 'user_id');
-                $studentNames = User::whereIn('id', $studentIds)->pluck('name', 'id');
-                $missingFeedback = [];
-                foreach ($studentIds as $studentId) {
-                    if (empty($feedbackMap[$studentId] ?? '')) {
-                        $missingFeedback[] = $studentNames[$studentId] ?? "ID: $studentId";
-                    }
-                }
-                if (!empty($missingFeedback)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Missing college feedback for: ' . implode(', ', array_slice($missingFeedback, 0, 5))
-                    ], 422);
-                }
-                // No criteria — record submission and check if all colleges done
-                DB::beginTransaction();
-                InternshipCollegeSubmit::firstOrCreate([
-                    'internship_id' => $internship->id,
-                    'college_id'    => $collegeId,
-                    'course_id'     => $courseId,
-                ], ['submitted_at' => now()]);
-
-                // Check if ALL distinct college+course groups for this internship have now submitted
-                $allCollegeCombos = InternshipApplication::where('internship_id', $internship->id)
-                    ->join('users', 'users.id', '=', 'tbl_internship_application.user_id')
-                    ->selectRaw('DISTINCT users.college_id, users.degree_id')
-                    ->whereNotNull('users.college_id')
-                    ->whereNotNull('users.degree_id')
-                    ->get();
-
-                $submittedCount = InternshipCollegeSubmit::where('internship_id', $internship->id)->count();
-                $allSubmitted = ($submittedCount >= $allCollegeCombos->count()) && $allCollegeCombos->count() > 0;
-
-                if ($allSubmitted) {
-                    $internship->update(['college_complete_sts' => 1]);
-                    $internship->refresh();
-                    if ($internship->company_complete_sts == 1) {
-                        $internship->update(['complete_status' => 1]);
-                        InternshipApplication::where('internship_id', $internship->id)->update(['complete_status' => 1]);
-                    }
-                }
-                DB::commit();
-                return response()->json(['success' => true, 'message' => 'College marks submitted successfully!']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No grade configured. Please configure College Marks grade criteria for this course before submitting.'
+                ], 422);
             }
 
             // Pre-load student names to avoid N+1
@@ -3708,5 +3990,48 @@ class InternshipController extends Controller
             'approved' => $approved,
             'rejected' => $rejected,
         ]);
+    }
+
+    private function normalizeTagList($value)
+    {
+        if (is_array($value)) {
+            $items = $value;
+        } else {
+            $value = trim((string) $value);
+            if ($value === '') {
+                return json_encode([]);
+            }
+
+            $decoded = json_decode($value, true);
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
+            }
+
+            if (is_array($decoded)) {
+                $items = $decoded;
+            } else {
+                $items = preg_split('/,/', $value);
+            }
+        }
+
+        $unique = [];
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                $item = implode(' ', $item);
+            }
+
+            $name = preg_replace('/\s+/u', ' ', trim(strip_tags((string) $item)));
+            $name = trim($name, " \t\n\r\0\x0B\"'[]");
+            if ($name === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($name);
+            if (!isset($unique[$key])) {
+                $unique[$key] = $name;
+            }
+        }
+
+        return json_encode(array_values($unique));
     }
 }

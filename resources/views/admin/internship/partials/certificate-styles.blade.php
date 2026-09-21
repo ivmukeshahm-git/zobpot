@@ -176,7 +176,7 @@
         line-height: 1.55;
     }
 
-    .zp-cert-body .internship-title {
+    .zp-cert-body .opportunity-title {
         font-size: 20px;
         color: #242a62;
         font-weight: 700;
@@ -325,7 +325,7 @@
         font-size: 30px;
     }
 
-    .zp-certificate.college-cert .zp-cert-body .internship-title {
+    .zp-certificate.college-cert .zp-cert-body .opportunity-title {
         margin: 4px 0;
         font-size: 18px;
     }

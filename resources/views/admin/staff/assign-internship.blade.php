@@ -6,8 +6,8 @@
         <div class="card-header p-4">
             <div class="row">
                 <div class="col-lg-6">
-                    <h5 class="card-title">Assign Internship</h5>
-                    <p class="text-muted">List of internships assigned to you (staff view).</p>
+                    <h5 class="card-title">Assign Opportunity</h5>
+                    <p class="text-muted">List of opportunities assigned to you (staff view).</p>
                 </div>
             </div>
         </div>
@@ -18,7 +18,7 @@
                     <tr>
                         <th>Sr. NO.</th>
                         <th>Student Name</th>
-                        <th>Internship</th>
+                        <th>Opportunity</th>
                         <th>Email</th>
                         <th>Contact</th>
                         <th>Assigned Date</th>

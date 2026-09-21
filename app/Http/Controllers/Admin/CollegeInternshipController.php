@@ -162,6 +162,26 @@ class CollegeInternshipController extends Controller
                 $url = route('admin.college-internship.view', $r->id);
                 return '<a href="' . $url . '" class="btn btn-sm btn-info"><i class="bx bx-show"></i> View</a>';
             })
+            ->filterColumn('internship_title', function ($query, $keyword) {
+                $query->where('i.internship_title', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('company_name', function ($query, $keyword) {
+                $query->where('comp.name', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('duration', function ($query, $keyword) {
+                $query->where('i.duration', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('category_name', function ($query, $keyword) {
+                $query->where('jc.category_nm', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('location', function ($query, $keyword) {
+                $query->where('i.location', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('openings', function ($query, $keyword) {
+                $query->where('i.openings', 'like', "%{$keyword}%");
+            })
+            ->orderColumn('company_name', 'comp.name $1')
+            ->orderColumn('category_name', 'jc.category_nm $1')
             ->rawColumns(['status_label', 'action'])
             ->make(true);
     }
@@ -218,6 +238,26 @@ class CollegeInternshipController extends Controller
                 $url = route('admin.college-internship.view', $r->id);
                 return '<a href="' . $url . '" class="btn btn-sm btn-info"><i class="bx bx-show"></i> View</a>';
             })
+            ->filterColumn('internship_title', function ($query, $keyword) {
+                $query->where('i.internship_title', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('company_name', function ($query, $keyword) {
+                $query->where('comp.name', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('duration', function ($query, $keyword) {
+                $query->where('i.duration', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('category_name', function ($query, $keyword) {
+                $query->where('jc.category_nm', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('location', function ($query, $keyword) {
+                $query->where('i.location', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('openings', function ($query, $keyword) {
+                $query->where('i.openings', 'like', "%{$keyword}%");
+            })
+            ->orderColumn('company_name', 'comp.name $1')
+            ->orderColumn('category_name', 'jc.category_nm $1')
             ->rawColumns(['status_label', 'action'])
             ->make(true);
     }

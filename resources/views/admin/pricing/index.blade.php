@@ -25,11 +25,11 @@
             @foreach($plans as $plan)
             <tr>
                 <td>{{ $plan->plan_id }}</td>
-                <td>{{ $plan->plan_name }}</td>
+                <td>{{ \App\Models\PlanPricing::decodePlanText($plan->plan_name) }}</td>
                 <td>{{ $plan->plan_price }}</td>
-                <td>{{ $plan->plan_description }}</td>
+                <td>{{ \App\Models\PlanPricing::decodePlanText($plan->plan_description) }}</td>
                 <td>{{ $plan->plan_for }}</td>
-                <td>{{ $plan->benefits }}</td>
+                <td>{{ \App\Models\PlanPricing::decodePlanText($plan->benefits) }}</td>
                 <td>{{ $plan->plan_duration }}</td>
                 <td>{{ $plan->plan_time }}</td>
                 <td>{{ $plan->status ? 'Active' : 'Inactive' }}</td>

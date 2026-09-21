@@ -129,6 +129,7 @@ class ProfileController extends Controller
 
             $user = User::findOrFail($id); // ❌ No creation, only update
 
+            $user->last_update = Auth::id();
             $user->name = $request->full_name;
             $user->email = $request->email;
             $user->contact_no = $request->contact_no;
@@ -282,7 +283,8 @@ class ProfileController extends Controller
 
         try {
             $user = User::findOrFail($id);
-
+            
+            $user->last_update = Auth::id();
             $user->about = $request->input('about');
             $user->category_id   = $request->input('category_id');
             $user->sub_category_id = $request->input('sub_category_id');
@@ -408,6 +410,7 @@ class ProfileController extends Controller
 
             $user = User::findOrFail($id); // ❌ No creation, only update
 
+$user->last_update = Auth::id();
             $user->name = $request->company_nm;
             $user->email = $request->email;
             $user->contact_no = $request->contact_no;
@@ -592,6 +595,7 @@ class ProfileController extends Controller
         try {
             $user = User::findOrFail($id);
 
+$user->last_update = Auth::id();
             $user->company_desc = $request->company_desc;
 
             // ✅ CLEAN & SAVE specialties

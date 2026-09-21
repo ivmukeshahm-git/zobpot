@@ -45,7 +45,7 @@
 
         <div class="card">
             <div class="card-header p-4">
-                <h5 class="card-title">Internship Register List</h5>
+                <h5 class="card-title">Opportunity Register List</h5>
             </div>
             <hr class="my-1">
             <div class="card-body table-responsive p-4">

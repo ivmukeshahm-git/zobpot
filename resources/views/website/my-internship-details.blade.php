@@ -1,19 +1,66 @@
 @extends('website.layout.layout')
 @section('website-content')
     <style>
-        /* My Internship Details Page Styles */
+        /* My Opportunity Details Page */
         .internship-details-header {
-            background: #242a62;
-            border-radius: 12px;
-            padding: 40px;
-            margin-bottom: 30px;
-            font-size: 32px;
-            font-weight: 700;
+            background: linear-gradient(135deg, #242a62 0%, #3d4575 55%, #f26e2c 160%);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            color: #ffffff;
+            box-shadow: 0 10px 28px rgba(36, 42, 98, 0.22);
+        }
+
+        .internship-details-header h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 800;
+            color: #ffffff !important;
+            line-height: 1.25;
+            letter-spacing: 0.2px;
+        }
+
+        .internship-details-header h2 i {
+            color: #ffd7c2;
+            margin-right: 8px;
         }
 
         .internship-details-header p {
-            margin: 0;
-            font-size: 16px;
+            margin: 8px 0 0 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.92) !important;
+        }
+
+        .internship-details-header .btn-back-profile {
+            background: rgba(255, 255, 255, 0.18) !important;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .internship-details-header .btn-back-profile:hover {
+            background: #ffffff !important;
+            color: #242a62 !important;
+            border-color: #ffffff !important;
+        }
+
+        .internship-details-header .status-badge {
+            color: #ffffff;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .stats-box .icon {
@@ -25,6 +72,29 @@
             justify-content: center;
             font-size: 28px;
             margin-bottom: 15px;
+        }
+
+        #AssignedTasksTable {
+            width: 100% !important;
+        }
+
+        #AssignedTasksTable thead th {
+            color: #ffffff !important;
+            background: #242a62;
+            white-space: nowrap;
+        }
+
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #242a62 !important;
+            color: #fff !important;
+            border-color: #242a62 !important;
         }
 
         .stats-box h3 {
@@ -41,17 +111,15 @@
             font-weight: 600;
         }
 
-        /* Per-stat styling */
         .stats-box {
             display: flex;
             flex-direction: column;
-            /* align-items: center; */
             justify-content: center;
-            padding: 18px 14px;
-            border-radius: 8px;
+            padding: 18px 16px;
+            border-radius: 12px;
             background: #fff;
-            border: 1px solid #e9ecef;
-            box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+            border: 1px solid #eef1f6;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
             min-height: 110px;
             transition: transform 0.15s ease, box-shadow 0.15s ease;
             text-align: left;
@@ -59,12 +127,17 @@
 
         .stats-box:hover {
             transform: translateY(-4px);
-            box-shadow: 0 14px 30px rgba(15,23,42,0.08);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
         }
+
+        .stats-box.stats-total { border-left: 4px solid #17a2b8; }
+        .stats-box.stats-completed { border-left: 4px solid #28a745; }
+        .stats-box.stats-pending { border-left: 4px solid #ffc107; }
+        .stats-box.stats-days { border-left: 4px solid #dc3545; }
 
         .stats-box.stats-total h3 { color: #17a2b8; }
         .stats-box.stats-completed h3 { color: #28a745; }
-        .stats-box.stats-pending h3 { color: #ffc107; }
+        .stats-box.stats-pending h3 { color: #e0a800; }
         .stats-box.stats-days h3 { color: #dc3545; }
 
         .stats-box .label {
@@ -76,7 +149,8 @@
         }
 
         /* Tab Navigation */
-        .nav-tabs-internship {
+        .nav-tabs-internship,
+        .nav-tabs-opportunity {
             background: #fff;
             border-radius: 12px 12px 0 0;
             padding: 15px 20px 0 20px;
@@ -84,7 +158,8 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
-        .nav-tabs-internship .nav-link {
+        .nav-tabs-internship .nav-link,
+        .nav-tabs-opportunity .nav-link {
             color: #666;
             border: none;
             border-bottom: 3px solid transparent;
@@ -96,12 +171,14 @@
             margin-bottom: -3px;
         }
 
-        .nav-tabs-internship .nav-link:hover {
+        .nav-tabs-internship .nav-link:hover,
+        .nav-tabs-opportunity .nav-link:hover {
             color: #242a62;
             background: #fff5f0;
         }
 
-        .nav-tabs-internship .nav-link.active {
+        .nav-tabs-internship .nav-link.active,
+        .nav-tabs-opportunity .nav-link.active {
             color: #242a62;
             background: transparent;
             border-bottom-color: #f26e2c;
@@ -114,26 +191,40 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
+        .tab-content-card > h5 {
+            color: #242a62 !important;
+            font-weight: 800;
+        }
+
         /* Section Card */
         .section-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 20px 22px;
             margin-bottom: 20px;
             border-left: 4px solid #242a62;
+            box-shadow: 0 2px 10px rgba(36, 42, 98, 0.04);
         }
 
         .section-card h6 {
-            color: #242a62;
+            color: #242a62 !important;
             font-weight: 700;
             margin-bottom: 15px;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-card h6 i {
+            color: #f26e2c;
         }
 
         /* Detail Row */
         .detail-row {
             display: flex;
             justify-content: space-between;
+            gap: 16px;
             padding: 12px 0;
             border-bottom: 1px dashed #dee2e6;
         }
@@ -144,15 +235,17 @@
 
         .detail-label {
             font-weight: 600;
-            color: #495057;
+            color: #6c757d;
             font-size: 14px;
-            min-width: 200px;
+            min-width: 180px;
         }
 
         .detail-value {
-            color: #212529;
+            color: #212529 !important;
             font-size: 14px;
+            font-weight: 600;
             flex: 1;
+            text-align: right;
         }
 
         /* Task Card */
@@ -193,43 +286,64 @@
             color: white;
         }
 
-
         .modal-title {
             color: #fff !important;
         }
 
-        
-    .ck-editor__editable {
-        min-height: 300px;
-    }
+        .ck-editor__editable {
+            min-height: 300px;
+        }
 
-    /* Star rating radio styles for review modal */
-    .stars{
-        display:flex;
-        flex-direction:row-reverse;
-        justify-content:center;
-        font-size:40px;
-    }
+        .stars {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            font-size: 40px;
+        }
 
-    .stars input{
-        display:none;
-    }
+        .stars input {
+            display: none;
+        }
 
-    .stars label{
-        color:#ccc;
-        cursor:pointer;
-        transition:0.3s;
-    }
+        .stars label {
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-    .stars label:hover,
-    .stars label:hover ~ label{
-        color:#ffc107;
-    }
+        .stars label:hover,
+        .stars label:hover ~ label {
+            color: #ffc107;
+        }
 
-    .stars input:checked ~ label{
-        color:#ffc107;
-    }
+        .stars input:checked ~ label {
+            color: #ffc107;
+        }
 
+        @media (max-width: 767.98px) {
+            .internship-details-header {
+                padding: 22px 18px;
+            }
+
+            .internship-details-header h2 {
+                font-size: 22px;
+            }
+
+            .internship-details-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 14px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .detail-value {
+                text-align: left;
+            }
+        }
     </style>
 
     <main class="main mb-5">
@@ -237,33 +351,36 @@
             <div class="container">
                 <!-- Header -->
                 <div class="internship-details-header">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <h2 style="color: #fff; margin: 0;"><i class="bx bx-briefcase"></i>
-                                {{ $internship->internship_title ?? 'Internship Details' }}</h2>
-                            <p style="color: #fff; margin: 5px 0 0 0;"><i class="bx bx-buildings"></i>
-                                {{ $internship->company->name ?? ($internship->company->company_name ?? '') }}</p>
+                            <h2>
+                                <i class="bx bx-briefcase"></i>
+                                {{ $internship->internship_title ?? 'Internship Details' }}
+                            </h2>
+                            <p>
+                                <i class="bx bx-buildings"></i>
+                                {{ $internship->company->name ?? ($internship->company->company_name ?? 'Company') }}
+                                @if(!empty($internship->duration))
+                                    &bull; {{ $internship->duration }}
+                                @endif
+                                @if(!empty($internship->mode))
+                                    &bull; {{ $internship->mode }} Mode
+                                @endif
+                            </p>
                         </div>
-                        <div class="d-flex align-items-center" style="gap: 15px;">
-                            <a href="{{ route('candidate-profile') }}" class="btn-back-profile"
-                                style="background: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"
-                                onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.borderColor='rgba(255, 255, 255, 0.5)';"
-                                onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.3)';">
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 12px;">
+                            <a href="{{ route('candidate-profile') }}" class="btn-back-profile">
                                 <i class="bx bx-arrow-back"></i> Back to Profile
                             </a>
                             @if(!empty($internship) && intval($internship->complete_status) === 1)
                                 @if(!empty($userReview))
                                 <button onclick="openViewReviewModal()" id="viewReviewBtn" class="btn"
-                                    style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid #6c757d; transition: all 0.3s ease;"
-                                    onmouseover="this.style.background='#5a636a'; this.style.borderColor='#5a636a';"
-                                    onmouseout="this.style.background='#6c757d'; this.style.borderColor='#6c757d';">
+                                    style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid #6c757d;">
                                     <i class="bx bx-show"></i> View Review
                                 </button>
                                 @else
                                     <button onclick="openReviewModal()" id="giveReviewBtn" class="btn"
-                                        style="background: #f26e2c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid #f26e2c; transition: all 0.3s ease;"
-                                        onmouseover="this.style.background='#ff8c42'; this.style.borderColor='#ff8c42';"
-                                        onmouseout="this.style.background='#f26e2c'; this.style.borderColor='#f26e2c';">
+                                        style="background: #f26e2c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: 1px solid #f26e2c;">
                                         <i class="bx bx-star"></i> Give Review
                                     </button>
                                 @endif
@@ -282,7 +399,6 @@
                                     $dynamicBadgeBg = '#17a2b8';
                                     $dynamicIcon = 'bx-time-five';
                                 } elseif ($endDt && $now->gt($endDt)) {
-                                    // Past end date but complete_status != 1 → Pending
                                     $dynamicStatus = 'Pending';
                                     $dynamicBadgeBg = '#ffc107';
                                     $dynamicIcon = 'bx-time';
@@ -292,8 +408,7 @@
                                     $dynamicIcon = 'bx-check-circle';
                                 }
                             @endphp
-                            <span class="badge"
-                                style="background: {{ $dynamicBadgeBg }}; color: white; padding: 10px 20px; font-size: 16px; border-radius: 8px;">
+                            <span class="status-badge" style="background: {{ $dynamicBadgeBg }};">
                                 <i class="bx {{ $dynamicIcon }}"></i> {{ $dynamicStatus }}
                             </span>
                         </div>
@@ -322,7 +437,7 @@
 
                 <!-- Statistics Boxes -->
                 @if(intval($internship->complete_status ?? 0) === 1)
-                <!-- Success Box - Internship Completed -->
+                <!-- Success Box - Program Completed -->
                 <div class="mb-4" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border: 1px solid #28a745; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(40,167,69,0.15);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
@@ -330,8 +445,8 @@
                                 <span style="font-size: 28px;">🎉</span>
                             </div>
                             <div>
-                                <h5 style="margin: 0 0 4px 0; color: #155724; font-weight: 700; font-size: 18px;">Internship Completed Successfully</h5>
-                                <p style="margin: 0; color: #155724; font-size: 14px; opacity: 0.85;">You have successfully completed this internship. Share your experience!</p>
+                                <h5 style="margin: 0 0 4px 0; color: #155724; font-weight: 700; font-size: 18px;">Program Completed Successfully</h5>
+                                <p style="margin: 0; color: #155724; font-size: 14px; opacity: 0.85;">You have successfully completed this Internship. Share your experience!</p>
                             </div>
                         </div>
                         @if(empty($userReview))
@@ -385,25 +500,25 @@
 
                 <div class="row mb-4">
                     <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <div class="stats-box stats-total" style="border-left:3px solid #17a2b8;border-left-color: #17a2b8;">
+                        <div class="stats-box stats-total">
                             <h3>{{ $totalTasks }}</h3>
                             <div class="label">Total Tasks</div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <div class="stats-box stats-completed" style="border-left:3px solid #28a745;border-left-color: #28a745;">
+                        <div class="stats-box stats-completed">
                             <h3>{{ $completedTasks }}</h3>
                             <div class="label">Completed Tasks</div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <div class="stats-box stats-pending" style="border-left:3px solid #ffc107;border-left-color: #ffc107;">
+                        <div class="stats-box stats-pending">
                             <h3>{{ $pendingTasks }}</h3>
                             <div class="label">Pending Tasks</div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <div class="stats-box stats-days" style="border-left:3px solid #dc3545;border-left-color: #dc3545;">
+                        <div class="stats-box stats-days">
                             @if($daysRemainingDisplay === 'Completed')
                                 <h4 style="color: #28a745;margin-bottom:10px;">Completed</h4>
                                 <div class="label">Internship Status</div>
@@ -459,7 +574,7 @@
 
                 <!-- Tab Content -->
                 <div class="tab-content tab-content-card">
-                    <!-- Internship Details Tab -->
+                    <!-- Opportunity Details Tab -->
                     <div class="tab-pane fade show active" id="internship-details" role="tabpanel">
                         <h5 style="color: #242a62; font-weight: 700; margin-bottom: 20px;">
                             <i class="bx bx-info-circle"></i> Internship Information
@@ -632,22 +747,15 @@
 
                         <!-- Task Table -->
                         <div class="table-responsive">
-                            <table class="table table-hover"
-                                style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <thead
-                                    style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); color: white;">
+                            <table id="AssignedTasksTable" class="table table-hover assigned-tasks-table" style="width:100%; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                                <thead style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); color: white;">
                                     <tr>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none;">#</th>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none;">Task
-                                            Title</th>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none;">File
-                                        </th>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none;">Due
-                                            Date</th>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none;">Status
-                                        </th>
-                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; text-align: center;">
-                                            Actions</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; color:#fff;">#</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; color:#fff;">Task Title</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; color:#fff;">File</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; color:#fff;">Due Date</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; color:#fff;">Status</th>
+                                        <th style="padding: 15px; font-weight: 600; font-size: 13px; border: none; text-align: center; color:#fff;">Actions</th>
                                     </tr>
                                 </thead>
                                     @php
@@ -755,9 +863,6 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr>
-                                            <td colspan="6" style="padding:20px; text-align:center; color:#6c757d;">No tasks assigned.</td>
-                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -781,7 +886,7 @@
 
                             @if(!empty($certificatesAvailable))
                                 <p style="color: #6c757d; font-size: 14px; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                                    Congratulations! Your internship certificates are ready. Download your digitally signed certificates below.
+                                    Congratulations! Your Internship certificates are ready. Download your digitally signed certificates below.
                                 </p>
 
                                 <div class="d-flex flex-wrap justify-content-center gap-3" style="margin-bottom: 25px;">
@@ -804,7 +909,7 @@
                             @else
                                 <p style="color: #6c757d; font-size: 14px; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
                                     Your certificate will be available once you complete all assigned tasks and successfully
-                                    finish your internship.
+                                    finish your Internship.
                                     The certificate will be digitally signed and can be downloaded in PDF format.
                                 </p>
 
@@ -817,7 +922,7 @@
                                 @elseif(intval($internship->complete_status ?? 0) !== 1)
                                 <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
                                     <p style="margin: 0; color: #856404; font-size: 13px;">
-                                        <i class="bx bx-info-circle"></i> <strong>Note:</strong> Your certificates will appear here after company and college complete the internship process.
+                                        <i class="bx bx-info-circle"></i> <strong>Note:</strong> Your certificates will appear here after company and college complete the Internship process.
                                     </p>
                                 </div>
                                 @endif
@@ -832,7 +937,7 @@
                                     <i class="bx bx-star"></i> Give Your Review
                                 </button>
                                 <p style="color: #6c757d; font-size: 12px; margin-top: 10px;">
-                                    Share your experience about this internship
+                                    Share your experience about this Internship
                                 </p>
                             </div>
                         </div>
@@ -1086,8 +1191,8 @@
         </div>
     </div>
 
-    <!-- Internship Review Modal -->
-    <div class="modal fade" id="internshipReviewModal" tabindex="-1" aria-labelledby="internshipReviewModalLabel"
+    <!-- Opportunity Review Modal -->
+    <div class="modal fade" id="internshipReviewModal" tabindex="-1" aria-labelledby="opportunityReviewModalLabel"
         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 650px;">
             <div class="modal-content"
@@ -1107,11 +1212,11 @@
                         🎉 Congratulations!
                     </h5>
                     <p style="margin: 0; font-size: 15px; opacity: 0.95; text-align: center;color:#fff;">You've
-                        successfully completed your internship</p>
+                        successfully completed your Internship</p>
                 </div>
 
                 <div class="modal-body" style="padding: 35px; background: white;">
-                    <!-- Internship Info Card -->
+                    <!-- Opportunity Info Card -->
                     <div
                         style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 4px solid #f26e2c;">
                         <div style="margin-bottom: 12px;">
@@ -1145,7 +1250,7 @@
                     <!-- Rating Section -->
                     <div style="text-align: center; margin-bottom: 25px;">
                         <h6 style="color: #242a62; font-weight: 700; font-size: 16px; margin-bottom: 15px;">
-                            How was your internship experience?
+                            How was your Internship experience?
                         </h6>
                         <div class="stars" id="radioStarRating" style="margin-bottom:8px;">
                             <input type="radio" name="rating" id="star5" value="5">
@@ -1175,7 +1280,7 @@
                         </label>
                         <textarea class="form-control" id="reviewText" rows="4"
                             style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; resize: none;height:130px;"
-                            placeholder="Tell us about your internship journey, what you learned, and how it helped you grow..."></textarea>
+                            placeholder="Tell us about your Internship journey, what you learned, and how it helped you grow..."></textarea>
                     </div>
 
                     <!-- Skip Option -->
@@ -1220,7 +1325,7 @@
                 </div>
 
                 <div class="modal-body" style="background: #f8f9fa; padding: 30px;">
-                    <form id="submitTaskForm" action="{{ route('internship.task.submit') }}" method="POST" enctype="multipart/form-data">
+                    <form id="submitTaskForm" action="{{ route('internship.task.submit') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
                         @csrf
                         <input type="hidden" name="task_id" id="submitTaskId" value="">
                         <!-- Task Info Display -->
@@ -1325,12 +1430,42 @@
     </div>
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('script')
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Initialize CKEditor 5 (ClassicEditor)
         let editorInstance = null;
+
+        $(document).ready(function() {
+            var assignedTasksTable = null;
+            if ($.fn.DataTable && $('#AssignedTasksTable').length) {
+                assignedTasksTable = $('#AssignedTasksTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    autoWidth: false,
+                    columnDefs: [
+                        { orderable: false, targets: [2, 5] }
+                    ],
+                    language: {
+                        emptyTable: 'No tasks assigned.',
+                        search: 'Search tasks:'
+                    }
+                });
+            }
+
+            $('button[data-bs-target="#assigned-tasks"], #tasks-tab').on('shown.bs.tab', function () {
+                if (assignedTasksTable) {
+                    assignedTasksTable.columns.adjust().draw(false);
+                }
+            });
+        });
 
            window.openInstructionsModal = function() {
         const instructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
@@ -1538,61 +1673,120 @@
             });
         }
 
-        // Open Submit Modal and prefill values
+        // Open Submit Modal and always start with a blank form
         window.openSubmitModal = function(button) {
-            const taskId = button.getAttribute('data-task-id');
-            const title = button.getAttribute('data-task-title') || 'Task';
-            const date = button.getAttribute('data-task-date') || '';
-            const isFinal = button.getAttribute('data-is-final') === '1' || button.getAttribute('data-is-final') === 'true';
+            try {
+                const taskId = button.getAttribute('data-task-id');
+                const title = button.getAttribute('data-task-title') || 'Task';
+                const date = button.getAttribute('data-task-date') || '';
+                const isFinal = button.getAttribute('data-is-final') === '1' || button.getAttribute('data-is-final') === 'true';
 
-            document.getElementById('submitTaskTitle').textContent = title;
-            document.getElementById('submitTaskDueDate').textContent = date ? (new Date(date)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-            document.getElementById('submitTaskId').value = taskId;
+                const titleEl = document.getElementById('submitTaskTitle');
+                const dueEl = document.getElementById('submitTaskDueDate');
+                const idEl = document.getElementById('submitTaskId');
+                if (titleEl) titleEl.textContent = title;
+                if (dueEl) {
+                    dueEl.textContent = date
+                        ? (new Date(date)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : '-';
+                }
+                if (idEl) idEl.value = taskId;
 
-            // Update modal title and submit button text when this is the final assignment
-            const modalTitleEl = document.getElementById('submitTaskModalLabel');
-            const submitBtn = document.getElementById('submitTaskBtn');
-            if (isFinal) {
-                if (modalTitleEl) modalTitleEl.innerHTML = '<i class="bx bx-upload"></i> Submit Final Assignment / Report';
-                if (submitBtn) submitBtn.innerHTML = '<i class="bx bx-check"></i> Submit Final Assignment / Report';
-            } else {
-                if (modalTitleEl) modalTitleEl.innerHTML = '<i class="bx bx-upload"></i> Submit Task';
-                if (submitBtn) submitBtn.innerHTML = '<i class="bx bx-check"></i> Submit Task';
+                // Reset previous task's form data so the next task opens empty
+                const form = document.getElementById('submitTaskForm');
+                if (form) form.reset();
+                if (idEl) idEl.value = taskId;
+
+                const fileInput = document.getElementById('taskFile');
+                if (fileInput) fileInput.value = '';
+
+                const projectLink = document.getElementById('projectLink');
+                if (projectLink) projectLink.value = '';
+
+                const notesEl = document.getElementById('taskNotes');
+                if (notesEl) notesEl.value = '';
+
+                // Update modal title and submit button text when this is the final assignment
+                const modalTitleEl = document.getElementById('submitTaskModalLabel');
+                const submitBtn = document.getElementById('submitTaskBtn');
+                if (isFinal) {
+                    if (modalTitleEl) modalTitleEl.innerHTML = '<i class="bx bx-upload"></i> Submit Final Assignment / Report';
+                    if (submitBtn) submitBtn.innerHTML = '<i class="bx bx-check"></i> Submit Final Assignment / Report';
+                } else {
+                    if (modalTitleEl) modalTitleEl.innerHTML = '<i class="bx bx-upload"></i> Submit Task';
+                    if (submitBtn) submitBtn.innerHTML = '<i class="bx bx-check"></i> Submit Task';
+                }
+
+                const modalEl = document.getElementById('submitTaskModal');
+                if (!modalEl) {
+                    console.error('submitTaskModal not found');
+                    return;
+                }
+
+                // Bootstrap 5.0 beta does not have getOrCreateInstance
+                let modal = bootstrap.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new bootstrap.Modal(modalEl);
+                }
+                modal.show();
+
+                const initEditor = function() {
+                    const clearAndCreate = function() {
+                        if (!window.ClassicEditor || !document.querySelector('#taskNotes')) return;
+                        ClassicEditor
+                            .create(document.querySelector('#taskNotes'), {
+                                toolbar: ['bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote']
+                            })
+                            .then(ed => {
+                                editorInstance = ed;
+                                window.editorInstance = ed;
+                                ed.setData('');
+                            })
+                            .catch(error => {
+                                console.error('Error initializing CKEditor 5:', error);
+                            });
+                    };
+
+                    if (editorInstance) {
+                        editorInstance.destroy()
+                            .then(() => {
+                                editorInstance = null;
+                                window.editorInstance = null;
+                                if (notesEl) notesEl.value = '';
+                                clearAndCreate();
+                            })
+                            .catch(() => {
+                                editorInstance = null;
+                                window.editorInstance = null;
+                                if (notesEl) notesEl.value = '';
+                                clearAndCreate();
+                            });
+                    } else {
+                        clearAndCreate();
+                    }
+                };
+
+                modalEl.addEventListener('shown.bs.modal', initEditor, { once: true });
+
+                if (!modalEl.dataset.resetListenerBound) {
+                    modalEl.dataset.resetListenerBound = '1';
+                    modalEl.addEventListener('hidden.bs.modal', function() {
+                        if (editorInstance) {
+                            editorInstance.destroy().catch(() => {});
+                            editorInstance = null;
+                            window.editorInstance = null;
+                        }
+                        if (form) form.reset();
+                        if (fileInput) fileInput.value = '';
+                        if (projectLink) projectLink.value = '';
+                        if (notesEl) notesEl.value = '';
+                        if (idEl) idEl.value = '';
+                    });
+                }
+            } catch (err) {
+                console.error('openSubmitModal error:', err);
+                alert('Unable to open submit form. Please refresh and try again.');
             }
-
-            // Show modal
-            const modalEl = document.getElementById('submitTaskModal');
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
-
-            // Initialize CKEditor 5 (ClassicEditor) when modal opens
-            modalEl.addEventListener('shown.bs.modal', function() {
-                if (!editorInstance && window.ClassicEditor) {
-                    ClassicEditor
-                        .create(document.querySelector('#taskNotes'), {
-                            toolbar: ['bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote']
-                        })
-                        .then(ed => {
-                            editorInstance = ed;
-                            window.editorInstance = ed;
-                        })
-                        .catch(error => {
-                            console.error('Error initializing CKEditor 5:', error);
-                        });
-                }
-            }, { once: true });
-
-            // Destroy CKEditor instance when modal is hidden to free memory
-            modalEl.addEventListener('hidden.bs.modal', function() {
-                if (editorInstance) {
-                    editorInstance.destroy().catch(() => {});
-                    editorInstance = null;
-                    window.editorInstance = null;
-                    // clear textarea
-                    const ta = document.getElementById('taskNotes');
-                    if (ta) ta.value = '';
-                }
-            });
         }
 
         // Submit Task Form (AJAX + SweetAlert2)
@@ -1669,7 +1863,7 @@
         // Star Rating System (radio-input based)
         let selectedRating = 0;
         const ratingText = document.getElementById('ratingText');
-        const ratingInput = document.getElementById('internshipRating');
+        const ratingInput = document.getElementById('opportunityRating');
 
         const ratingMessages = {
             1: '⭐ Poor - Needs improvement',
@@ -1701,7 +1895,7 @@
         window.serverUserReview = @json($userReview ?? null);
 
         // When modal opens, ensure radio reflects selectedRating (if previously set)
-        document.getElementById('internshipReviewModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('opportunityReviewModal').addEventListener('shown.bs.modal', function() {
             // sync radio UI
             if (selectedRating > 0) {
                 const sel = document.querySelector('.stars input[value="' + selectedRating + '"]');
@@ -1752,14 +1946,14 @@
                 // Expecting { success: true, message: '...' }
                 alert(data.message || 'Thank you for your feedback!');
                 // Close modal
-                bootstrap.Modal.getInstance(document.getElementById('internshipReviewModal')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('opportunityReviewModal')).hide();
                 // mark as submitted locally
-                localStorage.setItem('internshipReviewSubmitted', 'true');
+                localStorage.setItem('opportunityReviewSubmitted', 'true');
                 // Update UI: replace Give Review button with View Review button
                 const giveBtn = document.getElementById('giveReviewBtn');
                 if (giveBtn) giveBtn.remove();
                 if (!document.getElementById('viewReviewBtn')) {
-                    const container = document.querySelector('.internship-details-header .d-flex.align-items-center');
+                    const container = document.querySelector('.internship-details-header .d-flex.align-items-center, .opportunity-details-header .d-flex.align-items-center');
                     if (container) {
                         const btn = document.createElement('button');
                         btn.id = 'viewReviewBtn';
@@ -1790,7 +1984,7 @@
                 }
 
                 // Add "Your Review" tab dynamically
-                var tabList = document.querySelector('.nav-tabs-internship');
+                var tabList = document.querySelector('.nav-tabs-internship, .nav-tabs-opportunity');
                 var tabContent = document.querySelector('.tab-content.tab-content-card');
                 if (tabList && !document.getElementById('your-review-tab')) {
                     var li = document.createElement('li');
@@ -1846,12 +2040,12 @@
                 ratingText.style.fontWeight = '600';
             }
 
-            // Populate internship info from server-side values
-            const internshipNameEl = document.getElementById('reviewInternshipName');
+            // Populate opportunity info from server-side values
+            const internshipNameEl = document.getElementById('reviewOpportunityName');
             const startDateEl = document.getElementById('reviewStartDate');
             const endDateEl = document.getElementById('reviewEndDate');
 
-            if (internshipNameEl) internshipNameEl.textContent = @json($internship->internship_title ?? '-');
+            if (opportunityNameEl) opportunityNameEl.textContent = @json($internship->internship_title ?? '-');
             if (startDateEl) startDateEl.textContent = @json($startDateFormatted ?? ($internship->start_date ? \Carbon\Carbon::parse($internship->start_date)->format('d F Y') : '-'));
             if (endDateEl) endDateEl.textContent = @json($endDateFormatted ?? ($internship->end_date ? \Carbon\Carbon::parse($internship->end_date)->format('d F Y') : '-'));
 
@@ -1860,7 +2054,7 @@
             if (reviewTextarea) reviewTextarea.value = '';
 
             // Show modal
-            const reviewModal = new bootstrap.Modal(document.getElementById('internshipReviewModal'));
+            const reviewModal = new bootstrap.Modal(document.getElementById('opportunityReviewModal'));
             reviewModal.show();
 
             // Ensure radio stars are cleared after modal opens
@@ -1908,13 +2102,13 @@
             modal.show();
         }
 
-        // Show review modal on page load only when internship is marked complete (server-side)
+        // Show review modal on page load only when opportunity is marked complete (server-side)
         window.addEventListener('load', function() {
-            const reviewSubmitted = localStorage.getItem('internshipReviewSubmitted');
+            const reviewSubmitted = localStorage.getItem('opportunityReviewSubmitted');
 
             // Server-provided flag: 1 means complete, otherwise not complete
             const internshipCompleteFlag = @json($internship->complete_status ?? 0);
-            const shouldShowModal = parseInt(internshipCompleteFlag) === 1;
+            const shouldShowModal = parseInt(opportunityCompleteFlag) === 1;
 
             if (shouldShowModal && !reviewSubmitted) {
                 // Small delay for better UX, then open and populate modal

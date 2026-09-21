@@ -119,6 +119,18 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if(auth()->guard('college')->check() || auth()->guard('college_staff')->check())
+    @include('admin.layout.partials.college-page-banner', [
+        'emoji' => '🏅',
+        'title' => 'Manage Grade',
+        'subtitle' => 'Manage college-wise grading system.',
+        'illustration' => 'grade',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Manage Grade'],
+        ],
+    ])
+    @else
     <!-- Page Header -->
     <div class="grade-page-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -128,6 +140,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- College Grade Table -->
     <div class="grade-table-card">

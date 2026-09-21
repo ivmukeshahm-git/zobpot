@@ -120,8 +120,8 @@
                     <input type="text" class="form-control" placeholder="Enter contact number..." id="filterContact">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label" style="font-size: 13px; font-weight: 600; color: #242a62;">Internship Name</label>
-                    <input type="text" class="form-control" placeholder="Enter internship name..." id="filterInternship">
+                    <label class="form-label" style="font-size: 13px; font-weight: 600; color: #242a62;">Opportunity Name</label>
+                    <input type="text" class="form-control" placeholder="Enter opportunity name..." id="filterInternship">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label" style="font-size: 13px; font-weight: 600; color: transparent;">Filter</label>
@@ -143,7 +143,7 @@
                             <th style="font-weight: 700; color: #242a62;">Department</th>
                             <th style="font-weight: 700; color: #242a62;">Semester</th>
                             <th style="font-weight: 700; color: #242a62;">Contact</th>
-                            <th style="font-weight: 700; color: #242a62;">Internship Status</th>
+                            <th style="font-weight: 700; color: #242a62;">Opportunity Status</th>
                             <th style="font-weight: 700; color: #242a62;">Actions</th>
                         </tr>
                     </thead>
@@ -481,7 +481,7 @@
                 if (studentName && !rowStudentName.includes(studentName)) return false;
                 if (email && !rowStudentName.includes(email)) return false;
                 if (contact && !rowContact.includes(contact)) return false;
-                if (internship && !rowStudentName.includes(internship)) return false;
+                if (opportunity && !rowStudentName.includes(opportunity)) return false;
 
                 return true;
             }

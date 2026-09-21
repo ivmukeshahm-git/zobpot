@@ -96,8 +96,8 @@
         color: white;
     }
 
-    /* Internship Card */
-    .internship-card {
+    /* Opportunity Card */
+    .opportunity-card {
         background: white;
         border-radius: 10px;
         padding: 25px;
@@ -107,12 +107,12 @@
         border-left: 4px solid #242a62;
     }
 
-    .internship-card:hover {
+    .opportunity-card:hover {
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
     }
 
-    .internship-card-header {
+    .opportunity-card-header {
         display: flex;
         justify-content: space-between;
         align-items: start;
@@ -121,7 +121,7 @@
         border-bottom: 2px solid #f8f9fa;
     }
 
-    .internship-title {
+    .opportunity-title {
         color: #242a62;
         font-size: 20px;
         font-weight: 700;
@@ -143,7 +143,7 @@
         font-weight: 600;
     }
 
-    .internship-info-grid {
+    .opportunity-info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
@@ -431,10 +431,12 @@
         letter-spacing: 2px;
     }
 
+    .certificate-opportunity-info,
     .certificate-internship-info {
         margin: 20px 0;
     }
 
+    .certificate-opportunity-title,
     .certificate-internship-title {
         font-size: 22px;
         font-weight: 700;
@@ -621,7 +623,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h4><i class="bx bx-certification"></i> Certificate Management</h4>
-                <p>View and manage internship completion certificates</p>
+                <p>View and manage opportunity completion certificates</p>
             </div>
             <div>
                 <button class="btn" onclick="exportAllCertificates()" style="background: white; color: #242a62; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600;">
@@ -633,11 +635,11 @@
 
     <!-- Filter Section -->
     <div class="filter-card">
-        <h6><i class="bx bx-filter"></i> Filter Internships</h6>
+        <h6><i class="bx bx-filter"></i> Filter Opportunities</h6>
         <form id="filterForm">
             <div class="row">
                 <div class="col-md-3 mb-3">
-                    <label class="form-label">Search Internship</label>
+                    <label class="form-label">Search Opportunities</label>
                     <input type="text" class="form-control" id="searchInternship" placeholder="Search by title...">
                 </div>
                 <div class="col-md-3 mb-3">
@@ -675,15 +677,15 @@
         </form>
     </div>
 
-    <!-- Internship List Table -->
+    <!-- Opportunity Directory Table -->
     <div class="card" style="border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
         <div class="card-body" style="padding: 25px;">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 style="color: #242a62; font-weight: 700; margin: 0;">
-                    <i class="bx bx-list-ul"></i> Completed Internships
+                    <i class="bx bx-list-ul"></i> Completed Programs
                 </h5>
                 <span class="badge" style="background: #28a745; color: white; padding: 8px 16px; font-size: 13px; border-radius: 20px;">
-                    <i class="bx bx-check-circle"></i> 3 Internships
+                    <i class="bx bx-check-circle"></i> 3 Opportunities
                 </span>
             </div>
             <div class="table-responsive">
@@ -691,7 +693,7 @@
                     <thead >
                         <tr>
                             <th style="padding: 15px; font-weight: 700; font-size: 13px;">#</th>
-                            <th style="padding: 15px; font-weight: 700; font-size: 13px;">Internship Title</th>
+                            <th style="padding: 15px; font-weight: 700; font-size: 13px;">Opportunity Title</th>
                             <th style="padding: 15px; font-weight: 700; font-size: 13px;">Company Name</th>
                             <th style="padding: 15px; font-weight: 700; font-size: 13px;">Duration</th>
                             <th style="padding: 15px; font-weight: 700; font-size: 13px;">Completion Date</th>
@@ -709,7 +711,7 @@
                                         <i class="bx bx-code-alt" style="color: white; font-size: 20px;"></i>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Full-Stack Web Development Internship</div>
+                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Full-Stack Web Development Opportunity</div>
                                         <div style="font-size: 12px; color: #6c757d;"><i class="bx bx-time"></i> 3 Months Program</div>
                                     </div>
                                 </div>
@@ -734,7 +736,7 @@
                                 </span>
                             </td>
                             <td style="padding: 15px; vertical-align: middle; text-align: center;">
-                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(1, 'Full-Stack Web Development Internship')" style="padding: 8px 16px; font-size: 13px;">
+                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(1, 'Full-Stack Web Development Opportunity')" style="padding: 8px 16px; font-size: 13px;">
                                     <i class="bx bx-certification"></i> View Certificates
                                 </button>
                             </td>
@@ -747,7 +749,7 @@
                                         <i class="bx bx-bullseye" style="color: white; font-size: 20px;"></i>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Digital Marketing Internship</div>
+                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Digital Marketing Opportunity</div>
                                         <div style="font-size: 12px; color: #6c757d;"><i class="bx bx-time"></i> 2 Months Program</div>
                                     </div>
                                 </div>
@@ -772,7 +774,7 @@
                                 </span>
                             </td>
                             <td style="padding: 15px; vertical-align: middle; text-align: center;">
-                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(2, 'Digital Marketing Internship')" style="padding: 8px 16px; font-size: 13px;">
+                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(2, 'Digital Marketing Opportunity')" style="padding: 8px 16px; font-size: 13px;">
                                     <i class="bx bx-certification"></i> View Certificates
                                 </button>
                             </td>
@@ -785,7 +787,7 @@
                                         <i class="bx bx-mobile-alt" style="color: white; font-size: 20px;"></i>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Mobile App Development Internship</div>
+                                        <div style="font-weight: 600; color: #212529; font-size: 14px;">Mobile App Development Opportunity</div>
                                         <div style="font-size: 12px; color: #6c757d;"><i class="bx bx-time"></i> 3 Months Program</div>
                                     </div>
                                 </div>
@@ -810,7 +812,7 @@
                                 </span>
                             </td>
                             <td style="padding: 15px; vertical-align: middle; text-align: center;">
-                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(3, 'Mobile App Development Internship')" style="padding: 8px 16px; font-size: 13px;">
+                                <button class="btn btn-view-certificates" onclick="viewStudentCertificates(3, 'Mobile App Development Opportunity')" style="padding: 8px 16px; font-size: 13px;">
                                     <i class="bx bx-certification"></i> View Certificates
                                 </button>
                             </td>
@@ -831,7 +833,7 @@
                     <h5 class="modal-title" style="color: #fff; margin: 0; font-size: 20px; font-weight: 700;">
                         <i class="bx bx-certification"></i> Student Certificates
                     </h5>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;" id="internshipTitleModal">Full-Stack Web Development Internship</p>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;" id="internshipTitleModal">Full-Stack Web Development Opportunity</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" style="background: #fff; border: none; font-size: 24px; color: white; opacity: 1;">
                     <i class="bx bx-x" style="color: #000;"></i>
@@ -878,7 +880,7 @@
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">Gujarat University</td>
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">10 Jan 2026</td>
                                     <td style="padding: 12px; vertical-align: middle; text-align: center;">
-                                        <button class="btn btn-view-certificate" onclick="viewCertificate(1, 'Rahul Sharma', 'Full-Stack Web Development Internship', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-001')">
+                                        <button class="btn btn-view-certificate" onclick="viewCertificate(1, 'Rahul Sharma', 'Full-Stack Web Development Opportunity', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-001')">
                                             <i class="bx bx-show"></i> View
                                         </button>
                                         <button class="btn btn-download-certificate" onclick="downloadCertificate(1)">
@@ -900,7 +902,7 @@
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">Mumbai University</td>
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">10 Jan 2026</td>
                                     <td style="padding: 12px; vertical-align: middle; text-align: center;">
-                                        <button class="btn btn-view-certificate" onclick="viewCertificate(2, 'Priya Patel', 'Full-Stack Web Development Internship', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-002')">
+                                        <button class="btn btn-view-certificate" onclick="viewCertificate(2, 'Priya Patel', 'Full-Stack Web Development Opportunity', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-002')">
                                             <i class="bx bx-show"></i> View
                                         </button>
                                         <button class="btn btn-download-certificate" onclick="downloadCertificate(2)">
@@ -922,7 +924,7 @@
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">Delhi University</td>
                                     <td style="padding: 12px; vertical-align: middle; color: #495057; font-size: 13px;">10 Jan 2026</td>
                                     <td style="padding: 12px; vertical-align: middle; text-align: center;">
-                                        <button class="btn btn-view-certificate" onclick="viewCertificate(3, 'Amit Kumar', 'Full-Stack Web Development Internship', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-003')">
+                                        <button class="btn btn-view-certificate" onclick="viewCertificate(3, 'Amit Kumar', 'Full-Stack Web Development Opportunity', 'CodeCraft Solutions', '10 Jan 2026', 'CERT-2026-003')">
                                             <i class="bx bx-show"></i> View
                                         </button>
                                         <button class="btn btn-download-certificate" onclick="downloadCertificate(3)">
@@ -951,7 +953,7 @@
             <div class="modal-header modal-header-certificate">
                 <div>
                     <h5 class="modal-title" style="color: #fff; margin: 0; font-size: 20px; font-weight: 700;">
-                        <i class="bx bx-certification"></i> Internship Completion Certificate
+                        <i class="bx bx-certification"></i> Opportunity Completion Certificate
                     </h5>
                     <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;" id="certificateNumberDisplay">Certificate No: CERT-2026-001</p>
                 </div>
@@ -986,7 +988,7 @@
                             <i class="bx bx-briefcase-alt-2"></i>
                         </div>
                         <h1 class="certificate-title">CERTIFICATE</h1>
-                        <p class="certificate-subtitle">Of Internship Completion</p>
+                        <p class="certificate-subtitle">Of Program Completion</p>
                     </div>
 
                     <!-- Certificate Body -->
@@ -996,7 +998,7 @@
                         
                         <div class="certificate-internship-info">
                             <p class="certificate-text">
-                                has successfully completed the internship program in
+                                has successfully completed the opportunity program in
                             </p>
                             <div class="certificate-internship-title" id="certificateInternshipTitle">
                                 Full-Stack Web Development
@@ -1038,7 +1040,7 @@
                         <div class="certificate-signature">
                             <div class="signature-line"></div>
                             <div class="signature-name">Platform Director</div>
-                            <div class="signature-title">ZobPot Internship Portal</div>
+                            <div class="signature-title">ZobPot Opportunity Portal</div>
                         </div>
                     </div>
 
@@ -1070,13 +1072,13 @@
 @push('script')
 <script>
     $(document).ready(function() {
-        // Initialize DataTable for internships
+        // Initialize DataTable for opportunities
         $('#internshipsTable').DataTable({
             order: [[4, 'desc']], // Order by completion date descending
             pageLength: 10,
             language: {
-                search: "Search internships:",
-                lengthMenu: "Show _MENU_ internships per page"
+                search: "Search opportunities:",
+                lengthMenu: "Show _MENU_ opportunities per page"
             },
             columnDefs: [
                 { orderable: false, targets: [7] } // Disable sorting on Actions column
@@ -1095,15 +1097,15 @@
     });
 
     // View Student Certificates
-    window.viewStudentCertificates = function(internshipId, internshipTitle) {
-        console.log('Loading certificates for internship:', internshipId);
+    window.viewStudentCertificates = function(internshipId, opportunityTitle) {
+        console.log('Loading certificates for opportunity:', internshipId);
         
         // Update modal title
-        document.getElementById('internshipTitleModal').textContent = internshipTitle;
+        document.getElementById('opportunityTitleModal').textContent = opportunityTitle;
         
         // In production, fetch student data from server
         // $.ajax({
-        //     url: '/admin/internship/certificates/students/' + internshipId,
+        //     url: '/admin/opportunity/certificates/students/' + internshipId,
         //     method: 'GET',
         //     success: function(response) {
         //         // Populate table with real data
@@ -1118,12 +1120,12 @@
     }
 
     // View Certificate
-    window.viewCertificate = function(studentId, studentName, internshipTitle, companyName, completionDate, certificateNo) {
+    window.viewCertificate = function(studentId, studentName, opportunityTitle, companyName, completionDate, certificateNo) {
         console.log('Viewing certificate for student:', studentId);
         
         // Update certificate content
         document.getElementById('certificateStudentName').textContent = studentName;
-        document.getElementById('certificateInternshipTitle').textContent = internshipTitle;
+        document.getElementById('certificateOpportunityTitle').textContent = opportunityTitle;
         document.getElementById('certificateCompanyName').textContent = companyName;
         document.getElementById('certificateDate').textContent = completionDate;
         document.getElementById('certificateNumber').textContent = certificateNo;
@@ -1139,7 +1141,7 @@
         console.log('Downloading certificate for student:', studentId);
         
         // In production, make API call to download certificate
-        // window.location.href = '/admin/internship/certificates/download/' + studentId;
+        // window.location.href = '/admin/opportunity/certificates/download/' + studentId;
         
         alert('Certificate download initiated for student ID: ' + studentId + '\n\nIn production, this will download the certificate PDF.');
     }
@@ -1154,7 +1156,7 @@
         alert('Certificate download initiated: ' + certificateNo + '\n\nFilename: Certificate_' + studentName.replace(' ', '_') + '_' + certificateNo + '.pdf');
         
         // In production, implement PDF generation and download
-        // window.location.href = '/admin/internship/certificates/download/' + certificateNo;
+        // window.location.href = '/admin/opportunity/certificates/download/' + certificateNo;
     }
 
     // Print Certificate
@@ -1284,28 +1286,28 @@
 
     // Download All Certificates
     window.downloadAllCertificates = function() {
-        const internshipTitle = document.getElementById('internshipTitleModal').textContent;
-        console.log('Downloading all certificates for:', internshipTitle);
+        const internshipTitle = document.getElementById('opportunityTitleModal').textContent;
+        console.log('Downloading all certificates for:', opportunityTitle);
         
-        alert('Bulk download initiated!\n\nAll certificates for "' + internshipTitle + '" will be downloaded as a ZIP file.\n\nIn production, this will generate a ZIP containing all student certificates.');
+        alert('Bulk download initiated!\n\nAll certificates for "' + opportunityTitle + '" will be downloaded as a ZIP file.\n\nIn production, this will generate a ZIP containing all student certificates.');
         
         // In production
-        // window.location.href = '/admin/internship/certificates/download-all/' + internshipId;
+        // window.location.href = '/admin/opportunity/certificates/download-all/' + internshipId;
     }
 
     // Export All Certificates
     window.exportAllCertificates = function() {
         console.log('Exporting all certificates data...');
         
-        alert('Export functionality!\n\nThis will export all certificates data to Excel/CSV format.\n\nColumns: Certificate No, Student Name, Internship Title, Company, Completion Date, Status');
+        alert('Export functionality!\n\nThis will export all certificates data to Excel/CSV format.\n\nColumns: Certificate No, Student Name, Opportunity Title, Company, Completion Date, Status');
         
         // In production
-        // window.location.href = '/admin/internship/certificates/export';
+        // window.location.href = '/admin/opportunity/certificates/export';
     }
 
     // Apply Filters
     window.applyFilters = function() {
-        const searchTerm = document.getElementById('searchInternship').value;
+        const searchTerm = document.getElementById('searchOpportunity').value;
         const company = document.getElementById('filterCompany').value;
         const month = document.getElementById('filterMonth').value;
         const duration = document.getElementById('filterDuration').value;
@@ -1317,9 +1319,9 @@
             duration: duration
         });
         
-        // In production, make AJAX call to filter internships
+        // In production, make AJAX call to filter opportunities
         // $.ajax({
-        //     url: '/admin/internship/certificates/filter',
+        //     url: '/admin/opportunity/certificates/filter',
         //     method: 'GET',
         //     data: { search: searchTerm, company: company, month: month, duration: duration },
         //     success: function(response) {
@@ -1335,10 +1337,10 @@
         document.getElementById('filterForm').reset();
         console.log('Filters reset');
         
-        // In production, reload page or fetch all internships
+        // In production, reload page or fetch all opportunities
         // location.reload();
         
-        alert('Filters reset! Showing all completed internships.');
+        alert('Filters reset! Showing all completed programs.');
     }
 </script>
 @endpush

@@ -5,10 +5,18 @@
 </script>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @include('admin.layout.partials.college-page-banner', [
+        'emoji' => '⚙️',
+        'title' => 'College Settings',
+        'subtitle' => 'Update college profile details and certificate branding images.',
+        'illustration' => 'settings',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Settings'],
+        ],
+    ])
+
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0"><i class="bx bx-cog me-1"></i> College Settings</h5>
-        </div>
         <div class="card-body">
             <form id="college-settings-form" enctype="multipart/form-data">
                 @csrf

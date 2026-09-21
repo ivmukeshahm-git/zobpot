@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\JobCategory;
+use App\Models\Jobsubcategory;
+use App\Models\CategorySubcategoryRequest;
+use App\Models\Internship;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -284,6 +287,210 @@ class JobcategoryController extends Controller
                 'status' => 0,
                 'message' => 'Failed to delete job category.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getCategoryRequestsTableData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = CategorySubcategoryRequest::select([
+                    'tbl_category_subcategory_requests.id',
+                    'tbl_category_subcategory_requests.requested_name',
+                    'tbl_category_subcategory_requests.status',
+                    'tbl_category_subcategory_requests.created_at',
+                    'users.name as company_name',
+                    'users.email as company_email',
+                ])
+                ->leftJoin('users', 'users.id', '=', 'tbl_category_subcategory_requests.user_id')
+                ->where('tbl_category_subcategory_requests.request_type', 'category')
+                ->where('tbl_category_subcategory_requests.status', CategorySubcategoryRequest::STATUS_PENDING);
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('status_label', function ($row) {
+                    if ($row->status == CategorySubcategoryRequest::STATUS_APPROVED) {
+                        return '<span class="badge bg-success">Approved</span>';
+                    }
+                    if ($row->status == CategorySubcategoryRequest::STATUS_REJECTED) {
+                        return '<span class="badge bg-danger">Rejected</span>';
+                    }
+                    return '<span class="badge bg-warning">Pending</span>';
+                })
+                ->addColumn('action', function ($row) {
+                    if ($row->status != CategorySubcategoryRequest::STATUS_PENDING) {
+                        return '-';
+                    }
+
+                    return '
+                        <button type="button" class="btn btn-sm btn-success approve-category-request-btn" data-id="' . $row->id . '">Approve</button>
+                        <button type="button" class="btn btn-sm btn-danger reject-category-request-btn" data-id="' . $row->id . '">Reject</button>
+                    ';
+                })
+                ->filterColumn('requested_name', function ($query, $keyword) {
+                    $query->where('tbl_category_subcategory_requests.requested_name', 'like', "%$keyword%");
+                })
+                ->filterColumn('company_name', function ($query, $keyword) {
+                    $query->where('users.name', 'like', "%$keyword%");
+                })
+                ->rawColumns(['status_label', 'action'])
+                ->make(true);
+        }
+
+        return abort(403, 'Unauthorized');
+    }
+
+    public function approveCategoryRequest($id)
+    {
+        try {
+            $requestRecord = CategorySubcategoryRequest::where('id', $id)
+                ->where('request_type', 'category')
+                ->where('status', CategorySubcategoryRequest::STATUS_PENDING)
+                ->firstOrFail();
+
+            $category = JobCategory::create([
+                'preference_type' => 2,
+                'category_nm' => $requestRecord->requested_name,
+            ]);
+
+            $requestRecord->update([
+                'status' => CategorySubcategoryRequest::STATUS_APPROVED,
+                'approved_id' => $category->category_id,
+            ]);
+
+            if ($requestRecord->internship_id) {
+                Internship::where('id', $requestRecord->internship_id)
+                    ->update(['category' => $category->category_id]);
+            }
+
+            $approvedSubCount = $this->autoApproveRelatedSubcategoryRequests($requestRecord, $category);
+
+            StaffActivityController::insertActivity(Auth::user()->id, 'Category request approved: ' . $requestRecord->requested_name);
+
+            $message = 'Category request approved successfully.';
+            if ($approvedSubCount > 0) {
+                $message = 'Category request approved successfully. Related subcategory request(s) were also approved.';
+            }
+
+            return response()->json([
+                'status' => 1,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Failed to approve category request.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function autoApproveRelatedSubcategoryRequests($categoryRequest, $category)
+    {
+        $query = CategorySubcategoryRequest::where('request_type', 'subcategory')
+            ->where('status', CategorySubcategoryRequest::STATUS_PENDING);
+
+        if ($categoryRequest->internship_id) {
+            $query->where('internship_id', $categoryRequest->internship_id);
+        } else {
+            $query->where('user_id', $categoryRequest->user_id)
+                ->where(function ($q) use ($categoryRequest) {
+                    $q->where('parent_category_name', $categoryRequest->requested_name)
+                        ->orWhereNull('category_id');
+                });
+        }
+
+        $subRequests = $query->get();
+        $approvedCount = 0;
+
+        foreach ($subRequests as $subRequest) {
+            $subcategory = Jobsubcategory::create([
+                'category_id' => $category->category_id,
+                'sub_category_nm' => $subRequest->requested_name,
+            ]);
+
+            $subRequest->update([
+                'status' => CategorySubcategoryRequest::STATUS_APPROVED,
+                'approved_id' => $subcategory->sub_category_id,
+                'category_id' => $category->category_id,
+                'parent_category_name' => $subRequest->parent_category_name ?: $categoryRequest->requested_name,
+            ]);
+
+            if ($subRequest->internship_id) {
+                $internship = Internship::find($subRequest->internship_id);
+                if ($internship) {
+                    $subCategories = is_array($internship->sub_categories) ? $internship->sub_categories : [];
+                    $subCategories[] = (int) $subcategory->sub_category_id;
+                    $internship->update([
+                        'category' => $category->category_id,
+                        'sub_categories' => array_values(array_unique($subCategories)),
+                    ]);
+                }
+            }
+
+            $approvedCount++;
+        }
+
+        if ($approvedCount > 0) {
+            StaffActivityController::insertActivity(
+                Auth::id(),
+                'Auto-approved ' . $approvedCount . ' subcategory request(s) with category: ' . $categoryRequest->requested_name
+            );
+        }
+
+        return $approvedCount;
+    }
+
+    public function rejectCategoryRequest($id)
+    {
+        try {
+            $requestRecord = CategorySubcategoryRequest::where('id', $id)
+                ->where('request_type', 'category')
+                ->where('status', CategorySubcategoryRequest::STATUS_PENDING)
+                ->firstOrFail();
+
+            $requestRecord->update([
+                'status' => CategorySubcategoryRequest::STATUS_REJECTED,
+            ]);
+
+            // Reject related pending subcategory requests as well
+            $subQuery = CategorySubcategoryRequest::where('request_type', 'subcategory')
+                ->where('status', CategorySubcategoryRequest::STATUS_PENDING);
+
+            if ($requestRecord->internship_id) {
+                $subQuery->where('internship_id', $requestRecord->internship_id);
+            } else {
+                $subQuery->where('user_id', $requestRecord->user_id)
+                    ->where(function ($q) use ($requestRecord) {
+                        $q->where('parent_category_name', $requestRecord->requested_name)
+                            ->orWhereNull('category_id');
+                    });
+            }
+
+            $rejectedSubCount = $subQuery->update([
+                'status' => CategorySubcategoryRequest::STATUS_REJECTED,
+            ]);
+
+            StaffActivityController::insertActivity(Auth::user()->id, 'Category request rejected: ' . $requestRecord->requested_name);
+
+            $message = 'Category request rejected successfully.';
+            if ($rejectedSubCount > 0) {
+                StaffActivityController::insertActivity(
+                    Auth::id(),
+                    'Auto-rejected ' . $rejectedSubCount . ' subcategory request(s) with category: ' . $requestRecord->requested_name
+                );
+                $message = 'Category request rejected successfully. Related subcategory request(s) were also rejected.';
+            }
+
+            return response()->json([
+                'status' => 1,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Failed to reject category request.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

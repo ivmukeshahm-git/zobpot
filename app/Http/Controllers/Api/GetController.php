@@ -212,6 +212,28 @@ class GetController extends Controller
         $userArray["applied_jobs"] = $appliedJobs;
         $userArray["applied_jobs_count"] = $appliedJobs->count();
 
+        // Applied Internships Count (excluding deleted internships)
+        $userArray["applied_internships_count"] = DB::table("tbl_internship_application as a")
+            ->join("tbl_internship as i", "a.internship_id", "=", "i.id")
+            ->whereNull("i.deleted_at")
+            ->where("a.user_id", $user_id)
+            ->count();
+
+        // Resolve plan service and user active service
+        $plan = DB::table('tbl_plan_pricing')->where('plan_id', $user->active_plan_id ?? 0)->first();
+        $planPricingService = $plan ? strtolower(trim((string) ($plan->service ?? 'none'))) : 'none';
+
+        // 1) plan_service: Plan's service from tbl_plan_pricing (public/admin/pricing)
+        $userArray['plan_service'] = $planPricingService;
+
+        // 2) service: Assigned user service from Update Plan modal (users.plan_service), fallback to plan's service
+        $userService = strtolower(trim((string) ($user->plan_service ?? '')));
+        if (in_array($userService, ['none', 'all', 'job', 'internship'], true)) {
+            $userArray['service'] = $userService;
+        } else {
+            $userArray['service'] = $planPricingService;
+        }
+
         // Final response
         return response()->json([
             "status" => true,
@@ -1342,5 +1364,52 @@ class GetController extends Controller
             'message' => 'App banner fetched successfully.',
             'data' => $adBanner,
         ], 200);
+    }
+
+    public function getInterviewTips()
+    {
+        $tip = DB::table('tbl_interview_tips')
+            ->whereNull('deleted_at')
+            ->where('status', 1)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$tip) {
+            return response()->json([
+                'status' => true,
+                'message' => 'No interview tips found.',
+            ]);
+        }
+
+        $points = DB::table('tbl_interview_tip_points')
+            ->where('interview_tip_id', $tip->id)
+            ->whereNull('deleted_at')
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        $tips = [];
+        foreach ($points as $point) {
+            $tips[] = [
+                'id' => (int) $point->id,
+                'title' => $point->title,
+                'description' => $point->description,
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Interview tips fetched successfully.',
+            'data' => [
+                'Header' => [
+                    'title' => $tip->main_header,
+                    'subtitle' => $tip->short_line,
+                ],
+                'tips' => $tips,
+                'footer' => [
+                    'title' => $tip->footer_title,
+                    'message' => $tip->footer_description,
+                ],
+            ],
+        ]);
     }
 }

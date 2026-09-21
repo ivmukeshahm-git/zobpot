@@ -150,10 +150,18 @@ class CompanyregisterlistController extends Controller
                     'a.name',
                     'a.email',
                     'a.active_plan_id',
+                    'a.plan_service',
+                    'a.plan_job_limit',
+                    'a.plan_opportunity_limit',
+                    'a.plan_job_used',
+                    'a.plan_internship_used',
                     'b.plan_name',
                     'b.plan_price',
                     'b.plan_time',
-                    'b.plan_duration'
+                    'b.plan_duration',
+                    'b.service as plan_default_service',
+                    'b.job_limit as plan_job_limit_default',
+                    'b.opportunity_limit as plan_opportunity_limit_default'
                 )
                 ->first();
 
@@ -170,12 +178,38 @@ class CompanyregisterlistController extends Controller
                 ->orderByDesc('id')
                 ->first();
 
+            // Fallback: show latest history dates when plan marked expired but history remains
+            if (!$activeHistory) {
+                $activeHistory = DB::table('tbl_plan_history')
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('id')
+                    ->first();
+            }
+
             $plans = DB::table('tbl_plan_pricing')
                 ->where('plan_for', 'Company')
                 ->where('status', 1)
                 ->whereNull('deleted_at')
                 ->orderBy('plan_price')
-                ->get(['plan_id', 'plan_name', 'plan_price', 'plan_time', 'plan_duration']);
+                ->get(['plan_id', 'plan_name', 'plan_price', 'plan_time', 'plan_duration', 'service', 'job_limit', 'opportunity_limit']);
+
+            // Heal orphan active history in admin modal data too
+            if (((int) ($user->active_plan_id ?? 0) === 0) && $activeHistory && (int) $activeHistory->status === 1) {
+                $expireOk = $activeHistory->expire_date
+                    && Carbon::parse($activeHistory->expire_date)->gte(Carbon::today());
+                if ($expireOk) {
+                    DB::table('users')->where('id', $user->id)->update([
+                        'active_plan_id' => $activeHistory->plan_id,
+                        'updated_at' => now(),
+                    ]);
+                    $user->active_plan_id = $activeHistory->plan_id;
+                    if (empty($user->plan_name)) {
+                        $user->plan_name = DB::table('tbl_plan_pricing')
+                            ->where('plan_id', $activeHistory->plan_id)
+                            ->value('plan_name');
+                    }
+                }
+            }
 
             $currentPlanLabel = 'No Plan Purchased';
             if (is_null($user->active_plan_id)) {
@@ -188,6 +222,8 @@ class CompanyregisterlistController extends Controller
                 $currentPlanLabel = 'Unknown Plan';
             }
 
+            $currentService = $user->plan_service ?: ($user->plan_default_service ?: 'none');
+
             return response()->json([
                 'status' => 1,
                 'data' => [
@@ -197,6 +233,11 @@ class CompanyregisterlistController extends Controller
                     'active_plan_id' => $user->active_plan_id,
                     'current_plan_name' => $currentPlanLabel,
                     'current_plan_price' => $user->plan_price,
+                    'current_service' => $currentService,
+                    'job_limit' => $user->plan_job_limit ?? $user->plan_job_limit_default,
+                    'opportunity_limit' => $user->plan_opportunity_limit ?? $user->plan_opportunity_limit_default,
+                    'plan_job_used' => (int) ($user->plan_job_used ?? 0),
+                    'plan_internship_used' => (int) ($user->plan_internship_used ?? 0),
                     'purchase_date' => $activeHistory->purchase_date ?? null,
                     'expire_date' => $activeHistory->expire_date ?? null,
                     'plans' => $plans,
@@ -218,6 +259,9 @@ class CompanyregisterlistController extends Controller
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
             'plan_id' => 'required|integer|exists:tbl_plan_pricing,plan_id',
+            'service' => 'required|in:none,all,job,internship,opportunity',
+            'job_limit' => 'nullable|integer|min:1',
+            'opportunity_limit' => 'nullable|integer|min:1',
             'note' => 'nullable|string|max:1000',
         ]);
 
@@ -253,51 +297,115 @@ class CompanyregisterlistController extends Controller
                 ]);
             }
 
-            $startDate = Carbon::now();
-            $duration = (int) $plan->plan_time;
-            $expireDate = match (strtoupper(trim($plan->plan_duration))) {
-                'M' => $startDate->copy()->addMonths($duration),
-                'Y' => $startDate->copy()->addYears($duration),
-                'D' => $startDate->copy()->addDays($duration),
-                default => $startDate->copy()->addDays($duration),
-            };
-            $durationText = $duration . strtoupper(trim($plan->plan_duration));
+            $service = \App\Models\PlanPricing::normalizeService($request->input('service', 'none'));
+            $jobLimit = $request->filled('job_limit') ? (int) $request->input('job_limit') : null;
+            $opportunityLimit = $request->filled('opportunity_limit') ? (int) $request->input('opportunity_limit') : null;
 
-            // Deactivate previous active plans
-            DB::table('tbl_plan_history')
-                ->where('user_id', $user->id)
-                ->where('status', 1)
-                ->update([
+            if (in_array($service, ['all', 'job'], true) && empty($jobLimit)) {
+                DB::rollBack();
+                return response()->json([
                     'status' => 0,
-                    'updated_at' => now(),
+                    'message' => 'Please enter Job Limit.',
                 ]);
+            }
+            if (in_array($service, ['all', 'internship'], true) && empty($opportunityLimit)) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Please enter Opportunity Limit.',
+                ]);
+            }
 
-            DB::table('tbl_plan_history')->insert([
-                'plan_id' => $plan->plan_id,
-                'user_id' => $user->id,
-                'purchase_date' => $startDate->toDateString(),
-                'expire_date' => $expireDate->toDateString(),
-                'duration' => $durationText,
-                'status' => 1,
-                'payment_id' => null,
-                'order_id' => null,
-                'note' => $request->note,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Clear limits not included in selected service
+            if (!in_array($service, ['all', 'job'], true)) {
+                $jobLimit = null;
+            }
+            if (!in_array($service, ['all', 'internship'], true)) {
+                $opportunityLimit = null;
+            }
 
-            DB::table('users')
-                ->where('id', $user->id)
-                ->update([
+            $isSamePlan = (int) ($user->active_plan_id ?? 0) === (int) $plan->plan_id
+                && (int) ($user->active_plan_id ?? 0) > 0
+                && DB::table('tbl_plan_history')
+                    ->where('user_id', $user->id)
+                    ->where('plan_id', $plan->plan_id)
+                    ->where('status', 1)
+                    ->whereDate('expire_date', '>=', Carbon::today()->toDateString())
+                    ->exists();
+
+            if ($isSamePlan) {
+                // Same active plan: update service/limits only — keep purchase & expire dates and usage counters
+                DB::table('users')->where('id', $user->id)->update([
                     'active_plan_id' => $plan->plan_id,
+                    'plan_service' => $service,
+                    'plan_job_limit' => $jobLimit,
+                    'plan_opportunity_limit' => $opportunityLimit,
                     'updated_at' => now(),
                 ]);
+
+                $activeHistoryId = DB::table('tbl_plan_history')
+                    ->where('user_id', $user->id)
+                    ->where('status', 1)
+                    ->where('plan_id', $plan->plan_id)
+                    ->orderByDesc('id')
+                    ->value('id');
+
+                if ($activeHistoryId) {
+                    DB::table('tbl_plan_history')->where('id', $activeHistoryId)->update([
+                        'note' => $request->note,
+                        'updated_at' => now(),
+                    ]);
+                }
+            } else {
+                // New / renewed plan: new purchase/expire dates and reset usage
+                $startDate = Carbon::now();
+                $duration = (int) $plan->plan_time;
+                $expireDate = match (strtoupper(trim($plan->plan_duration))) {
+                    'M' => $startDate->copy()->addMonths($duration),
+                    'Y' => $startDate->copy()->addYears($duration),
+                    'D' => $startDate->copy()->addDays($duration),
+                    default => $startDate->copy()->addDays($duration),
+                };
+                $durationText = $duration . strtoupper(trim($plan->plan_duration));
+
+                DB::table('tbl_plan_history')
+                    ->where('user_id', $user->id)
+                    ->where('status', 1)
+                    ->update([
+                        'status' => 0,
+                        'updated_at' => now(),
+                    ]);
+
+                DB::table('tbl_plan_history')->insert([
+                    'plan_id' => $plan->plan_id,
+                    'user_id' => $user->id,
+                    'purchase_date' => $startDate->toDateString(),
+                    'expire_date' => $expireDate->toDateString(),
+                    'duration' => $durationText,
+                    'status' => 1,
+                    'payment_id' => null,
+                    'order_id' => null,
+                    'note' => $request->note,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                \App\Models\PlanPricing::activatePlanForUser(
+                    (object) ['id' => $user->id],
+                    $plan,
+                    $service,
+                    $jobLimit,
+                    $opportunityLimit
+                );
+            }
 
             DB::commit();
 
             return response()->json([
                 'status' => 1,
-                'message' => 'Plan updated successfully.',
+                'message' => $isSamePlan
+                    ? 'Plan limits updated successfully. Purchase and expire dates unchanged.'
+                    : 'Plan updated successfully.',
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();

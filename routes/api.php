@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GetController;
 use App\Http\Controllers\Api\JobController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\InternshipController;
 use App\Models\Setting;
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Route::post('/update-active-plan', [AuthController::class, 'updateActivePlan']);
 Route::post('/handle-payment-status', [AuthController::class, 'handlePaymentStatus']);
 Route::post('/check-plan-status', [AuthController::class, 'checkPlanStatus']);
 Route::post('/check-job-post-eligibility', [AuthController::class, 'checkJobPostEligibility']);
+Route::post('/check-internship-post-eligibility', [AuthController::class, 'checkInternshipPostEligibility']);
 Route::delete('/resume/delete', [AuthController::class, 'deleteResume']);
 
 Route::get('/states', [AuthController::class, 'getStates']);
@@ -65,6 +67,7 @@ Route::get('/min-qualifications', [GetController::class, 'getMinQualificationLis
 Route::get('/experience-list', [GetController::class, 'getExperienceList']);
 Route::get('/partners-list', [GetController::class, 'getPartnersList']);
 Route::get('/get-all-job-titles', [GetController::class, 'getAllJobTitles']);
+Route::get('/interview-tips', [GetController::class, 'getInterviewTips']);
 
 Route::get('/get-education', [AuthController::class, 'getEducation']);
 Route::post('/add-education', [AuthController::class, 'addEducation']);
@@ -115,3 +118,47 @@ Route::get("get-setting", function () {
     return response()->json(["success" => true, "data" => $setting]);
 });
 
+
+// Internship APIs - Company Side
+Route::post('/internship/create', [InternshipController::class, 'createInternship']);
+Route::get('/internship/perks-benefits', [InternshipController::class, 'getPerksAndBenefits']);
+Route::post('/company/internships', [InternshipController::class, 'getCompanyInternships']);
+Route::post('/company/internship/applicants', [InternshipController::class, 'getInternshipApplicants']);
+Route::post('/internship/details', [InternshipController::class, 'getInternshipDetails']);
+Route::post('/internship/instruction/add-update', [InternshipController::class, 'addUpdateGeneralInstruction']);
+Route::post('/internship/edit', [InternshipController::class, 'editInternship']);
+Route::post('/internship/delete', [InternshipController::class, 'deleteInternship']);
+Route::post('/internship/toggle-status', [InternshipController::class, 'toggleInternshipStatus']);
+Route::post('/internship/tasks', [InternshipController::class, 'getInternshipTasks']);
+Route::post('/internship/task/add', [InternshipController::class, 'addInternshipTask']);
+Route::post('/internship/task/view', [InternshipController::class, 'viewInternshipTask']);
+Route::post('/internship/task/edit', [InternshipController::class, 'editInternshipTask']);
+Route::post('/internship/task/delete', [InternshipController::class, 'deleteInternshipTask']);
+Route::post('/internship/task/submissions', [InternshipController::class, 'getTaskSubmissions']);
+Route::post('/internship/task/submission/view', [InternshipController::class, 'viewSubmittedTask']);
+Route::post('/internship/task/feedback/add', [InternshipController::class, 'addFeedback']);
+Route::post('/internship/task/feedback/view', [InternshipController::class, 'viewFeedback']);
+Route::post('/internship/task/marks/add', [InternshipController::class, 'addIndustryMarks']);
+Route::post('/internship/complete', [InternshipController::class, 'completeInternship']);
+Route::get('/internship/education-list', [InternshipController::class, 'getEducationList']);
+
+// Internship APIs - Candidate Side
+Route::post('/candidate/internships', [InternshipController::class, 'getActiveInternships']);
+Route::post('/candidate/internship/details', [InternshipController::class, 'getInternshipDetailsForCandidate']);
+Route::get('/candidate/education-details', [InternshipController::class, 'getEducationDetails']);
+Route::post('/candidate/internship/college-info/submit', [InternshipController::class, 'submitCollegeInfo']);
+Route::post('/candidate/internship/razorpay/create-order', [InternshipController::class, 'createInternshipRazorpayOrder']);
+Route::post('/candidate/internship/apply', [InternshipController::class, 'applyInternship']);
+Route::post('/candidate/internship/tasks', [InternshipController::class, 'getAssignedTasks']);
+Route::post('/candidate/internship/task/submit', [InternshipController::class, 'submitTask']);
+Route::post('/candidate/internship/task/submitted/view', [InternshipController::class, 'viewMySubmittedTask']);
+Route::post('/candidate/internships/applied', [InternshipController::class, 'getMyAppliedInternships']);
+Route::post('/candidate/internship/applied/details', [InternshipController::class, 'getAppliedInternshipDetails']);
+Route::match(['get', 'post'], '/candidate/internship/certificate/download', [InternshipController::class, 'downloadCertificate']);
+Route::get('/candidate/internship/certificate/pdf/{applicationId}/{type?}', [InternshipController::class, 'downloadCertificatePdf']);
+Route::get('/candidate/internship/certificate/preview/{applicationId}/{type?}', [InternshipController::class, 'previewCertificatePdf']);
+Route::post('/candidate/internship/wishlist/toggle', [InternshipController::class, 'toggleWishlist']);
+Route::post('/candidate/internship/wishlist/list', [InternshipController::class, 'getWishlistInternships']);
+Route::post('/candidate/internship/review/add', [InternshipController::class, 'addReview']);
+Route::post('/internship/reviews', [InternshipController::class, 'getInternshipReviews']);
+Route::get('/internship/reviews/global', [InternshipController::class, 'getGlobalReviews']);

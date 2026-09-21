@@ -28,7 +28,7 @@
                 <div class="row d-flex justify-content-center">
 
                     @foreach($pricing as $row)
-                        @php $benefits = $row->benefits ? explode(',', $row->benefits) : []; @endphp
+                        @php $benefits = $row->benefits_list; @endphp
 
                         <div class="col-xl-4 col-lg-6 col-md-6">
                             <div class="pricing-card">
@@ -41,13 +41,13 @@
                                     </div>
                                 </div>
 
-                                <p class="plan-desc">{{ $row->plan_description }}</p>
+                                <p class="plan-desc">{{ \App\Models\PlanPricing::decodePlanText($row->plan_description) }}</p>
 
                                 <ul class="plan-benefits">
                                     @foreach($benefits as $b)
                                         <li>
                                             <span class="tick">✓</span>
-                                            {{ trim($b) }}
+                                            {{ $b }}
                                         </li>
                                     @endforeach
                                 </ul>
@@ -92,7 +92,7 @@
                 <div class="row d-flex justify-content-center">
 
                     @foreach($pricingCompany as $row)
-                        @php $benefits = $row->benefits ? explode(',', $row->benefits) : []; @endphp
+                        @php $benefits = $row->benefits_list; @endphp
 
                         <div class="col-xl-4 col-lg-6 col-md-6">
                             <div class="pricing-card">
@@ -135,13 +135,13 @@
 
                                 </div>
 
-                                <p class="plan-desc">{{ $row->plan_description }}</p>
+                                <p class="plan-desc">{{ \App\Models\PlanPricing::decodePlanText($row->plan_description) }}</p>
 
                                 <ul class="plan-benefits">
                                     @foreach($benefits as $b)
                                         <li>
                                             <span class="tick company">✓</span>
-                                            {{ trim($b) }}
+                                            {{ $b }}
                                         </li>
                                     @endforeach
                                 </ul>

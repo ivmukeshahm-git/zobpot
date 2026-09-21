@@ -85,6 +85,30 @@ class JobController extends Controller
             ], 200);
         }
 
+        $authUser = Auth::user();
+        if ($authUser && ($authUser->profile_type ?? '') === 'Company') {
+            if (!\App\Models\PlanPricing::companyCanPost($authUser, 'job')) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'Your current plan does not include Job service. Please upgrade your plan to post jobs.',
+                    'upgrade_url' => route('pricing', ['user_id' => $authUser->id]),
+                    'contact_url' => route('contact'),
+                ], 403);
+            }
+
+            $limitCheck = \App\Models\PlanPricing::checkServiceLimit($authUser, 'job', 'create');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => $limitCheck['message'],
+                    'upgrade_url' => route('pricing', ['user_id' => $authUser->id]),
+                    'contact_url' => route('contact'),
+                    'limit' => $limitCheck['limit'],
+                    'used' => $limitCheck['used'],
+                ], 403);
+            }
+        }
+
         $state_id = 0;
         $city_id = 0;
         $area_id = 0;
@@ -217,6 +241,9 @@ class JobController extends Controller
             ]);
         }
 
+        if ($authUser && ($authUser->profile_type ?? '') === 'Company') {
+            \App\Models\PlanPricing::incrementServiceUsage($authUser, 'job');
+        }
 
         return response()->json([
             'status' => 1,

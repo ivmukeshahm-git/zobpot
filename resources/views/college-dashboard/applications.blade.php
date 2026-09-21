@@ -112,7 +112,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="fw-bold mb-1" style="color: #242a62;">
-                    <i class="bx bx-file"></i> Internship Applications
+                    <i class="bx bx-file"></i> Candidate Applications
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
@@ -138,7 +138,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="mb-0" style="font-weight: 700; color: #242a62;">156</h3>
-                                <small style="color: #666;">Total Internships</small>
+                                <small style="color: #666;">Total Opportunities</small>
                             </div>
                             <i class="bx bx-briefcase" style="font-size: 36px; color: #2196F3;"></i>
                         </div>
@@ -151,7 +151,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="mb-0" style="font-weight: 700; color: #242a62;">67</h3>
-                                <small style="color: #666;">Processing Internships</small>
+                                <small style="color: #666;">Processing Opportunities</small>
                             </div>
                             <i class="bx bx-time-five" style="font-size: 36px; color: #FF9800;"></i>
                         </div>
@@ -164,7 +164,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="mb-0" style="font-weight: 700; color: #242a62;">124</h3>
-                                <small style="color: #666;">Completed Internships</small>
+                                <small style="color: #666;">Completed Programs</small>
                             </div>
                             <i class="bx bx-check-circle" style="font-size: 36px; color: #4CAF50;"></i>
                         </div>
@@ -190,7 +190,7 @@
         <ul class="nav nav-pills mb-4" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#all-applications" role="tab">
-                    <i class="bx bx-list-ul"></i>&nbsp; All Internships
+                    <i class="bx bx-list-ul"></i>&nbsp; All Opportunities
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -220,7 +220,7 @@
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">ID</th>
-                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Internship Title</th>
+                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Opportunity Title</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Company Name</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Duration</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Stipend</th>
@@ -255,7 +255,7 @@
                                         <span class="badge" style="background: #17a2b8; color: white; font-size: 11px;">In Progress</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/1') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/1') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -284,7 +284,7 @@
                                         <span class="badge" style="background: #ffc107; color: #000; font-size: 11px;">Pending</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/2') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/2') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -313,7 +313,7 @@
                                         <span class="badge" style="background: #4CAF50; color: white; font-size: 11px;">Completed</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/3') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/3') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -342,7 +342,7 @@
                                         <span class="badge" style="background: #17a2b8; color: white; font-size: 11px;">In Progress</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/4') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/4') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -371,7 +371,7 @@
                                         <span class="badge" style="background: #ffc107; color: #000; font-size: 11px;">Pending</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/5') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/5') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -390,7 +390,7 @@
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">ID</th>
-                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Internship Title</th>
+                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Opportunity Title</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Company Name</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Duration</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Stipend</th>
@@ -425,7 +425,7 @@
                                         <span class="badge" style="background: #ffc107; color: #000; font-size: 11px;">Pending</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/2') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/2') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -454,7 +454,7 @@
                                         <span class="badge" style="background: #ffc107; color: #000; font-size: 11px;">Pending</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/5') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/5') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -473,7 +473,7 @@
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">ID</th>
-                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Internship Title</th>
+                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Opportunity Title</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Company Name</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Duration</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Stipend</th>
@@ -508,7 +508,7 @@
                                         <span class="badge" style="background: #17a2b8; color: white; font-size: 11px;">In Progress</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/1') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/1') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -537,7 +537,7 @@
                                         <span class="badge" style="background: #17a2b8; color: white; font-size: 11px;">In Progress</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/4') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/4') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -556,7 +556,7 @@
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">ID</th>
-                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Internship Title</th>
+                                    <th style="font-weight: 700; color: #242a62; font-size: 13px;">Opportunity Title</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Company Name</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Duration</th>
                                     <th style="font-weight: 700; color: #242a62; font-size: 13px;">Stipend</th>
@@ -591,7 +591,7 @@
                                         <span class="badge" style="background: #4CAF50; color: white; font-size: 11px;">Completed</span>
                                     </td>
                                     <td style="vertical-align: middle;">
-                                        <a href="{{ url('admin/internship/view/3') }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ url('admin/opportunity/view/3') }}" class="btn btn-sm btn-primary">
                                             <i class="bx bx-show"></i> View
                                         </a>
                                     </td>
@@ -633,16 +633,16 @@
             ]
         };
 
-        // Initialize DataTable for All Internships
+        // Initialize DataTable for All Opportunities
         var allInternshipsTable = $('#allInternshipsTable').DataTable(dataTableOptions);
 
-        // Initialize DataTable for Pending Internships
+        // Initialize DataTable for Pending Programs
         var pendingInternshipsTable = $('#pendingInternshipsTable').DataTable(dataTableOptions);
 
-        // Initialize DataTable for In Progress Internships
+        // Initialize DataTable for In Progress Opportunities
         var inProgressInternshipsTable = $('#inProgressInternshipsTable').DataTable(dataTableOptions);
 
-        // Initialize DataTable for Completed Internships
+        // Initialize DataTable for Completed Programs
         var completedInternshipsTable = $('#completedInternshipsTable').DataTable(dataTableOptions);
 
         // Reinitialize DataTable when tab is shown (fixes column width issues)
@@ -650,13 +650,13 @@
             var target = $(e.target).attr("data-bs-target");
             
             if (target === '#all-applications') {
-                allInternshipsTable.columns.adjust().responsive.recalc();
+                allOpportunitiesTable.columns.adjust().responsive.recalc();
             } else if (target === '#pending-applications') {
-                pendingInternshipsTable.columns.adjust().responsive.recalc();
+                pendingOpportunitiesTable.columns.adjust().responsive.recalc();
             } else if (target === '#in-progress-applications') {
-                inProgressInternshipsTable.columns.adjust().responsive.recalc();
+                inProgressOpportunitiesTable.columns.adjust().responsive.recalc();
             } else if (target === '#completed-applications') {
-                completedInternshipsTable.columns.adjust().responsive.recalc();
+                completedOpportunitiesTable.columns.adjust().responsive.recalc();
             }
         });
 

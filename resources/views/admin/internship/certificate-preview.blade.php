@@ -167,7 +167,7 @@
             <p class="meta">Certificate No: {{ $certificate_no }} &nbsp;|&nbsp; Student: {{ $student_name }}</p>
         </div>
         <div class="cert-preview-actions">
-            <a href="{{ $back_url ?? url('admin/internship/view/' . $internship->id) . '#students' }}" class="btn btn-cert-back">
+            <a href="{{ $back_url ?? url('admin/opportunity/view/' . $internship->id) . '#students' }}" class="btn btn-cert-back">
                 <i class="bx bx-arrow-back"></i> Back
             </a>
             <button type="button" class="btn btn-cert-print" onclick="printCertificatePreview()">

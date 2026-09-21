@@ -240,6 +240,23 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
 
+    @if(auth()->guard('college')->check() || auth()->guard('college_staff')->check())
+    @component('admin.layout.partials.college-page-banner', [
+        'emoji' => '🕒',
+        'title' => $internship->internship_title,
+        'subtitle' => 'College Marks History — Read Only',
+        'illustration' => 'history',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'Marks History', 'url' => route('admin.internship.college-marks-history')],
+            ['label' => 'Detail'],
+        ],
+    ])
+        <a href="{{ route('admin.internship.college-marks-history') }}" class="btn zp-banner-btn">
+            <i class="bx bx-arrow-back"></i> Back
+        </a>
+    @endcomponent
+    @else
     {{-- Page Header --}}
     <div class="detail-header">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -251,18 +268,16 @@
                 <a href="{{ route('admin.internship.college-marks-history') }}" class="back-btn">
                     <i class="bx bx-arrow-back"></i> Back
                 </a>
-                {{-- <a href="{{ route('admin.internship.export-marks-history', $internship->id) }}" class="export-btn">
-                    <i class="bx bx-download"></i> Export Excel
-                </a> --}}
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Status Alert --}}
     <div class="alert alert-success d-flex align-items-center" style="border-radius:10px;">
         <i class="bx bx-check-circle me-2" style="font-size:22px;"></i>
         @if($internship->internship_type == 2)
-        <div><strong>Company Marks Submitted!</strong> This is a company-only internship. Feedback has been finalized. This is a read-only view.</div>
+        <div><strong>Company Marks Submitted!</strong> This is a company-only opportunity. Feedback has been finalized. This is a read-only view.</div>
         @else
         <div><strong>College Marks Submitted!</strong> All marks and feedback have been finalized. This is a read-only view.</div>
         @endif
@@ -272,7 +287,7 @@
     <div class="info-card">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <div class="info-row"><i class="bx bx-briefcase-alt-2"></i><strong>Internship:</strong>&nbsp;{{ $internship->internship_title }}</div>
+                <div class="info-row"><i class="bx bx-briefcase-alt-2"></i><strong>Opportunity:</strong>&nbsp;{{ $internship->internship_title }}</div>
                 <div class="info-row"><i class="bx bx-building"></i><strong>Company:</strong>&nbsp;{{ optional($internship->company)->name ?? 'N/A' }}</div>
                 @if($internship->start_date || $internship->end_date)
                 <div class="info-row">
@@ -379,7 +394,7 @@
                     </td>
 
                     @if($internship->internship_type == 2)
-                    {{-- Company-only internship: show only company feedback --}}
+                    {{-- Company-only opportunity: show only company feedback --}}
                     <td style="min-width:200px;">
                         <div class="feedback-box industry {{ $student['company_feedback'] ? '' : 'empty' }}">
                             {{ $student['company_feedback'] ?: 'No feedback' }}
@@ -490,7 +505,7 @@
                 <tr>
                     <td colspan="{{ $internship->internship_type == 2 ? 3 : ($isSuperAdmin ? 12 : 7) }}" class="text-center py-5 text-muted">
                         <i class="bx bx-info-circle" style="font-size:36px;"></i>
-                        <p class="mt-2">No students found for this internship.</p>
+                        <p class="mt-2">No students found for this opportunity.</p>
                     </td>
                 </tr>
                 @endforelse

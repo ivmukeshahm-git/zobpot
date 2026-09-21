@@ -6,12 +6,13 @@
 
 <style>
     .college-marks-header {
-        background: #242a62;
+        background: linear-gradient(135deg, #242a62 0%, #3d4575 55%, #f26e2c 160%);
         border-radius: 16px;
         padding: 24px 32px;
         margin-bottom: 24px;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 28px rgba(36, 42, 98, 0.22);
     }
     .college-marks-header::after {
         content: '';
@@ -23,110 +24,265 @@
         background: rgba(242, 110, 44, 0.15);
         border-radius: 50%;
     }
+    .college-marks-header h4 {
+        color: #fff !important;
+        margin: 0;
+        font-weight: 800;
+        position: relative;
+        z-index: 1;
+    }
+    .college-marks-header p {
+        color: rgba(255,255,255,0.9) !important;
+        margin: 6px 0 0 0;
+        font-size: 14px;
+        position: relative;
+        z-index: 1;
+    }
+
     .filter-card {
         background: white;
-        border-radius: 12px;
-        padding: 24px;
+        border-radius: 14px;
+        padding: 22px 24px;
         box-shadow: 0 2px 15px rgba(0,0,0,0.08);
         margin-bottom: 24px;
+        border: 1px solid #eef0f4;
     }
     .filter-card label {
-        font-weight: 600;
+        font-weight: 700;
         color: #242a62;
         margin-bottom: 6px;
         font-size: 13px;
+        display: block;
     }
-    .filter-card select {
+    .filter-card select,
+    .filter-card .form-control {
         border: 2px solid #e9ecef;
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 10px 14px;
         font-size: 14px;
         transition: all 0.3s ease;
+        height: auto;
     }
-    .filter-card select:focus {
+    .filter-card select:focus,
+    .filter-card .form-control:focus {
         border-color: #242a62;
         box-shadow: 0 0 0 3px rgba(36, 42, 98, 0.1);
     }
     .btn-load-data {
         background: linear-gradient(135deg, #242a62 0%, #3d4575 100%);
         color: white;
-        padding: 10px 28px;
-        border-radius: 8px;
-        font-weight: 600;
+        padding: 11px 28px;
+        border-radius: 10px;
+        font-weight: 700;
         border: none;
         transition: all 0.3s ease;
+        width: 100%;
     }
-    .btn-load-data:hover {
+    .btn-load-data:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(36, 42, 98, 0.3);
         color: white;
     }
+    .btn-load-data:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
 
-    /* Complete Internship Table Styles */
-    .complete-internship-table {
+    .college-marks-empty {
+        background: #fff;
+        border-radius: 14px;
+        padding: 48px 24px;
+        text-align: center;
+        color: #6c757d;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        border: 1px dashed #d7dbe3;
+    }
+    .college-marks-empty i {
+        font-size: 48px;
+        color: #c5cad6;
+    }
+
+    /* Opportunity / Internship cards */
+    .internship-card,
+    .opportunity-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 28px;
+        box-shadow: 0 4px 20px rgba(36, 42, 98, 0.08);
+        border: 1px solid #eef0f4;
+        overflow: hidden;
+    }
+    .internship-card-header,
+    .opportunity-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 18px 22px;
+        background: linear-gradient(135deg, #f7f8fc 0%, #ffffff 100%);
+        border-bottom: 1px solid #eef0f4;
+    }
+    .internship-card-header h5,
+    .opportunity-card-header h5 {
+        color: #242a62 !important;
+        font-weight: 800;
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.35;
+    }
+    .internship-card-header h5 i,
+    .opportunity-card-header h5 i {
+        color: #f26e2c;
+        margin-right: 6px;
+    }
+    .internship-card-body,
+    .opportunity-card-body {
+        padding: 18px 22px 8px;
+    }
+    .internship-card-footer,
+    .opportunity-card-footer {
+        padding: 16px 22px 22px;
+        background: #fafbfd;
+        border-top: 1px solid #eef0f4;
+    }
+
+    .status-badge-completed {
+        background: #28a745;
+        color: white;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .status-badge-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffe08a;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Marks table */
+    .complete-internship-table,
+    .complete-opportunity-table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: separate;
         border-spacing: 0;
         background: white;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        margin-bottom: 0;
     }
-    .complete-internship-table thead {
+    .complete-internship-table thead,
+    .complete-opportunity-table thead {
         background: linear-gradient(135deg, #242a62 0%, #3d4575 100%);
     }
-    .complete-internship-table thead th {
-        color: white;
-        font-weight: 600;
-        padding: 16px 12px;
+    .complete-internship-table thead th,
+    .complete-opportunity-table thead th {
+        color: #ffffff !important;
+        font-weight: 700;
+        padding: 14px 12px;
         text-align: center;
-        font-size: 13px;
+        vertical-align: middle;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-right: 1px solid rgba(255,255,255,0.1);
+        letter-spacing: 0.4px;
+        border-right: 1px solid rgba(255,255,255,0.12);
+        white-space: nowrap;
     }
-    .complete-internship-table thead th:last-child {
+    .complete-internship-table thead th:last-child,
+    .complete-opportunity-table thead th:last-child {
         border-right: none;
     }
-    .complete-internship-table tbody tr {
+    .complete-internship-table tbody tr,
+    .complete-opportunity-table tbody tr {
         border-bottom: 1px solid #e9ecef;
-        transition: all 0.3s ease;
+        transition: background 0.2s ease;
     }
-    .complete-internship-table tbody tr:hover {
-        background: #f8f9fa;
+    .complete-internship-table tbody tr:hover,
+    .complete-opportunity-table tbody tr:hover {
+        background: #f8f9fc;
     }
-    .complete-internship-table tbody td {
-        padding: 16px 12px;
+    .complete-internship-table tbody td,
+    .complete-opportunity-table tbody td {
+        padding: 14px 12px;
         vertical-align: middle;
-        font-size: 14px;    
+        font-size: 13px;
         color: #495057;
-    }
-    .complete-internship-table tbody td:first-child {
         text-align: center;
-        font-weight: 600;
+        word-wrap: break-word;
+    }
+
+    .complete-internship-table .col-sr { width: 70px; }
+    .complete-internship-table .col-student { width: 170px; text-align: left !important; }
+    .complete-internship-table .col-college { width: 140px; }
+    .complete-internship-table .col-marks { width: 260px; }
+    .complete-internship-table .col-feedback { width: 220px; }
+    .complete-internship-table .col-total { width: 100px; }
+    .complete-internship-table .col-percent { width: 100px; }
+    .complete-internship-table .col-grade { width: 90px; }
+
+    .complete-internship-table td.col-student > div,
+    .complete-internship-table td.col-sr {
+        font-weight: 700;
         color: #242a62;
     }
+    .complete-internship-table td.col-student > div {
+        text-align: left;
+        line-height: 1.35;
+    }
+
+    .college-marks-table-wrap {
+        overflow-x: auto;
+        border-radius: 12px;
+    }
+
     .marks-input-group {
         display: flex;
         align-items: center;
         gap: 8px;
-        justify-content: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        background: #f8f9fc;
+        border-radius: 8px;
+        border: 1px solid #eef0f4;
+    }
+    .marks-input-group:last-child {
+        margin-bottom: 0;
     }
     .marks-input-group label {
         margin: 0;
         font-size: 12px;
-        color: #6c757d;
-        font-weight: 600;
+        color: #5c6578;
+        font-weight: 700;
+        min-width: 110px;
+        text-align: left;
     }
     .marks-input {
-        width: 70px;
+        width: 72px;
         padding: 8px 10px;
         border: 2px solid #e9ecef;
         border-radius: 8px;
         text-align: center;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 14px;
+        color: #242a62;
         transition: all 0.3s ease;
+        background: #fff;
     }
     .marks-input:focus {
         outline: none;
@@ -134,47 +290,55 @@
         box-shadow: 0 0 0 3px rgba(36, 42, 98, 0.1);
     }
     .marks-input:disabled {
-        background: #f8f9fa;
+        background: #f1f3f5;
         cursor: not-allowed;
     }
     .max-marks {
-        font-size: 13px;
+        font-size: 12px;
         color: #6c757d;
-        font-weight: 600;
+        font-weight: 700;
     }
     .feedback-textarea {
         width: 100%;
-        min-height: 80px;
-        padding: 10px;
+        min-height: 88px;
+        padding: 10px 12px;
         border: 2px solid #e9ecef;
         border-radius: 8px;
         font-size: 13px;
         resize: vertical;
         transition: all 0.3s ease;
+        background: #fff;
     }
     .feedback-textarea:focus {
         outline: none;
         border-color: #242a62;
         box-shadow: 0 0 0 3px rgba(36, 42, 98, 0.1);
     }
+    .feedback-textarea:disabled {
+        background: #f1f3f5;
+        cursor: not-allowed;
+    }
     .total-display {
-        font-size: 18px;
-        font-weight: 700;
+        font-size: 16px;
+        font-weight: 800;
         color: #242a62;
         text-align: center;
+        white-space: nowrap;
     }
     .percentage-display {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 800;
         color: #17a2b8;
         text-align: center;
+        white-space: nowrap;
     }
     .grade-badge {
         display: inline-block;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 14px;
+        min-width: 42px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 13px;
         text-align: center;
     }
     .grade-A { background: #28a745; color: white; }
@@ -182,13 +346,14 @@
     .grade-C { background: #ffc107; color: #333; }
     .grade-D { background: #fd7e14; color: white; }
     .grade-F { background: #dc3545; color: white; }
+
     .btn-submit-college-marks {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: white;
-        padding: 14px 32px;
+        padding: 12px 28px;
         border-radius: 10px;
-        font-weight: 700;
-        font-size: 16px;
+        font-weight: 800;
+        font-size: 15px;
         border: none;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         transition: all 0.3s ease;
@@ -200,59 +365,59 @@
     }
     .export-btn {
         background: linear-gradient(135deg, #242a62 0%, #3d4575 100%);
-        color: white;
-        padding: 12px 24px;
+        color: white !important;
+        padding: 8px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 700;
         border: none;
         transition: all 0.3s ease;
-        margin-left: 12px;
+        font-size: 13px;
     }
     .export-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(36, 42, 98, 0.3);
-        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(36, 42, 98, 0.28);
+        color: white !important;
     }
-    .internship-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+
+    .college-marks-note {
+        margin: 0;
+        border-radius: 10px;
+        border: 1px solid #cfe2ff;
+        background: #f0f6ff;
+        color: #1e3a5f;
+        padding: 12px 14px;
+        font-size: 13px;
     }
-    .internship-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #e9ecef;
-    }
-    .status-badge-completed {
-        background: #28a745;
-        color: white;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    .status-badge-pending {
-        background: #ffc107;
-        color: #333;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
+
     @media (max-width: 768px) {
-        .complete-internship-table { font-size: 12px; }
+        .complete-internship-table,
+        .complete-opportunity-table { font-size: 12px; }
         .marks-input { width: 60px; padding: 6px 8px; font-size: 12px; }
+        .marks-input-group label { min-width: 80px; }
         .complete-internship-table thead th,
-        .complete-internship-table tbody td { padding: 10px 6px; }
+        .complete-opportunity-table thead th,
+        .complete-internship-table tbody td,
+        .complete-opportunity-table tbody td { padding: 10px 6px; }
+        .internship-card-header,
+        .opportunity-card-header,
+        .internship-card-body,
+        .internship-card-footer { padding-left: 16px; padding-right: 16px; }
     }
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if(auth()->guard('college')->check() || auth()->guard('college_staff')->check())
+    @include('admin.layout.partials.college-page-banner', [
+        'emoji' => '📊',
+        'title' => 'Update College Marks',
+        'subtitle' => 'Evaluate student performance and assign college-side marks.',
+        'illustration' => 'marks',
+        'crumbs' => [
+            ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+            ['label' => 'College Marks'],
+        ],
+    ])
+    @else
     <!-- Page Header -->
     <div class="college-marks-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -266,6 +431,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Filter Section -->
     <div class="filter-card">
@@ -306,9 +472,9 @@
 
     <!-- Data Container -->
     <div id="dataContainer">
-        <div class="text-center py-5 text-muted">
-            <i class="bx bx-filter-alt" style="font-size: 48px;"></i>
-            <p class="mt-2">Select filters above and click "Load Students" to view data</p>
+        <div class="college-marks-empty">
+            <i class="bx bx-filter-alt"></i>
+            <p class="mt-2 mb-0">Select filters above and click <strong>Load Students</strong> to view data</p>
         </div>
     </div>
 </div>
@@ -424,10 +590,10 @@ $(document).ready(function() {
 
                 if (!res.success || !res.internships || res.internships.length === 0) {
                     $('#dataContainer').html(`
-                        <div class="text-center py-5 text-muted">
-                            <i class="bx bx-info-circle" style="font-size: 48px;"></i>
-                            <p class="mt-2">${res.message || 'No internships found for the selected filters.'}</p>
-                        </div>  
+                        <div class="college-marks-empty">
+                            <i class="bx bx-info-circle"></i>
+                            <p class="mt-2 mb-0">${res.message || 'No opportunities found for the selected filters.'}</p>
+                        </div>
                     `);
                     return;
                 }
@@ -444,109 +610,116 @@ $(document).ready(function() {
     });
 
     // ==================== RENDER INTERNSHIPS ====================
-    function renderInternships(internships, criteria, collegeId, courseId) {
+    function renderInternships(opportunities, criteria, collegeId, courseId) {
         let html = '';
+        const baseColSpan = isSuperAdmin ? 8 : 7;
 
-        internships.forEach(function(internship) {
-            const isCompleted = internship.college_submitted === true;
+        opportunities.forEach(function(opportunity) {
+            const isCompleted = opportunity.college_submitted === true;
             const statusBadge = isCompleted
-                ? '<span class="status-badge-completed"><i class="bx bx-check"></i> College Marks Submitted</span>'
+                ? '<span class="status-badge-completed"><i class="bx bx-check"></i> Submitted</span>'
                 : '<span class="status-badge-pending"><i class="bx bx-time"></i> Pending</span>';
+            const studentCount = (opportunity.students && opportunity.students.length) ? opportunity.students.length : 0;
 
-            html += `<div class="internship-card" data-internship-id="${internship.internship_id}" data-college-id="${collegeId}">`;
+            html += `<div class="internship-card" data-opportunity-id="${opportunity.internship_id}" data-college-id="${collegeId}">`;
             html += `<div class="internship-card-header">`;
             html += `<div>
-                        <h5 style="color: #242a62; font-weight: 700; margin: 0;">
-                            <i class="bx bx-briefcase-alt-2"></i> ${escHtml(internship.internship_title)}
-                        </h5>
+                        <h5><i class="bx bx-briefcase-alt-2"></i> ${escHtml(opportunity.internship_title)}</h5>
+                        <div style="margin-top:6px;color:#6c757d;font-size:13px;font-weight:600;">
+                            <i class="bx bx-user"></i> ${studentCount} Student${studentCount === 1 ? '' : 's'}
+                        </div>
                      </div>`;
-            html += `<div class="d-flex align-items-center gap-2">
+            html += `<div class="d-flex align-items-center gap-2 flex-wrap">
                         ${statusBadge}
-                        <button class="btn export-btn btn-sm" onclick="exportCollegeMarks(${internship.internship_id})">
+                        <button type="button" class="btn export-btn btn-sm" onclick="exportCollegeMarks(${opportunity.internship_id})">
                             <i class="fa fa-file-excel-o"></i> Export
                         </button>
                      </div>`;
             html += `</div>`;
 
+            html += `<div class="internship-card-body">`;
             if (isCompleted) {
-                html += `<div class="alert alert-success"><i class="bx bx-check-circle"></i> <strong>Submitted!</strong> College marks have been finalized. Grades and feedback are locked.</div>`;
+                html += `<div class="alert alert-success mb-3"><i class="bx bx-check-circle"></i> <strong>Submitted!</strong> College marks are locked and cannot be edited.</div>`;
             }
 
-            html += `<div class="table-responsive">`;
-            html += `<table class="complete-internship-table" id="collegeTable_${internship.internship_id}">`;
+            html += `<div class="college-marks-table-wrap table-responsive">`;
+            html += `<table class="complete-internship-table" id="collegeTable_${opportunity.internship_id}" style="width:100%">`;
             html += `<thead><tr>`;
-            html += `<th>SR.NO</th><th>INTERNSHIP</th><th>STUDENT</th>`;
-            if (isSuperAdmin) html += `<th>COLLEGE</th>`;
-            html += `<th style="min-width: 300px;">COLLEGE MARKS</th>`;
-            html += `<th>FEEDBACK</th><th>TOTAL</th><th>PERCENTAGE</th><th>GRADE</th>`;
+            html += `<th class="col-sr">SR.NO</th>`;
+            html += `<th class="col-student">STUDENT</th>`;
+            if (isSuperAdmin) html += `<th class="col-college">COLLEGE</th>`;
+            html += `<th class="col-marks">COLLEGE MARKS</th>`;
+            html += `<th class="col-feedback">FEEDBACK</th>`;
+            html += `<th class="col-total">TOTAL</th>`;
+            html += `<th class="col-percent">%</th>`;
+            html += `<th class="col-grade">GRADE</th>`;
             html += `</tr></thead><tbody>`;
 
-            if (internship.students.length === 0) {
-                const colSpan = isSuperAdmin ? 9 : 8;
-                html += `<tr><td colspan="${colSpan}" class="text-center py-4"><i class="bx bx-info-circle"></i> No students found</td></tr>`;
+            if (!opportunity.students || opportunity.students.length === 0) {
+                html += `<tr><td colspan="${baseColSpan}" class="text-center py-4"><i class="bx bx-info-circle"></i> No students found</td></tr>`;
             } else {
-                internship.students.forEach(function(student, idx) {
+                opportunity.students.forEach(function(student, idx) {
                     const savedMarks = student.saved_marks || {};
                     const savedFeedback = student.feedback || '';
                     let maxTotal = 0;
 
-                    html += `<tr data-student-id="${student.id}" data-internship-id="${internship.internship_id}">`;
-                    html += `<td>${idx + 1}</td>`;
-                    html += `<td><div style="font-weight: 600; color: #3d4575;">${escHtml(internship.internship_title)}</div></td>`;
-                    html += `<td><div style="font-weight: 600; color: #242a62;">${escHtml(student.name).toUpperCase()}</div></td>`;
-                    if (isSuperAdmin) html += `<td>${escHtml(student.college_name)}</td>`;
+                    html += `<tr data-student-id="${student.id}" data-opportunity-id="${opportunity.internship_id}">`;
+                    html += `<td class="col-sr">${idx + 1}</td>`;
+                    html += `<td class="col-student"><div>${escHtml(student.name).toUpperCase()}</div></td>`;
+                    if (isSuperAdmin) html += `<td class="col-college">${escHtml(student.college_name)}</td>`;
 
-                    // College criteria inputs
-                    html += `<td>`;
+                    html += `<td class="col-marks">`;
                     criteria.forEach(function(c) {
                         const savedVal = savedMarks[c.id] ? (typeof savedMarks[c.id] === 'object' ? savedMarks[c.id].marks : savedMarks[c.id]) : '';
-                        maxTotal += parseInt(c.marks);
-                        html += `<div class="marks-input-group mb-2">`;
-                        html += `<label>${c.title}</label>`;
+                        maxTotal += parseInt(c.marks) || 0;
+                        html += `<div class="marks-input-group">`;
+                        html += `<label>${escHtml(c.title)}</label>`;
                         html += `<input type="number" class="marks-input college-mark"
                                     min="0" max="${c.marks}"
                                     data-max="${c.marks}"
                                     data-criteria-id="${c.id}"
-                                    data-criteria-name="${c.title}"
+                                    data-criteria-name="${escHtml(c.title)}"
                                     data-student-id="${student.id}"
-                                    data-internship-id="${internship.internship_id}"
+                                    data-opportunity-id="${opportunity.internship_id}"
                                     placeholder="0"
                                     value="${savedVal}"
                                     ${isCompleted ? 'disabled' : ''}>`;
                         html += `<span class="max-marks">/ ${c.marks}</span>`;
                         html += `</div>`;
                     });
+                    if (!criteria || criteria.length === 0) {
+                        html += `<div class="text-muted" style="font-size:12px;font-weight:600;">No grade configured</div>`;
+                    }
                     html += `</td>`;
 
-                    // Feedback
-                    html += `<td>
+                    html += `<td class="col-feedback">
                         <textarea class="feedback-textarea college-feedback"
                             data-student-id="${student.id}"
-                            data-internship-id="${internship.internship_id}"
+                            data-opportunity-id="${opportunity.internship_id}"
                             placeholder="Enter college feedback..."
                             ${isCompleted ? 'disabled' : ''}>${escHtml(savedFeedback)}</textarea>
                     </td>`;
 
-                    html += `<td class="total-display">0 / ${maxTotal}</td>`;
-                    html += `<td class="percentage-display">0.00%</td>`;
-                    html += `<td><span class="grade-badge grade-F">-</span></td>`;
+                    html += `<td class="col-total total-display">0 / ${maxTotal}</td>`;
+                    html += `<td class="col-percent percentage-display">0.00%</td>`;
+                    html += `<td class="col-grade"><span class="grade-badge grade-F">-</span></td>`;
                     html += `</tr>`;
                 });
             }
 
             html += `</tbody></table></div>`;
+            html += `</div>`; // card body
 
-            // Submit button
-            if (!isCompleted && internship.students.length > 0) {
-                html += `<div class="text-center mt-4">
-                    <button class="btn btn-submit-college-marks" onclick="showSubmitConfirm(${internship.internship_id}, '${collegeId}', '${courseId}')">
-                        <i class="fa fa-check-circle"></i> Submit College Marks
-                    </button>
-                </div>`;
+            html += `<div class="internship-card-footer">`;
+            html += `<div class="d-flex flex-wrap justify-content-between align-items-center gap-3">`;
+            html += `<div class="college-marks-note flex-grow-1"><i class="bx bx-info-circle"></i> <strong>Note:</strong> Marks auto-save as you type. Once submitted, grades and feedback cannot be modified.</div>`;
+            if (!isCompleted && studentCount > 0) {
+                html += `<button type="button" class="btn btn-submit-college-marks" onclick="showSubmitConfirm(${opportunity.internship_id}, '${collegeId}', '${courseId}')">
+                            <i class="fa fa-check-circle"></i> Submit College Marks
+                         </button>`;
             }
-
-            html += `<div class="alert alert-info mt-3"><i class="bx bx-info-circle"></i> <strong>Note:</strong> Marks auto-save as you type. Once submitted, grades and feedback cannot be modified.</div>`;
-            html += `</div>`;
+            html += `</div></div>`;
+            html += `</div>`; // card
         });
 
         $('#dataContainer').html(html);
@@ -572,7 +745,7 @@ $(document).ready(function() {
         const criteriaId = input.data('criteria-id');
         const criteriaName = input.data('criteria-name');
         const maxMarks = input.data('max');
-        const internshipId = input.data('internship-id');
+        const internshipId = input.data('opportunity-id');
         const key = internshipId + '_' + studentId + '_' + criteriaId;
 
         clearTimeout(saveTimer[key]);
@@ -609,7 +782,7 @@ $(document).ready(function() {
     $(document).on('input', '.college-feedback', function() {
         const textarea = $(this);
         const studentId = textarea.data('student-id');
-        const internshipId = textarea.data('internship-id');
+        const internshipId = textarea.data('opportunity-id');
         const feedback = textarea.val();
 
         const key = internshipId + '_' + studentId;
@@ -671,6 +844,21 @@ $(document).ready(function() {
     // ==================== SHOW SUBMIT CONFIRM ====================
     window.showSubmitConfirm = function(internshipId, collegeId, courseId) {
         const table = document.getElementById('collegeTable_' + internshipId);
+        if (!table) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Marks table not found.' });
+            return;
+        }
+
+        const markInputs = table.querySelectorAll('.college-mark');
+        if (!markInputs || markInputs.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Grade Configured',
+                html: 'College Marks grade criteria are not configured for this course.<br><small>Please configure grades first, then submit marks.</small>'
+            });
+            return;
+        }
+
         const rows = table.querySelectorAll('tbody tr[data-student-id]');
         let allFilled = true;
         let missingList = [];
@@ -681,12 +869,9 @@ $(document).ready(function() {
             const feedback = row.querySelector('.college-feedback');
             let rowOk = true;
 
-            // Only validate marks if criteria inputs exist for this student
-            if (inputs.length > 0) {
-                inputs.forEach(input => {
-                    if (input.value === '' || input.value === null) { rowOk = false; }
-                });
-            }
+            inputs.forEach(input => {
+                if (input.value === '' || input.value === null) { rowOk = false; }
+            });
 
             if (!feedback || !feedback.value.trim()) { rowOk = false; }
 

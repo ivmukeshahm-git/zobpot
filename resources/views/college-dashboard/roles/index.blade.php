@@ -5,20 +5,26 @@
     </script>
 
     <div class="container-xxl flex-grow-1 container-p-y">
+        @component('admin.layout.partials.college-page-banner', [
+            'emoji' => '🛡️',
+            'title' => 'College Roles Management',
+            'subtitle' => 'Create roles and assign permissions for college staff access control.',
+            'illustration' => 'roles',
+            'crumbs' => [
+                ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+                ['label' => 'Roles'],
+            ],
+        ])
+            <button type="button" class="btn zp-banner-btn" id="addRoleBtn">
+                <i class="bx bx-plus"></i> Add Role
+            </button>
+        @endcomponent
+
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center"
-                style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); border-radius: 12px 12px 0 0;">
-                <h5 class="mb-0" style="color: #fff; font-weight: 700;">
-                    <i class="bx bx-shield-quarter"></i> College Roles Management
-                </h5>
-                <button type="button" class="btn btn-light btn-sm" id="addRoleBtn">
-                    <i class="bx bx-plus"></i> Add Role
-                </button>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="rolesDataTable" style="width:100%">
-                        <thead style="background: #f8f9fa;">
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Role Name</th>

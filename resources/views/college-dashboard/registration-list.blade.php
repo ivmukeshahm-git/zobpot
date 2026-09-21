@@ -5,17 +5,22 @@
     </script>
 
     <div class="container-xxl flex-grow-1 container-p-y">
+        @include('admin.layout.partials.college-page-banner', [
+            'emoji' => '🎓',
+            'title' => 'Registration List',
+            'subtitle' => 'View and manage all students registered under your college.',
+            'illustration' => 'students',
+            'crumbs' => [
+                ['label' => 'Dashboard', 'url' => route('admin.college.dashboard')],
+                ['label' => 'Students'],
+            ],
+        ])
+
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center"
-                style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); border-radius: 12px 12px 0 0;">
-                <h5 class="mb-0" style="color: #fff; font-weight: 700;">
-                    <i class="bx bx-list-ul"></i> Registration List
-                </h5>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="registrationTable" style="width:100%">
-                        <thead style="background: #f8f9fa;">
+                        <thead>
                             <tr>
                                 <th>Sr No</th>
                                 <th>Student Name</th>

@@ -213,6 +213,10 @@ class CompanyprofileController extends Controller
             $user_id = $request->user_id;
             $user = User::findOrFail($user_id); // ❌ No creation, only update
 
+ $updaterId = Auth::id();
+            $user->last_update = $updaterId;
+            
+            
             $user->name = $request->company_nm;
             $user->email = $request->email;
             $user->contact_no = $request->contact_no;
@@ -226,6 +230,11 @@ class CompanyprofileController extends Controller
 
 
             $user->save();
+            
+            if ($updaterId) {
+                DB::table('users')->where('id', $user->id)->update(['last_update' => $updaterId]);
+            }
+
 
             StaffActivityController::insertActivity(Auth::user()->id, 'Company Profile update successfully.');
 
@@ -256,6 +265,8 @@ class CompanyprofileController extends Controller
 
 
             $user = User::findOrFail($id);
+                        $updaterId = Auth::id();
+            $user->last_update = $updaterId;
 
             $user->company_desc = $request->input('company_desc');
     
@@ -269,6 +280,9 @@ class CompanyprofileController extends Controller
             }
             
             $user->save();
+            if ($updaterId) {
+                DB::table('users')->where('id', $user->id)->update(['last_update' => $updaterId]);
+            }
 
             StaffActivityController::insertActivity(Auth::user()->id, 'Company About update successfully.');
 

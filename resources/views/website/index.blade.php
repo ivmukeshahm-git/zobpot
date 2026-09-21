@@ -88,6 +88,53 @@
             }
         }
 
+        @media (max-width: 1199.98px) {
+            .banner-hero .hero-1,
+            .banner-hero.hero-1,
+            .banner-hero .banner-inner {
+                overflow: visible !important;
+            }
+
+            .banner-hero .block-banner .banner-description {
+                display: block !important;
+                visibility: visible !important;
+                position: relative !important;
+                z-index: 2;
+            }
+
+            .banner-hero .img-job-1,
+            .img-job-1 {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                max-width: 220px;
+                width: 100%;
+                height: auto;
+                margin: 16px auto 0;
+                object-fit: contain;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .banner-hero .img-job-1,
+            .img-job-1 {
+                max-width: 180px;
+            }
+
+            .banner-hero .block-banner .banner-description {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .banner-hero .img-job-1,
+            .img-job-1 {
+                max-width: 150px;
+            }
+        }
+
         .job-type-select {
             border: 1px solid #e0e0e0;
             border-radius: 13px;
@@ -386,15 +433,23 @@
                     <div class="row">
                         <div class="col-xl-8 col-lg-12">
                             <div class="block-banner">
-                                <h1 class="heading-banner wow animate__animated animate__fadeInUp">Find Your Dream Job with
+                                <!-- <h1 class="heading-banner wow animate__animated animate__fadeInUp">Find Your Dream Job with
+                                    <span class="color-brand-2">Zobpot</span><br class="d-none d-lg-block">
+                                </h1> -->
+                                <h1 class="heading-banner wow animate__animated animate__fadeInUp">Empowering Youth Education With
                                     <span class="color-brand-2">Zobpot</span><br class="d-none d-lg-block">
                                 </h1>
-                                <div class="banner-description mt-20 wow animate__animated animate__fadeInUp"
+                                <!-- <div class="banner-description mt-20 wow animate__animated animate__fadeInUp"
                                     data-wow-delay=".1s">Explore thousands of career opportunities across the industrial and corporate sectors of India.<br
                                         class="d-none d-lg-block">  Over 2M job seekers trust our website as<br
-                                        class="d-none d-lg-block">most genuine and supportive in terms of job searching and placements. whether you’re a fresher or a professional, just grab your perfect career opportunity with us.</div>
+                                        class="d-none d-lg-block">most genuine and supportive in terms of job searching and placements. whether you’re a fresher or a professional, just grab your perfect career opportunity with us.</div> -->
+                                        <div class="banner-description mt-20 wow animate__animated animate__fadeInUp"
+                                    data-wow-delay=".1s">We believe every young person deserves the right guidance, platform, <br
+                                        class="d-none d-lg-block">and opportunity to build a successful career.<br
+                                        class="d-none d-lg-block">From education to internships, skills to employment, we help youth move from learning to earning.
+                                        Empower the youth. Build skills. Create opportunities. Shape the future.</div>
                         
-                                <div class="col-lg-12 col-sm-12 d-flex justify-content-center mt-20">
+                                <div class="col-lg-12 col-sm-12 d-flex justify-content-center mt-20 banner-job-img-wrap">
                                     <img class="img-job-1" alt="jobBox"
                                         src="{{ asset('assets/imgs/page/homepage1/startup.png') }}" width="270">
                                 </div>
@@ -690,7 +745,7 @@
                 </div>
             </div>
         </section>
-
+        @if (!$Achievement->isEmpty())
         <section class="section-box overflow-visible mt-50 mb-50 pt-40 pb-40" style="background: #f2682412;">
             <div class="container">
                 <div class="row">
@@ -708,7 +763,7 @@
                 </div>
             </div>
         </section>
-
+        @endif
         @if (!$Blog->isEmpty())
             <!--<section class="section-box mt-50 mb-50">-->
             <!--    <div class="container">-->

@@ -1,21 +1,22 @@
 @push('css')
     <style>
+        /* Page-level polish; global college theme lives in college-saas.css */
         .stats-card {
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 1px solid #E5E7EB;
         }
         .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.12);
         }
         .staff-section-card {
-            background: #fff; border-radius: 12px; border: 2px solid #242a62;
-            overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); margin-bottom: 30px;
+            background: #fff; border-radius: 20px; border: 1px solid #E5E7EB;
+            overflow: hidden; box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06); margin-bottom: 30px;
         }
         .staff-section-header {
-            background: linear-gradient(135deg, #242a62, #3d4575); color: #fff;
+            background: linear-gradient(135deg, #2563EB, #4F46E5); color: #fff;
             padding: 20px 25px; display: flex; align-items: center; gap: 10px;
         }
         .staff-section-header h5 { margin: 0; font-weight: 700; font-size: 18px; color: #fff; }
@@ -29,27 +30,37 @@
     </script>
 
     <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Welcome Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card" style="background: linear-gradient(135deg, #242a62 0%, #3a4799 100%); border-radius: 12px; color: white;">
-                    <div class="card-body" style="padding: 30px;">
-                        @php
-                            $authUser = auth()->guard('college')->user() ?? auth()->guard('college_staff')->user();
-                            $welcomeName = auth()->guard('college')->check()
-                                ? ($authUser->college_name ?? 'College')
-                                : ($authUser->name ?? 'Staff');
-                        @endphp
-                        <h3 style="color: white; font-weight: 700; margin-bottom: 10px;">
-                            Welcome, {{ $welcomeName }}
-                        </h3>
-                        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 15px;">
-                            @if($isCollegeStaff)
-                                Manage assigned internships and track student progress
-                            @else
-                                Manage your students, track internship applications, and monitor college activities
-                            @endif
-                        </p>
+        @php
+            $authUser = auth()->guard('college')->user() ?? auth()->guard('college_staff')->user();
+            $welcomeName = auth()->guard('college')->check()
+                ? ($authUser->college_name ?? 'College')
+                : ($authUser->name ?? 'Staff');
+        @endphp
+
+        <div class="zp-page-banner zp-banner-default">
+            <div class="zp-page-banner-bg" aria-hidden="true">
+                <span class="zp-orb zp-orb-1"></span>
+                <span class="zp-orb zp-orb-2"></span>
+                <span class="zp-grid"></span>
+            </div>
+            <div class="zp-page-banner-inner">
+                <div class="zp-page-banner-copy">
+                    <div class="zp-page-banner-badge">College Dashboard</div>
+                    <h1>Welcome back, {{ $welcomeName }} 👋</h1>
+                    <p>
+                        @if($isCollegeStaff)
+                            Manage assigned internships and track student progress from one place.
+                        @else
+                            Manage students, internships, staff, marks and placements from one dashboard.
+                        @endif
+                    </p>
+                    <nav class="zp-breadcrumb" aria-label="Breadcrumb">
+                        <span>Dashboard</span>
+                    </nav>
+                </div>
+                <div class="zp-page-banner-right">
+                    <div class="zp-page-illu d-none d-md-flex" aria-hidden="true">
+                        @include('admin.layout.partials.college-illustrations', ['type' => 'students'])
                     </div>
                 </div>
             </div>
@@ -57,74 +68,60 @@
 
         @if($isCollegeStaff)
         {{-- ══════════════ COLLEGE STAFF DASHBOARD ══════════════ --}}
-        <!-- Staff Statistics Cards -->
-        <div class="row mb-4 g-4">
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #e7f3ff; border-color: #2196F3;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $assignedInternships }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Assign Internship</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #2196F3;">
-                                <i class="bx bx-briefcase bx-lg" style="color: white;"></i>
-                            </span>
+        <div class="zp-stats-grid zp-stats-4" id="zp-dashboard-stats">
+            <div class="card stats-card zp-stat-card zp-stat-active">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $assignedInternships }}</h5>
+                            <small class="zp-stat-label">Assign Internship</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-briefcase"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #e8f5e9; border-color: #4CAF50;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $assignedStudents }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Assign Student</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #4CAF50;">
-                                <i class="bx bx-user bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-students">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $assignedStudents }}</h5>
+                            <small class="zp-stat-label">Assign Student</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-user"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #fff3e0; border-color: #FF9800;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $staffProcessingInternships }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">In Processing Internship</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #FF9800;">
-                                <i class="bx bx-loader-circle bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-pending">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $staffProcessingInternships }}</h5>
+                            <small class="zp-stat-label">In Processing Internship</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-loader-circle"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #f3e5f5; border-color: #9C27B0;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $staffCompletedInternships }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Complete Internship</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #9C27B0;">
-                                <i class="bx bx-check-circle bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-completed">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $staffCompletedInternships }}</h5>
+                            <small class="zp-stat-label">Complete Internship</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-check-circle"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
         </div>
 
-        <!-- Assigned Students Table -->
         <div class="staff-section-card">
             <div class="staff-section-header">
                 <i class="bx bx-user" style="font-size:24px;"></i>
@@ -133,7 +130,7 @@
             <div style="padding: 25px;">
                 <div class="table-responsive">
                     <table class="table table-hover" id="assignedStudentsTable" style="width:100%">
-                        <thead >
+                        <thead>
                             <tr>
                                 <th>Sr No</th>
                                 <th>Student Name</th>
@@ -150,7 +147,6 @@
             </div>
         </div>
 
-        <!-- Staff Internships Table -->
         <div class="staff-section-card">
             <div class="staff-section-header">
                 <i class="bx bx-briefcase-alt-2" style="font-size:24px;"></i>
@@ -159,7 +155,7 @@
             <div style="padding: 25px;">
                 <div class="table-responsive">
                     <table class="table table-hover" id="staffInternshipsTable" style="width:100%">
-                        <thead >
+                        <thead>
                             <tr>
                                 <th>Sr No</th>
                                 <th>Internship Title</th>
@@ -179,90 +175,73 @@
 
         @else
         {{-- ══════════════ COLLEGE ADMIN DASHBOARD ══════════════ --}}
-        <!-- Statistics Cards -->
-        <div class="row mb-4 g-4">
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #e7f3ff; border-color: #2196F3;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $totalStudents }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Total Students</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #2196F3;">
-                                <i class="bx bx-user bx-lg" style="color: white;"></i>
-                            </span>
+        <div class="zp-stats-grid" id="zp-dashboard-stats">
+            <div class="card stats-card zp-stat-card zp-stat-students">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $totalStudents }}</h5>
+                            <small class="zp-stat-label">Total Students</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-user"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #e8f5e9; border-color: #4CAF50;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $activeInternships }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Active Internships</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #4CAF50;">
-                                <i class="bx bx-briefcase bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-active">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $activeInternships }}</h5>
+                            <small class="zp-stat-label">Active Internships</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-briefcase"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #fff3e0; border-color: #FF9800;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $pendingApplications }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Pending Applications</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #FF9800;">
-                                <i class="bx bx-time-five bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-pending">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $pendingApplications }}</h5>
+                            <small class="zp-stat-label">Pending Applications</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-time-five"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #f3e5f5; border-color: #9C27B0;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $completedInternships }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Completed Internships</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #9C27B0;">
-                                <i class="bx bx-check-circle bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-completed">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $completedInternships }}</h5>
+                            <small class="zp-stat-label">Completed Internships</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-check-circle"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card stats-card" style="background: #fff8e1; border-color: #FFC107; cursor:pointer;" onclick="window.location='{{ route('admin.college.pending-marks') }}'">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="content-left">
-                                <h5 class="mb-1" style="font-size: 28px; font-weight: 700; color: #242a62;">{{ $pendingMarksCount }}</h5>
-                                <small style="font-size: 15px; font-weight: 600; color: #666;">Pending Marks</small>
-                            </div>
-                            <span class="badge rounded-circle p-3" style="background: #FFC107;">
-                                <i class="bx bx-time bx-lg" style="color: white;"></i>
-                            </span>
+            <div class="card stats-card zp-stat-card zp-stat-marks" style="cursor:pointer;" onclick="window.location='{{ route('admin.college.pending-marks') }}'">
+                <div class="card-body">
+                    <div class="zp-stat-top">
+                        <div>
+                            <h5 class="zp-stat-value">{{ $pendingMarksCount }}</h5>
+                            <small class="zp-stat-label">Pending Marks</small>
                         </div>
+                        <span class="zp-stat-icon"><i class="bx bx-time"></i></span>
                     </div>
+                    <div class="zp-stat-progress"><span></span></div>
                 </div>
             </div>
         </div>
 
-        {{-- Pending Marks Section --}}
         @if($pendingMarksCount > 0)
         <div class="card mt-4">
             <div class="card-header p-4 d-flex justify-content-between align-items-center">
@@ -290,7 +269,6 @@
         </div>
         @endif
 
-        {{-- College Internship Dashboard Sections --}}
         @include('admin.college-internship.dashboard-section')
         @endif
     </div>
@@ -300,7 +278,6 @@
 @push('script')
 <script>
 $(function(){
-    // Assigned Students DataTable
     $('#assignedStudentsTable').DataTable({
         processing: true,
         serverSide: true,
@@ -322,7 +299,6 @@ $(function(){
         language: { emptyTable: "No students assigned to you yet." }
     });
 
-    // Staff Internships DataTable
     $('#staffInternshipsTable').DataTable({
         processing: true,
         serverSide: true,
@@ -338,8 +314,8 @@ $(function(){
             { data: 'duration' },
             { data: 'category_name' },
             { data: 'status_label', orderable: false },
-            { data: 'total_students', orderable: false }
-            ,{ data: 'action', orderable: false, searchable: false }
+            { data: 'total_students', orderable: false },
+            { data: 'action', orderable: false, searchable: false }
         ],
         order: [[1, 'asc']],
         language: { emptyTable: "No internships assigned to you yet." }

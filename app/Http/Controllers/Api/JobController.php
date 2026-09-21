@@ -65,7 +65,7 @@ class JobController extends Controller
             200
         );
     }
-
+    
     public function applyJob(Request $request)
     {
         $request->validate([
@@ -76,6 +76,50 @@ class JobController extends Controller
             "resume_path" => "nullable|string",
             "isotherresume" => "required|boolean",
         ]);
+	
+	$alreadyApplied = DB::table("tbl_job_apply")
+            ->where("job_id", $request->job_id)
+            ->where("user_id", $request->user_id)
+            ->whereNull("deleted_at")
+            ->exists();
+        if ($alreadyApplied) {
+            return response()->json([
+                "status" => false,
+                "message" => "You have already applied for this job.",
+            ], 200);
+        }
+
+        $FindUser = \App\Models\User::find($request->user_id);
+        if (!\App\Models\PlanPricing::employeeCanApply($FindUser, 'job')) {
+            return response()->json([
+                "status" => 0,
+                "message" => "Your current plan does not include Job service. Please upgrade your plan to apply.",
+            ], 403);
+        }
+
+        $limitCheck = \App\Models\PlanPricing::checkServiceLimit($FindUser, 'job', 'apply');
+        if (!$limitCheck['allowed']) {
+            return response()->json([
+                "status" => 0,
+                "message" => $limitCheck['message'],
+                "limit" => $limitCheck['limit'],
+                "used" => $limitCheck['used'],
+            ], 403);
+        }
+
+        // Fast path: already applied (same email/user + same job)
+        $alreadyApplied = DB::table("tbl_job_apply")
+            ->where("job_id", $request->job_id)
+            ->where("user_id", $request->user_id)
+            ->whereNull("deleted_at")
+            ->exists();
+
+        if ($alreadyApplied) {
+            return response()->json([
+                "status" => false,
+                "message" => "You have already applied for this job.",
+            ], 409);
+        }
 
         $filePath = null;
 
@@ -101,8 +145,25 @@ class JobController extends Controller
 
             // Store uploaded file
             $file = $request->file("file");
-            $fileName = time() . "." . $file->getClientOriginalExtension();
-            $file->move(public_path("storage/resumes"), $fileName);
+            $fileName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
+            
+            $publicStorage = public_path("storage");
+            if (file_exists($publicStorage) && !is_dir($publicStorage)) {
+                @unlink($publicStorage);
+            }
+            $resumePath = public_path("storage/resumes");
+            if (!file_exists($resumePath) || !is_dir($resumePath)) {
+                @mkdir($resumePath, 0777, true);
+            }
+            try {
+                $file->move($resumePath, $fileName);
+            } catch (\Exception $e) {
+                $fallbackPath = storage_path("app/public/resumes");
+                if (!file_exists($fallbackPath) || !is_dir($fallbackPath)) {
+                    @mkdir($fallbackPath, 0777, true);
+                }
+                $file->move($fallbackPath, $fileName);
+            }
             $filePath = $fileName;
 
             if (!$existingResume) {
@@ -129,28 +190,59 @@ class JobController extends Controller
             }
         }
 
-        // Step 3: Insert into tbl_job_apply
-        $id = DB::table("tbl_job_apply")->insertGetId([
-            "job_id" => $request->job_id,
-            "user_id" => $request->user_id,
-            "description" => $request->description,
-            "file_nm" => $filePath,
-            "status" => 0,
-            "datetime" => now(),
-            "created_at" => now(),
-            "updated_at" => now(),
-        ]);
+        // Step 3+4: Insert apply + history with lock so 2 devices at same time
+        // only create one application; the other gets "already applied".
+        $id = DB::transaction(function () use ($request, $filePath) {
+            // Lock user row to serialize concurrent apply requests for same account
+            DB::table("users")
+                ->where("id", $request->user_id)
+                ->lockForUpdate()
+                ->first();
 
-        // Step 4: Insert into tbl_job_apply_history
-        DB::table("tbl_job_apply_history")->insert([
-            "user_id" => $request->user_id,
-            "job_id" => $request->job_id,
-            "job_apply_id" => $id,
-            "msg" => null,
-            "datetime" => now(),
-            "created_at" => now(),
-            "updated_at" => now(),
-        ]);
+            $exists = DB::table("tbl_job_apply")
+                ->where("job_id", $request->job_id)
+                ->where("user_id", $request->user_id)
+                ->whereNull("deleted_at")
+                ->exists();
+
+            if ($exists) {
+                return null;
+            }
+
+            $applyId = DB::table("tbl_job_apply")->insertGetId([
+                "job_id" => $request->job_id,
+                "user_id" => $request->user_id,
+                "description" => $request->description,
+                "file_nm" => $filePath,
+                "status" => 0,
+                "datetime" => now(),
+                "created_at" => now(),
+                "updated_at" => now(),
+            ]);
+
+            DB::table("tbl_job_apply_history")->insert([
+                "user_id" => $request->user_id,
+                "job_id" => $request->job_id,
+                "job_apply_id" => $applyId,
+                "msg" => null,
+                "datetime" => now(),
+                "created_at" => now(),
+                "updated_at" => now(),
+            ]);
+
+            return $applyId;
+        });
+
+        if ($id === null) {
+            return response()->json([
+                "status" => false,
+                "message" => "You have already applied for this job.",
+            ], 409);
+        }
+
+        if ($FindUser) {
+            \App\Models\PlanPricing::incrementServiceUsage($FindUser, 'job');
+        }
 
         // Step 5: Fetch and insert rounds into tbl_round_complete
         $rounds = DB::table("tbl_job_round")
@@ -223,6 +315,172 @@ class JobController extends Controller
             "data" => $appliedJob,
         ]);
     }
+
+    // public function applyJob(Request $request)
+    // {
+    //     $request->validate([
+    //         "job_id" => "required",
+    //         "user_id" => "required",
+    //         "description" => "nullable",
+    //         "file" => "nullable|mimes:jpeg,png,jpg,pdf,doc,docx",
+    //         "resume_path" => "nullable|string",
+    //         "isotherresume" => "required|boolean",
+    //     ]);
+
+    //     $FindUser = \App\Models\User::find($request->user_id);
+    //     if (!\App\Models\PlanPricing::employeeCanApply($FindUser, 'job')) {
+    //         return response()->json([
+    //             "status" => 0,
+    //             "message" => "Your current plan does not include Job service. Please upgrade your plan to apply.",
+    //         ], 403);
+    //     }
+
+    //     $filePath = null;
+
+    //     // Case 1: resume_path given, no file, and isotherresume = false
+    //     if (
+    //         $request->resume_path &&
+    //         !$request->hasFile("file") &&
+    //         !$request->isotherresume
+    //     ) {
+    //         $filePath = $request->resume_path;
+    //     }
+
+    //     // Case 2: isotherresume = true, file uploaded, resume_path null
+    //     elseif (
+    //         $request->isotherresume &&
+    //         $request->hasFile("file") &&
+    //         !$request->resume_path
+    //     ) {
+    //         $existingResume = DB::table("tbl_resume")
+    //             ->where("user_id", $request->user_id)
+    //             ->where("resume_type", 1)
+    //             ->first();
+
+    //         // Store uploaded file
+    //         $file = $request->file("file");
+    //         $fileName = time() . "." . $file->getClientOriginalExtension();
+    //         $file->move(public_path("storage/resumes"), $fileName);
+    //         $filePath = $fileName;
+
+    //         if (!$existingResume) {
+    //             // Insert into tbl_resume if not exists
+    //             DB::table("tbl_resume")->insert([
+    //                 "user_id" => $request->user_id,
+    //                 "file_nm" => $filePath,
+    //                 "resume_type" => 1,
+    //                 "created_at" => now(),
+    //                 "updated_at" => now(),
+    //             ]);
+    //         }
+    //     }
+
+    //     // Case 3: If user_id has resume_type=1 already, and no file uploaded, use it
+    //     elseif (!$request->hasFile("file") && !$request->resume_path) {
+    //         $existingResume = DB::table("tbl_resume")
+    //             ->where("user_id", $request->user_id)
+    //             ->where("resume_type", 1)
+    //             ->first();
+
+    //         if ($existingResume) {
+    //             $filePath = $existingResume->file_nm;
+    //         }
+    //     }
+
+    //     // Step 3: Insert into tbl_job_apply
+    //     $id = DB::table("tbl_job_apply")->insertGetId([
+    //         "job_id" => $request->job_id,
+    //         "user_id" => $request->user_id,
+    //         "description" => $request->description,
+    //         "file_nm" => $filePath,
+    //         "status" => 0,
+    //         "datetime" => now(),
+    //         "created_at" => now(),
+    //         "updated_at" => now(),
+    //     ]);
+
+    //     // Step 4: Insert into tbl_job_apply_history
+    //     DB::table("tbl_job_apply_history")->insert([
+    //         "user_id" => $request->user_id,
+    //         "job_id" => $request->job_id,
+    //         "job_apply_id" => $id,
+    //         "msg" => null,
+    //         "datetime" => now(),
+    //         "created_at" => now(),
+    //         "updated_at" => now(),
+    //     ]);
+
+    //     // Step 5: Fetch and insert rounds into tbl_round_complete
+    //     $rounds = DB::table("tbl_job_round")
+    //         ->where("job_id", $request->job_id)
+    //         ->pluck("id");
+
+    //     if (!$rounds->isEmpty()) {
+    //         $insertRounds = [];
+    //         foreach ($rounds as $roundId) {
+    //             $insertRounds[] = [
+    //                 "user_id" => $request->user_id,
+    //                 "job_id" => $request->job_id,
+    //                 "round_id" => $roundId,
+    //                 "hr_name" => null,
+    //                 "hr_contact_no" => null,
+    //                 "hr_email" => null,
+    //                 "interview_address" => null,
+    //                 "datetime" => null,
+    //                 "complete_datetime" => null,
+    //                 "status" => 0,
+    //                 "created_at" => now(),
+    //                 "updated_at" => now(),
+    //             ];
+    //         }
+    //         DB::table("tbl_round_complete")->insert($insertRounds);
+    //     }
+
+    //     // Step 6: Fetch additional details for WhatsApp
+    //     $FindUser = DB::table("users")
+    //         ->where("id", $request->user_id)
+    //         ->select("name")
+    //         ->first();
+
+    //     $FindJob = DB::table("tbl_job")
+    //         ->where("job_id", $request->job_id)
+    //         ->select("job_title", "user_id")
+    //         ->first();
+
+    //     $company = null;
+    //     if ($FindJob) {
+    //         $company = DB::table("users")
+    //             ->where("id", $FindJob->user_id)
+    //             ->select("contact_no")
+    //             ->first();
+    //     }
+
+    //     // Send WhatsApp notification if company contact is available
+    //     try {
+    //         if ($company && $company->contact_no && $FindUser && $FindJob) {
+    //             WhatsappHelper::sendTemplate(
+    //                 $company->contact_no,
+    //                 'candidate_company_apply',
+    //                 [$FindUser->name, $FindJob->job_title]
+    //             );
+    //         }
+    //     } catch (\Throwable $wh) {
+    //         \Illuminate\Support\Facades\Log::warning('WhatsApp failed on API job apply', [
+    //             'error' => $wh->getMessage(),
+    //         ]);
+    //     }
+
+    //     // Step 7: Return response
+    //     $appliedJob = DB::table("tbl_job_apply")
+    //         ->where("id", $id)
+    //         ->first();
+
+    //     return response()->json([
+    //         "status" => true,
+    //         "message" => "Job applied successfully and rounds added",
+    //         "data" => $appliedJob,
+    //     ]);
+    // }
 
     public function toggleSavedJobPost(Request $request)
     {
@@ -2138,7 +2396,23 @@ class JobController extends Controller
         // ---- Store file ----
         $fileName =
             time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
-        $file->move(public_path("storage/resumes/"), $fileName);
+        $publicStorage = public_path("storage");
+        if (file_exists($publicStorage) && !is_dir($publicStorage)) {
+            @unlink($publicStorage);
+        }
+        $resumePath = public_path("storage/resumes");
+        if (!file_exists($resumePath) || !is_dir($resumePath)) {
+            @mkdir($resumePath, 0777, true);
+        }
+        try {
+            $file->move($resumePath, $fileName);
+        } catch (\Exception $e) {
+            $fallbackPath = storage_path("app/public/resumes");
+            if (!file_exists($fallbackPath) || !is_dir($fallbackPath)) {
+                @mkdir($fallbackPath, 0777, true);
+            }
+            $file->move($fallbackPath, $fileName);
+        }
 
         $filePath = $fileName;
 

@@ -266,7 +266,7 @@
             line-height: 1.4;
         }
 
-        .zp-cert-body .internship-title {
+        .zp-cert-body .opportunity-title {
             font-size: 14pt;
             color: #242a62;
             font-weight: bold;
@@ -410,7 +410,7 @@
             padding: 3pt 8pt;
             font-size: 20pt;
         }
-        .zp-certificate.college-cert .zp-cert-body .internship-title { margin: 2pt 0; font-size: 12pt; }
+        .zp-certificate.college-cert .zp-cert-body .opportunity-title { margin: 2pt 0; font-size: 12pt; }
         .zp-certificate.college-cert .zp-cert-body .org-name { margin: 1pt 0 2pt; font-size: 10pt; }
         .zp-certificate.college-cert .zp-cert-meta { margin-top: 5pt; }
         .zp-certificate.college-cert .zp-cert-meta .item { padding: 3pt 3pt; }

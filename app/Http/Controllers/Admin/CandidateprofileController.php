@@ -248,6 +248,9 @@ class CandidateprofileController extends Controller
 
             $user = User::findOrFail($userId); // ❌ No creation, only update
 
+  
+            $updaterId = Auth::id();
+
             $user->name = $request->full_name;
             $user->email = $request->email;
             $user->contact_no = $request->contact_no;
@@ -258,9 +261,17 @@ class CandidateprofileController extends Controller
             $user->address = $request->address;
             $user->personal_website = $request->personal_website;
             $user->designation = $request->designation;
+            $user->last_update = $updaterId;
+
+
 
 
             $user->save();
+            
+                 // Force-persist updater id (bypass any attribute/guard edge cases)
+            if ($updaterId) {
+                DB::table('users')->where('id', $user->id)->update(['last_update' => $updaterId]);
+            }
 
             StaffActivityController::insertActivity(Auth::user()->id, 'Candidate Profile update Successfully.');
 

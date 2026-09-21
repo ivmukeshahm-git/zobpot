@@ -21,6 +21,17 @@
         page_active_id = "Master-Category";
     </script>
     <div class="container-xxl flex-grow-1 container-p-y">
+        <ul class="nav nav-tabs mb-3" id="jobCategoryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-panel" type="button" role="tab">Categories</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="category-requests-tab" data-bs-toggle="tab" data-bs-target="#category-requests-panel" type="button" role="tab">Requests</button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="categories-panel" role="tabpanel">
         <!-- Product List Table -->
         <div class="card">
             <div class="card-header p-4">
@@ -52,6 +63,32 @@
 
                     </tbody>
                 </table>
+            </div>
+        </div>
+            </div>
+
+            <div class="tab-pane fade" id="category-requests-panel" role="tabpanel">
+                <div class="card">
+                    <div class="card-header p-4">
+                        <h5 class="card-title mb-0">Category Requests</h5>
+                    </div>
+                    <hr class="my-1">
+                    <div class="card-body table-responsive p-4">
+                        <table id="JobCategoryRequestsDataTable" class="table table-sm table-striped table-hover">
+                            <thead class="border-top">
+                                <tr>
+                                    <th>Sr. NO.</th>
+                                    <th>Requested Category</th>
+                                    <th>Company Name</th>
+                                    <th>Company Email</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -268,6 +305,100 @@
 
             $('#JobCategory').on('hidden.bs.modal', function() {
                 $("#_method").val("POST");
+            });
+
+            var requestsDatatable = $('#JobCategoryRequestsDataTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.job-category.requests.gettabledata') }}",
+                    type: "POST",
+                    data: function(d) {
+                        d._token = '{{ csrf_token() }}';
+                    }
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'requested_name', name: 'requested_name' },
+                    { data: 'company_name', name: 'company_name' },
+                    { data: 'company_email', name: 'company_email' },
+                    { data: 'status_label', name: 'status_label', orderable: false, searchable: false },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ]
+            });
+
+            $('#JobCategoryRequestsDataTable').on('click', '.approve-category-request-btn', function() {
+                var requestId = $(this).data('id');
+                Swal.fire({
+                    title: 'Approve Request?',
+                    text: 'This will create a new job category.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Approve',
+                    customClass: {
+                        confirmButton: 'btn btn-success me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    }
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
+                    LoaderShow();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ url('admin/job-category-requests') }}/" + requestId + "/approve",
+                        data: { _token: '{{ csrf_token() }}' },
+                        success: function(response) {
+                            LoaderHide();
+                            if (response.status === 1) {
+                                toastr.success(response.message, 'Success');
+                                requestsDatatable.ajax.reload(null, false);
+                                datatable.ajax.reload(null, false);
+                            } else {
+                                toastr.warning(response.message, 'Warning');
+                            }
+                        },
+                        error: function(xhr) {
+                            LoaderHide();
+                            toastr.error(xhr.responseJSON?.message || 'Failed to approve request', 'Error');
+                        }
+                    });
+                });
+            });
+
+            $('#JobCategoryRequestsDataTable').on('click', '.reject-category-request-btn', function() {
+                var requestId = $(this).data('id');
+                Swal.fire({
+                    title: 'Reject Request?',
+                    text: 'This request will be marked as rejected.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Reject',
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    }
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
+                    LoaderShow();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ url('admin/job-category-requests') }}/" + requestId + "/reject",
+                        data: { _token: '{{ csrf_token() }}' },
+                        success: function(response) {
+                            LoaderHide();
+                            if (response.status === 1) {
+                                toastr.success(response.message, 'Success');
+                                requestsDatatable.ajax.reload(null, false);
+                                datatable.ajax.reload(null, false);
+                            } else {
+                                toastr.warning(response.message, 'Warning');
+                            }
+                        },
+                        error: function(xhr) {
+                            LoaderHide();
+                            toastr.error(xhr.responseJSON?.message || 'Failed to reject request', 'Error');
+                        }
+                    });
+                });
             });
 
         });

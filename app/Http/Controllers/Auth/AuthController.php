@@ -403,14 +403,27 @@ class AuthController extends Controller
 
             if ($request->hasFile('file_nm')) {
                 $file = $request->file('file_nm');
-                $fileName = $file->getClientOriginalName();
-                $resumePath = public_path('storage/resumes');
-
-                if (!file_exists($resumePath)) {
-                    mkdir($resumePath, 0755, true);
+                $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                
+                $publicStorage = public_path('storage');
+                if (file_exists($publicStorage) && !is_dir($publicStorage)) {
+                    @unlink($publicStorage);
                 }
 
-                $file->move($resumePath, $fileName);
+                $resumePath = public_path('storage/resumes');
+                if (!file_exists($resumePath) || !is_dir($resumePath)) {
+                    @mkdir($resumePath, 0777, true);
+                }
+
+                try {
+                    $file->move($resumePath, $fileName);
+                } catch (\Exception $e) {
+                    $fallbackPath = storage_path('app/public/resumes');
+                    if (!file_exists($fallbackPath) || !is_dir($fallbackPath)) {
+                        @mkdir($fallbackPath, 0777, true);
+                    }
+                    $file->move($fallbackPath, $fileName);
+                }
 
                 Resume::create([
                     'user_id' => $user->id,
@@ -660,10 +673,14 @@ class AuthController extends Controller
                 'status'        => 1,
             ]);
 
-            // Update user's active_plan_id
-            $user->update([
-                'active_plan_id' => $plan->plan_id,
-            ]);
+            // Deactivate previous active plans
+            PlanHistory::where('user_id', $user_id)
+                ->where('id', '!=', $planHistory->id)
+                ->where('status', 1)
+                ->update(['status' => 0]);
+
+            // Activate plan + reset usage counters to 0
+            PlanPricing::activatePlanForUser($user, $plan);
 
             Auth::login($user);
 
@@ -690,11 +707,17 @@ class AuthController extends Controller
                     'order_id' => $request->razorpay_order_id,
                     'status'     => 1,  
                 ]);
-                // Update user's active_plan_id
-                $user= User::find($planHistory->user_id);
-                $user->update([
-                    'active_plan_id' => $planHistory->plan_id ,
-                ]);
+
+                // Deactivate previous active plans
+                PlanHistory::where('user_id', $planHistory->user_id)
+                    ->where('id', '!=', $planHistory->id)
+                    ->where('status', 1)
+                    ->update(['status' => 0]);
+
+                // Update user's active_plan_id + reset usage counters
+                $user = User::find($planHistory->user_id);
+                $plan = PlanPricing::find($planHistory->plan_id);
+                PlanPricing::activatePlanForUser($user, $plan ?: $planHistory->plan_id);
                 return   response()->json(['status' => 'success']);
             }else{
                 $planHistory = PlanHistory::find($history_id);
@@ -709,24 +732,24 @@ class AuthController extends Controller
                 ]);
                 // Update user's active_plan_id
                 $user= User::find($planHistory->user_id);
-                $user->update([
-                    'active_plan_id' => 0,
-                ]);
-
                 $lastSuccess = PlanHistory::where('user_id', $user->id)
                     ->where('status', 1)
                     ->orderBy('id', 'desc')
                     ->first();
 
                 if ($lastSuccess) {
-                    $user->update([
-                        'active_plan_id' => $lastSuccess->plan_id,
-                    ]);
+                    $plan = PlanPricing::find($lastSuccess->plan_id);
+                    // Restore previous successful plan without wiping its counters if same plan
+                    // Payment failed for new plan — restore last success, keep counters only if same active plan
+                    if ((int) $user->active_plan_id !== (int) $lastSuccess->plan_id) {
+                        PlanPricing::activatePlanForUser($user, $plan ?: $lastSuccess->plan_id);
+                    } else {
+                        $user->update([
+                            'active_plan_id' => $lastSuccess->plan_id,
+                        ]);
+                    }
                 } else {
-                    // optional: clear active_plan_id if no successful plan exists
-                    $user->update([
-                        'active_plan_id' => 0,
-                    ]);
+                    PlanPricing::clearPlanForUser($user);
                 }
                 return  response()->json(['status' => 'failed'], 400);
             }
@@ -737,10 +760,17 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        Auth::guard('college')->logout();
+        Auth::guard('college_staff')->logout();
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        $referer = (string) $request->headers->get('referer', '');
+        if (str_contains($referer, '/admin') || $request->boolean('admin')) {
+            return redirect()->route('admin.login')->with('success', 'You have been logged out.');
+        }
 
         return redirect()->route('login')->with('success', 'You have been logged out.');
     }

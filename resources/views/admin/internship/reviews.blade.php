@@ -63,10 +63,10 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h4 style="color: #fff; margin: 0;">
-                    <i class="bx bx-star"></i> Internship Review Management
+                    <i class="bx bx-star"></i> Opportunity Review Management
                 </h4>
                 <p style="color: rgba(255,255,255,0.7); margin: 5px 0 0 0; font-size: 14px;">
-                    Manage and moderate student internship reviews
+                    Manage and moderate student opportunity reviews
                 </p>
             </div>
         </div>
@@ -100,7 +100,7 @@
                     <tr>
                         <th>#</th>
                         <th>Student</th>
-                        <th>Internship</th>
+                        <th>Opportunity</th>
                         <th>Rating</th>
                         <th>Review</th>
                         <th>Status</th>

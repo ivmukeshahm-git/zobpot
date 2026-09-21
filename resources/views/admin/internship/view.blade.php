@@ -5,25 +5,48 @@
 </script>
 
 <style>
-    /* Internship View Page Styles */
+    /* Opportunity View Page Styles */
     .internship-view-header {
-        background: #242a62;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(36, 42, 98, 0.3);
+        background: linear-gradient(135deg, #242a62 0%, #3d4575 55%, #f26e2c 160%);
+        border-radius: 14px;
+        padding: 28px 30px;
+        margin-bottom: 24px;
+        color: #ffffff;
+        box-shadow: 0 8px 24px rgba(36, 42, 98, 0.22);
     }
 
     .internship-view-header h4 {
         margin: 0;
         font-size: 28px;
         font-weight: 700;
+        color: #ffffff !important;
+        line-height: 1.3;
+        letter-spacing: 0.2px;
+    }
+
+    .internship-view-header h4 i {
+        color: #ffd7c2;
+        margin-right: 6px;
     }
 
     .internship-view-header p {
-        margin: 8px 0 0 0;
-        opacity: 0.9;
+        margin: 10px 0 0 0;
+        color: rgba(255, 255, 255, 0.92) !important;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .internship-view-header .btn-light {
+        background: #ffffff;
+        color: #242a62;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .internship-view-header .btn-light:hover {
+        background: #fff5f0;
+        color: #f26e2c;
     }
 
     /* Tab Navigation */
@@ -138,7 +161,7 @@
         transform: translateY(-2px);
     }
 
-    .btn-complete-internship {
+    .btn-complete-opportunity {
         background: #28a745;
         color: white;
         border: none;
@@ -148,7 +171,7 @@
         font-weight: 600;
     }
 
-    .btn-complete-internship:hover {
+    .btn-complete-opportunity:hover {
         background: #218838;
         color: white;
         transform: translateY(-2px);
@@ -189,8 +212,126 @@
     }
 
     /* Table Styles */
-    .table-internship-view .table-hover tbody tr:hover {
+    .table-internship-view.table-hover tbody tr:hover,
+    .table-opportunity-view .table-hover tbody tr:hover {
         background-color: #fff5f0;
+    }
+
+    /* Enrolled Students DataTable */
+    .enrolled-students-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .enrolled-students-table {
+        width: 100% !important;
+        margin: 0 !important;
+        border-collapse: collapse !important;
+    }
+
+    .enrolled-students-table thead th {
+        background: linear-gradient(135deg, #242a62 0%, #3d4575 100%) !important;
+        color: #ffffff !important;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        vertical-align: middle !important;
+        border-bottom: none !important;
+        padding: 14px 12px !important;
+    }
+
+    .enrolled-students-table tbody td {
+        vertical-align: middle !important;
+        font-size: 13px;
+        color: #495057;
+        padding: 12px !important;
+        border-color: #eef1f5 !important;
+        white-space: nowrap;
+    }
+
+    .enrolled-students-table tbody tr:hover {
+        background: #fff7f2 !important;
+    }
+
+    .enrolled-students-table .col-sr { width: 70px; min-width: 70px; text-align: center; }
+    .enrolled-students-table .col-name { min-width: 140px; }
+    .enrolled-students-table .col-email { min-width: 180px; }
+    .enrolled-students-table .col-phone { min-width: 110px; }
+    .enrolled-students-table .col-uni { min-width: 130px; }
+    .enrolled-students-table .col-college { min-width: 120px; }
+    .enrolled-students-table .col-degree { min-width: 140px; }
+    .enrolled-students-table .col-sem { width: 90px; min-width: 90px; text-align: center; }
+    .enrolled-students-table .col-date { min-width: 120px; }
+    .enrolled-students-table .col-action {
+        width: 90px;
+        min-width: 90px;
+        text-align: center;
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        background: #fff;
+        box-shadow: -6px 0 10px rgba(36, 42, 98, 0.06);
+    }
+
+    .enrolled-students-table thead th.col-action {
+        background: linear-gradient(135deg, #242a62 0%, #3d4575 100%) !important;
+        z-index: 3;
+    }
+
+    .enrolled-students-table tbody tr:hover td.col-action {
+        background: #fff7f2 !important;
+    }
+
+    .btn-view-profile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 8px;
+        background: #242a62;
+        color: #fff !important;
+        border: none;
+        box-shadow: 0 2px 8px rgba(36, 42, 98, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-view-profile i {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .btn-view-profile:hover {
+        background: #f26e2c;
+        color: #fff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(242, 110, 44, 0.3);
+    }
+
+    .enrolled-students-wrap .dataTables_wrapper {
+        padding: 12px;
+    }
+
+    .enrolled-students-wrap .dataTables_filter input,
+    .enrolled-students-wrap .dataTables_length select {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 6px 10px;
+    }
+
+    .enrolled-students-wrap table.dataTable thead th,
+    .enrolled-students-wrap table.dataTable thead td {
+        border-bottom: none !important;
+    }
+
+    .enrolled-students-wrap table.dataTable.no-footer {
+        border-bottom: none !important;
     }
 
     .badge-enrolled {
@@ -218,81 +359,133 @@
         min-height: 300px;
     }
 
-    /* Complete Internship Table Styles */
-    .complete-internship-table {
+    /* Complete Program Table Styles */
+    .complete-internship-table,
+    .complete-opportunity-table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: separate;
         border-spacing: 0;
         background: white;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        margin-bottom: 0;
     }
 
-    .complete-internship-table thead {
+    .complete-internship-table thead,
+    .complete-opportunity-table thead {
         background: linear-gradient(135deg, #242a62 0%, #3d4575 100%);
     }
 
-    .complete-internship-table thead th {
-        color: white;
+    .complete-internship-table thead th,
+    .complete-opportunity-table thead th {
+        color: #ffffff !important;
         font-weight: 600;
-        padding: 16px 12px;
+        padding: 14px 12px;
         text-align: center;
-        font-size: 13px;
+        vertical-align: middle;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-right: 1px solid rgba(255,255,255,0.1);
+        letter-spacing: 0.4px;
+        border-right: 1px solid rgba(255,255,255,0.12);
+        white-space: nowrap;
     }
 
-    .complete-internship-table thead th:last-child {
+    .complete-internship-table thead th:last-child,
+    .complete-opportunity-table thead th:last-child {
         border-right: none;
     }
 
-    .complete-internship-table tbody tr {
+    .complete-internship-table tbody tr,
+    .complete-opportunity-table tbody tr {
         border-bottom: 1px solid #e9ecef;
-        transition: all 0.3s ease;
+        transition: background 0.2s ease;
     }
 
-    .complete-internship-table tbody tr:hover {
+    .complete-internship-table tbody tr:hover,
+    .complete-opportunity-table tbody tr:hover {
         background: #f8f9fa;
     }
 
-    .complete-internship-table tbody td {
-        padding: 16px 12px;
+    .complete-internship-table tbody td,
+    .complete-opportunity-table tbody td {
+        padding: 14px 12px;
         vertical-align: middle;
-        font-size: 14px;
+        font-size: 13px;
         color: #495057;
+        text-align: center;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
-    .complete-internship-table tbody td:first-child {
-        text-align: center;
+    .complete-internship-table tbody td:first-child,
+    .complete-opportunity-table tbody td:first-child {
+        font-weight: 700;
+        color: #242a62;
+        width: 70px;
+    }
+
+    /* Column widths via classes (works for type 1 and type 2) */
+    .complete-internship-table .col-sr { width: 70px; }
+    .complete-internship-table .col-student { width: 160px; text-align: left !important; }
+    .complete-internship-table .col-college { width: 140px; }
+    .complete-internship-table .col-industry { width: 240px; }
+    .complete-internship-table .col-feedback { width: 220px; }
+    .complete-internship-table .col-total { width: 90px; }
+    .complete-internship-table .col-percent { width: 90px; }
+    .complete-internship-table .col-grade { width: 90px; }
+
+    .complete-internship-table td.col-student > div {
+        text-align: left;
         font-weight: 600;
         color: #242a62;
+        line-height: 1.35;
     }
 
     .marks-input-group {
         display: flex;
         align-items: center;
         gap: 8px;
-        justify-content: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+        padding: 6px 8px;
+        background: #f8f9fc;
+        border-radius: 8px;
+        border: 1px solid #eef0f4;
+    }
+
+    .marks-input-group:last-child {
+        margin-bottom: 0;
     }
 
     .marks-input-group label {
         margin: 0;
-        font-size: 12px;
+        font-size: 11px;
         color: #6c757d;
         font-weight: 600;
+        min-width: 90px;
+        text-align: left;
+        flex: 1 1 90px;
     }
 
     .marks-input {
-        width: 70px;
-        padding: 8px 10px;
+        width: 64px;
+        padding: 6px 8px;
         border: 2px solid #e9ecef;
         border-radius: 8px;
         text-align: center;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13px;
         transition: all 0.3s ease;
+        flex: 0 0 auto;
+    }
+
+    .marks-input.is-invalid,
+    .feedback-textarea.is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
     }
 
     .marks-input:focus {
@@ -307,20 +500,36 @@
     }
 
     .max-marks {
-        font-size: 13px;
+        font-size: 12px;
         color: #6c757d;
         font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .industry-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 56px;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px dashed #dee2e6;
     }
 
     .feedback-textarea {
         width: 100%;
-        min-height: 80px;
+        min-height: 72px;
+        max-height: 140px;
         padding: 10px;
         border: 2px solid #e9ecef;
         border-radius: 8px;
         font-size: 13px;
         resize: vertical;
         transition: all 0.3s ease;
+        box-sizing: border-box;
     }
 
     .feedback-textarea:focus {
@@ -330,23 +539,29 @@
     }
 
     .total-display {
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 700;
         color: #242a62;
         text-align: center;
+        white-space: nowrap;
     }
 
     .percentage-display {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
         color: #17a2b8;
         text-align: center;
+        white-space: nowrap;
     }
 
     .grade-badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 10px;
+        border-radius: 50%;
         font-weight: 700;
         font-size: 14px;
         text-align: center;
@@ -358,31 +573,49 @@
     .grade-D { background: #fd7e14; color: white; }
     .grade-F { background: #dc3545; color: white; }
 
+    .btn-complete-opportunity-submit,
     .btn-complete-internship-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        padding: 14px 32px;
-        border-radius: 10px;
+        color: #ffffff !important;
+        padding: 14px 36px;
+        border-radius: 12px;
         font-weight: 700;
         font-size: 16px;
         border: none;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        transition: all 0.3s ease;
+        box-shadow: 0 6px 18px rgba(40, 167, 69, 0.35);
+        transition: all 0.25s ease;
+        min-width: 280px;
     }
 
+    .btn-complete-opportunity-submit i,
+    .btn-complete-internship-submit i {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .btn-complete-opportunity-submit:hover,
     .btn-complete-internship-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        color: white;
+        box-shadow: 0 8px 22px rgba(40, 167, 69, 0.45);
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #219653 0%, #1aa179 100%);
     }
 
-    .btn-complete-internship-submit:disabled {
+    .btn-complete-opportunity-submit:disabled,
+    .btn-complete-internship-submit:disabled,
+    .btn-complete-opportunity-submit.disabled,
+    .btn-complete-internship-submit.disabled {
         opacity: 0.6;
         cursor: not-allowed;
         transform: none;
+        box-shadow: none;
     }
 
-    /* Readonly display for replaced inputs (when internship is submitted) */
+    /* Readonly display for replaced inputs (when opportunity is submitted) */
     .readonly-mark {
         display: inline-block;
         min-width: 70px;
@@ -393,6 +626,14 @@
         font-weight: 600;
     }
 
+    @media (max-width: 1200px) {
+        .complete-internship-table,
+        .complete-opportunity-table {
+            table-layout: auto;
+            min-width: 980px;
+        }
+    }
+
     .readonly-feedback {
         padding: 10px;
         border-radius: 8px;
@@ -401,22 +642,47 @@
         white-space: pre-wrap;
     }
 
-    /* Internship Complete Alert */
-    .internship-complete-alert {
+    /* Opportunity / Internship Complete Alert */
+    .internship-complete-alert,
+    .opportunity-complete-alert {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: #ffffff;
+        color: #ffffff !important;
         border: none;
-        border-radius: 10px;
-        padding: 14px 20px;
-        box-shadow: 0 6px 18px rgba(32, 201, 151, 0.12);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 6px 18px rgba(40, 167, 69, 0.25);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         margin-bottom: 18px;
     }
-    .internship-complete-alert .icon {
+    .internship-complete-alert .icon,
+    .opportunity-complete-alert .icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 22px;
-        opacity: 0.95;
+        color: #ffffff;
+    }
+    .internship-complete-alert strong,
+    .opportunity-complete-alert strong {
+        color: #ffffff !important;
+        font-size: 16px;
+        font-weight: 800;
+        display: block;
+        line-height: 1.3;
+    }
+    .internship-complete-alert .small,
+    .opportunity-complete-alert .small {
+        color: rgba(255, 255, 255, 0.95) !important;
+        opacity: 1 !important;
+        font-size: 13px;
+        margin-top: 2px;
     }
 
     /* Confirmation Modal Styles */
@@ -511,7 +777,8 @@
     }
 
     @media (max-width: 768px) {
-        .complete-internship-table {
+        .complete-internship-table,
+        .complete-opportunity-table {
             font-size: 12px;
         }
         
@@ -522,7 +789,9 @@
         }
         
         .complete-internship-table thead th,
-        .complete-internship-table tbody td {
+        .complete-opportunity-table thead th,
+        .complete-internship-table tbody td,
+        .complete-opportunity-table tbody td {
             padding: 10px 6px;
         }
     }
@@ -548,26 +817,29 @@
         <div class="internship-complete-alert" role="alert">
             <span class="icon"><i class="bx bx-check-circle"></i></span>
             <div>
-                <strong>Internship Completed</strong>
-                <div class="small" style="opacity:0.95;">This internship has been marked complete successfully.</div>
+                <strong>Program Completed</strong>
+                <div class="small" style="opacity:0.95;">This opportunity has been marked complete successfully.</div>
             </div>
         </div>
     @endif
     
     <!-- Page Header -->
     <div class="internship-view-header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <h4 style="color: #fff;">
+                <h4>
                     <i class="bx bx-briefcase-alt-2"></i> {{ $internship->internship_title }}
                 </h4>
-                <p>{{ $internship->company ? $internship->company->name : 'N/A' }} • {{ $internship->duration }} • {{ $internship->mode }} Mode</p>
+                <p>
+                    {{ $internship->company ? $internship->company->name : 'N/A' }}
+                    &bull; {{ $internship->duration ?: 'N/A' }}
+                    &bull; {{ $internship->mode ?: 'N/A' }} Mode
+                </p>
             </div>
             <a href="{{ route('admin.internship.management') }}" class="btn btn-light">
                 <i class="bx bx-arrow-back"></i> Back to List
             </a>
         </div>
-       
     </div>
 
     <!-- Tab Navigation -->
@@ -575,7 +847,7 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" 
                     type="button" role="tab">
-                <i class="bx bx-info-circle"></i> &nbsp;&nbsp;Internship Details
+                <i class="bx bx-info-circle"></i> &nbsp;&nbsp;Opportunity Details
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -614,7 +886,7 @@
                         <i class="bx bx-eye"></i> &nbsp;&nbsp; View Marks
                     @endif
                 @else
-                    <i class="bx bx-check-circle"></i> &nbsp;&nbsp; Complete Internship
+                    <i class="bx bx-check-circle"></i> &nbsp;&nbsp; Complete Program
                 @endif
             </button>
         </li>
@@ -622,16 +894,16 @@
 
     <!-- Tab Content -->
     <div class="tab-content tab-content-card" id="internshipViewTabContent">
-        <!-- Internship Details Tab -->
+        <!-- Opportunity Details Tab -->
         <div class="tab-pane fade show active" id="details" role="tabpanel">
             <h5 style="color: #242a62; font-weight: 700; margin-bottom: 20px;">
-                <i class="bx bx-detail"></i> Internship Information
+                <i class="bx bx-detail"></i> Opportunity Information
             </h5>
 
             <div class="section-card">
                 <h6><i class="bx bx-info-circle"></i> Basic Details</h6>
                 <div class="detail-row-view">
-                    <span class="detail-label-view">Internship Title:</span>
+                    <span class="detail-label-view">Opportunity Title:</span>
                     <span class="detail-value-view">{{ $internship->internship_title }}</span>
                 </div>
                 <div class="detail-row-view">
@@ -708,6 +980,18 @@
                     <span class="detail-label-view">Registration Fee:</span>
                     <span class="detail-value-view">₹{{ number_format($internship->registration_fees, 2) }}</span>
                 </div>
+                @if(!empty($internship->last_registration_date))
+                <div class="detail-row-view">
+                    <span class="detail-label-view">Last Date of Registration:</span>
+                    <span class="detail-value-view">{{ $internship->last_registration_date->format('d M Y') }}</span>
+                </div>
+                @endif
+                @if((float) ($internship->late_registration_fee ?? 0) > 0)
+                <div class="detail-row-view">
+                    <span class="detail-label-view">Late Registration Fee:</span>
+                    <span class="detail-value-view">₹{{ number_format($internship->late_registration_fee, 2) }}</span>
+                </div>
+                @endif
                 <div class="detail-row-view">
                     <span class="detail-label-view">GST ({{ $internship->gst_percentage }}%):</span>
                     <span class="detail-value-view">₹{{ number_format($internship->gst_amount, 2) }}</span>
@@ -772,7 +1056,7 @@
             </div>
 
             <div class="section-card">
-                <h6><i class="bx bx-detail"></i> Internship Description</h6>
+                <h6><i class="bx bx-detail"></i> Program Overview</h6>
                 <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                     {!! $internship->internship_description ?? '<p class="text-muted">No description available</p>' !!}
                 </div>
@@ -786,14 +1070,14 @@
             </div>
 
             <div class="section-card">
-                <h6><i class="bx bx-target-lock"></i> Internship Objective</h6>
+                <h6><i class="bx bx-target-lock"></i> Learning Objectives</h6>
                 <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                     {!! $internship->internship_objective ?? '<p class="text-muted">No objective defined</p>' !!}
                 </div>
             </div>
 
             <div class="section-card">
-                <h6><i class="bx bx-trophy"></i> Internship Outcome</h6>
+                <h6><i class="bx bx-trophy"></i> Skills You'll Gain</h6>
                 <div style="padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                     {!! $internship->internship_outcome ?? '<p class="text-muted">No outcome defined</p>' !!}
                 </div>
@@ -806,23 +1090,23 @@
                 <h5 style="color: #242a62; font-weight: 700; margin: 0;">
                     <i class="bx bx-user"></i> Enrolled Students
                 </h5>
-                <span class="badge-enrolled">Total: 3 Students</span>
+                <span class="badge-enrolled" id="enrolledStudentsCount">Total: {{ $students->count() }} {{ $students->count() === 1 ? 'Student' : 'Students' }}</span>
             </div>
 
-            <div class="table-responsive">
-                <table id="StudentsTable" class="table table-sm table-striped table-hover table-internship-view">
-                    <thead class="border-top">
+            <div class="enrolled-students-wrap">
+                <table id="StudentsTable" class="table table-hover enrolled-students-table w-100">
+                    <thead>
                         <tr>
-                            <th>Sr. No.</th>
-                            <th>Student Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>University</th>
-                            <th>College</th>
-                            <th>Degree</th>
-                            <th>Semester</th>
-                            <th>Enrollment Date</th>
-                            <th>Action</th>
+                            <th class="col-sr">Sr. No.</th>
+                            <th class="col-name">Student Name</th>
+                            <th class="col-email">Email</th>
+                            <th class="col-phone">Phone</th>
+                            <th class="col-uni">University</th>
+                            <th class="col-college">College</th>
+                            <th class="col-degree">Degree</th>
+                            <th class="col-sem">Semester</th>
+                            <th class="col-date">Enrollment Date</th>
+                            <th class="col-action">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1001,7 +1285,7 @@
             </div>
         </div>
 
-        <!-- Complete Internship Tab -->
+        <!-- Complete Program Tab -->
         <div class="tab-pane fade" id="complete" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -1013,7 +1297,7 @@
                                 <i class="bx bx-eye"></i> View Marks | {{ $internship->internship_title }}
                             @endif
                         @else
-                            <i class="bx bx-check-circle"></i> Complete The Internship | {{ $internship->internship_title }}
+                            <i class="bx bx-check-circle"></i> Complete The Opportunity | {{ $internship->internship_title }}
                         @endif
                     </h5>
                     <p class="text-muted mb-0" style="font-size: 14px; margin-top: 5px;">
@@ -1035,7 +1319,7 @@
 
             @if($internship->complete_status == 1)
                 <div class="alert alert-success" role="alert">
-                    <i class="bx bx-check-circle"></i> <strong>Completed!</strong> This internship has been finalized. Grades and feedback are locked.
+                    <i class="bx bx-check-circle"></i> <strong>Completed!</strong> This opportunity has been finalized. Grades and feedback are locked.
                 </div>
             @elseif(!$internship->complete_status && $internship->internship_type == 1 && $internship->company_complete_sts == 1 && $internship->college_complete_sts == 0)
                 <div class="alert alert-warning d-flex align-items-center flex-wrap gap-2" role="alert">
@@ -1060,23 +1344,23 @@
                 if($internship->internship_type == 1) $colspan += 3; // TOTAL, PERCENTAGE, GRADE
             @endphp
 
-            <div class="table-responsive">
+            <div class="table-responsive complete-program-table-wrap">
                 <table class="complete-internship-table" id="completionTable">
                     <thead>
                         <tr>
-                            <th>SR.NO</th>
-                            <th>STUDENT</th>
+                            <th class="col-sr">SR.NO</th>
+                            <th class="col-student">STUDENT</th>
                             @if($internship->internship_type == 1)
-                                <th>COLLEGE</th>
+                                <th class="col-college">COLLEGE</th>
                             @endif
                             @if($internship->internship_type == 1)
-                                <th style="min-width: 300px;">INDUSTRY (INDUSTRY MARKS)</th>
+                                <th class="col-industry">INDUSTRY MARKS</th>
                             @endif
-                            <th>FEEDBACK</th>
+                            <th class="col-feedback">FEEDBACK</th>
                             @if($internship->internship_type == 1)
-                                <th>TOTAL</th>
-                                <th>PERCENTAGE</th>
-                                <th>GRADE</th>
+                                <th class="col-total">TOTAL</th>
+                                <th class="col-percent">%</th>
+                                <th class="col-grade">GRADE</th>
                             @endif
                         </tr>
                     </thead>
@@ -1094,20 +1378,20 @@
                                 $maxTotal = $studentCriteria->sum('marks');
                             @endphp
                             <tr data-student-id="{{ $student->id }}">
-                                <td>{{ $index + 1 }}</td>
-                                <td>
-                                    <div style="font-weight: 600; color: #242a62;">
+                                <td class="col-sr">{{ $index + 1 }}</td>
+                                <td class="col-student">
+                                    <div>
                                         {{ strtoupper($student->name ?? 'N/A') }}
                                     </div>
                                 </td>
                                 @if($internship->internship_type == 1)
-                                <td>{{ $college ? $college->college_name : 'N/A' }}</td>
+                                <td class="col-college">{{ $college ? $college->college_name : 'N/A' }}</td>
                                 @endif
                                 @if($internship->internship_type == 1)
-                                <td>
+                                <td class="col-industry">
                                     @if($studentCriteria->count() > 0)
                                         @foreach($studentCriteria as $criterion)
-                                            <div class="marks-input-group mb-2">
+                                            <div class="marks-input-group">
                                                 <label>{{ $criterion->title }}</label>
                                                 <input type="number"
                                                        class="marks-input industry-mark"
@@ -1124,21 +1408,23 @@
                                             </div>
                                         @endforeach
                                     @else
-                                        <span class="text-muted d-block text-center" style="font-size:22px;font-weight:700;letter-spacing:2px;">-</span>
-                                        <small class="text-muted d-block text-center" style="font-size:11px;">No grade configured</small>
+                                        <div class="industry-empty-state">
+                                            <span class="text-muted" style="font-size:18px;font-weight:700;">—</span>
+                                            <small class="text-muted">No grade configured</small>
+                                        </div>
                                     @endif
                                 </td>
                                 @endif
-                                <td>
+                                <td class="col-feedback">
                                     <textarea class="feedback-textarea"
                                               data-student-id="{{ $student->id }}"
                                               placeholder="Enter feedback for student..."
                                               {{ $isSubmitted ? 'disabled' : '' }}>{{ $savedFeedback }}</textarea>
                                 </td>
                                 @if($internship->internship_type == 1)
-                                    <td class="total-display">0 / {{ $maxTotal }}</td>
-                                    <td class="percentage-display">0.00%</td>
-                                    <td>
+                                    <td class="col-total total-display">0 / {{ $maxTotal }}</td>
+                                    <td class="col-percent percentage-display">0%</td>
+                                    <td class="col-grade">
                                         <span class="grade-badge grade-F">-</span>
                                     </td>
                                 @endif
@@ -1146,7 +1432,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ $colspan }}" class="text-center py-4">
-                                    <i class="bx bx-info-circle"></i> No students enrolled in this internship
+                                    <i class="bx bx-info-circle"></i> No students enrolled in this opportunity
                                 </td>
                             </tr>
                         @endforelse
@@ -1162,8 +1448,9 @@
             </div>
             @elseif(!$internship->complete_status && !($internship->company_complete_sts == 1 && $internship->college_complete_sts == 0) && $students->count() > 0)
             <div class="text-center mt-4">
-                <button class="btn btn-complete-internship-submit" onclick="showConfirmModal()">
-                    <i class="fa fa-check-circle"></i> Submit &amp; Complete Internship
+                <button type="button" class="btn btn-complete-internship-submit" id="btnSubmitCompleteProgram" onclick="showConfirmModal()">
+                    <i class="bx bx-check-circle"></i>
+                    <span>Submit &amp; Complete Program</span>
                 </button>
             </div>
             @endif
@@ -1265,7 +1552,7 @@
                                 </label>
                             </div>
                             <small class="text-muted" style="margin-left: 2.5em; display: block; margin-top: 4px;">
-                                Check this box if the task is the final assignment or report for this internship.
+                                Check this box if the task is the final assignment or report for this opportunity.
                             </small>
                         </div>
                     </div>
@@ -1375,7 +1662,7 @@
                                 </label>
                             </div>
                             <small class="text-muted" style="margin-left: 2.5em; display: block; margin-top: 4px;">
-                                Check this box if the task is the final assignment or report for this internship.
+                                Check this box if the task is the final assignment or report for this opportunity.
                             </small>
                         </div>
                     </div>
@@ -1624,9 +1911,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 10px 24px; border-radius: 6px; font-weight: 600;">
                     <i class="bx bx-x"></i> Close
                 </button>
-                <button type="button" class="btn" style="background: #28a745; color: white; padding: 10px 24px; border-radius: 6px; font-weight: 600; border: none;">
-                    <i class="bx bx-check"></i> Approve Submission
-                </button>
             </div>
         </div>
     </div>
@@ -1797,14 +2081,26 @@
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <div style="display: flex; padding: 8px 0; border-bottom: 1px solid #e9ecef;">
-                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">Base Fee:</span>
+                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">Registration Fee:</span>
                                 <span style="color: #212529; font-size: 13px;" id="paymentBaseFee">₹2,000</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2" id="paymentLateFeeWrap" style="display:none;">
+                            <div style="display: flex; padding: 8px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">Late Registration Fee:</span>
+                                <span style="color: #212529; font-size: 13px;" id="paymentLateFee">₹0</span>
                             </div>
                         </div>
                         <div class="col-md-6 mb-2">
                             <div style="display: flex; padding: 8px 0; border-bottom: 1px solid #e9ecef;">
-                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">GST (18%):</span>
+                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">GST:</span>
                                 <span style="color: #212529; font-size: 13px;" id="paymentGST">₹360</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div style="display: flex; padding: 8px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="font-weight: 600; color: #6c757d; font-size: 13px; min-width: 140px;">Total Paid:</span>
+                                <span style="color: #28a745; font-size: 13px; font-weight: 700;" id="paymentTotalPaid">₹2,360</span>
                             </div>
                         </div>
                         <div class="col-md-12 mb-2">
@@ -1843,7 +2139,7 @@
                     <h5 class="modal-title" style="color: #fff; margin: 0; font-size: 20px; font-weight: 700;">
                         <i class="bx bx-receipt"></i> Payment Receipt
                     </h5>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Full-Stack Web Development Internship</p>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Full-Stack Web Development Opportunity</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" style="background: #fff; border: none; font-size: 24px; color: white; opacity: 1; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
                     <i class="bx bx-x" style="color: #000"></i>
@@ -1860,11 +2156,11 @@
                             </div>
                             <div style="text-align: left;">
                                 <h3 style="margin: 0; color: #242a62; font-weight: 700; font-size: 24px;">ZobPot</h3>
-                                <p style="margin: 0; color: #6c757d; font-size: 13px;">Job & Internship Portal</p>
+                                <p style="margin: 0; color: #6c757d; font-size: 13px;">Job & Opportunity Portal</p>
                             </div>
                         </div>
                         <h4 style="color: #242a62; font-weight: 700; margin: 10px 0 5px 0; font-size: 20px;">PAYMENT RECEIPT</h4>
-                        <p style="color: #6c757d; font-size: 13px; margin: 0;">Official receipt for internship enrollment</p>
+                        <p style="color: #6c757d; font-size: 13px; margin: 0;">Official receipt for opportunity enrollment</p>
                     </div>
 
                     <!-- Receipt Info Bar -->
@@ -1917,14 +2213,14 @@
                         </div>
                     </div>
 
-                    <!-- Internship Details -->
+                    <!-- Opportunity Details -->
                     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
                         <h6 style="color: #242a62; font-weight: 700; font-size: 13px; margin-bottom: 15px; text-transform: uppercase;">
-                            <i class="bx bx-briefcase"></i> Internship Details
+                            <i class="bx bx-briefcase"></i> Opportunity Details
                         </h6>
                         <div class="row">
                             <div class="col-md-8">
-                                <p style="margin: 0 0 8px 0; color: #212529; font-size: 15px; font-weight: 700;" id="receiptInternshipTitle">Full-Stack Web Development Internship</p>
+                                <p style="margin: 0 0 8px 0; color: #212529; font-size: 15px; font-weight: 700;" id="receiptInternshipTitle">Full-Stack Web Development Opportunity</p>
                                 <p style="margin: 0 0 5px 0; color: #6c757d; font-size: 13px;"><strong>Duration:</strong> <span id="receiptInternshipDuration">3 Months (10 Mar 2026 - 10 Jun 2026)</span></p>
                                 <p style="margin: 0 0 5px 0; color: #6c757d; font-size: 13px;"><strong>Mode:</strong> <span id="receiptInternshipMode">Hybrid</span></p>
                                 <p style="margin: 0; color: #6c757d; font-size: 13px;"><strong>Enrollment Date:</strong> <span id="receiptEnrollmentDate">28 Jan 2026</span></p>
@@ -1949,9 +2245,14 @@
                             </thead>
                             <tbody>
                                 <tr style="border-bottom: 1px solid #dee2e6;">
-                                    <td style="padding: 12px; color: #212529; font-size: 13px;">Internship Enrollment Fee</td>
+                                    <td style="padding: 12px; color: #212529; font-size: 13px;">Registration Fee</td>
                                     <td id="receiptHsn" style="padding: 12px; text-align: center; color: #6c757d; font-size: 13px;">999293</td>
                                     <td id="receiptBaseAmount" style="padding: 12px; text-align: right; color: #212529; font-size: 13px; font-weight: 600;">₹2,000.00</td>
+                                </tr>
+                                <tr id="receiptLateRow" style="border-bottom: 1px solid #dee2e6; display: none;">
+                                    <td style="padding: 12px; color: #212529; font-size: 13px;">Late Registration Fee</td>
+                                    <td style="padding: 12px; text-align: center; color: #6c757d; font-size: 13px;">-</td>
+                                    <td id="receiptLateAmount" style="padding: 12px; text-align: right; color: #212529; font-size: 13px; font-weight: 600;">₹0.00</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #dee2e6;">
                                     <td style="padding: 12px; color: #212529; font-size: 13px;">GST @ 18%</td>
@@ -1996,7 +2297,7 @@
                             <p style="margin: 0 0 8px 0; color: #242a62; font-size: 13px; font-weight: 700;">Terms & Conditions:</p>
                             <ul style="margin: 0; padding-left: 20px; color: #6c757d; font-size: 12px; line-height: 1.8;">
                                 <li>This receipt is computer generated and does not require a signature.</li>
-                                <li>All payments are non-refundable once the internship has commenced.</li>
+                                <li>All payments are non-refundable once the opportunity has commenced.</li>
                                 <li>Please retain this receipt for your records.</li>
                                 <li>For any queries, contact us at support@zobpot.com</li>
                             </ul>
@@ -2063,25 +2364,31 @@
 @push('script')
 @php
     $completionAlerts = $internship->internship_type == 2 ? [
-        'tabTitle' => 'Open Complete Internship',
-        'tabText' => 'You are about to review student feedback and complete this industry internship.',
+        'tabTitle' => 'Open Complete Program',
+        'tabText' => 'You are about to review student feedback and complete this industry opportunity.',
         'tabConfirm' => 'Continue',
-        'submitTitle' => 'Confirm Internship Completion',
-        'submitHtml' => '<p>This will finalize all student feedback and mark the internship as completed.</p><p><strong>This action cannot be undone.</strong></p>',
-        'submitConfirm' => '<i class="fa fa-check"></i> Yes, Complete Internship',
+        'submitTitle' => 'Confirm Program Completion',
+        'submitHtml' => '<p>This will finalize all student feedback and mark the opportunity as completed.</p><p><strong>This action cannot be undone.</strong></p>',
+        'submitConfirm' => '<i class="fa fa-check"></i> Yes, Complete Program',
         'loadingTitle' => 'Completing...',
-        'loadingText' => 'Please wait while we finalize the internship',
+        'loadingText' => 'Please wait while we finalize the opportunity',
         'incompleteText' => 'Please fill in feedback for all students before submitting.',
+        'noGradeText' => 'Grade criteria is not configured for one or more students. Please configure Industry Marks first.',
+        'missingMarksText' => 'Please enter industry marks for all students before submitting.',
+        'missingFeedbackText' => 'Please enter feedback for all students before submitting.',
     ] : [
-        'tabTitle' => 'Open Complete Internship',
+        'tabTitle' => 'Open Complete Program',
         'tabText' => 'You are about to evaluate students and submit industry marks. College marks will still be required after submission.',
         'tabConfirm' => 'Continue',
         'submitTitle' => 'Submit Industry Marks',
-        'submitHtml' => '<p>This will submit industry (company) marks and feedback for all students.</p><p><strong>College marks are still required before the internship can be fully completed.</strong></p>',
+        'submitHtml' => '<p>This will submit industry (company) marks and feedback for all students.</p><p><strong>College marks are still required before the opportunity can be fully completed.</strong></p>',
         'submitConfirm' => '<i class="fa fa-check"></i> Yes, Submit Industry Marks',
         'loadingTitle' => 'Submitting...',
         'loadingText' => 'Please wait while we submit industry marks',
         'incompleteText' => 'Please fill in all industry marks and feedback for all students before submitting.',
+        'noGradeText' => 'Grade criteria is not configured for one or more students. Please configure Industry Marks in Manage Grade first.',
+        'missingMarksText' => 'Please enter industry marks for all students before submitting.',
+        'missingFeedbackText' => 'Please enter feedback for all students before submitting.',
     ];
 @endphp
 <!-- Include CKEditor -->
@@ -2148,9 +2455,12 @@
 
     $(document).ready(function() {
         // Initialize Students DataTable (server-side)
-        $('#StudentsTable').DataTable({
+        // Do NOT use scrollX here — it misaligns headers when table is inside a hidden tab.
+        var studentsTable = $('#StudentsTable').DataTable({
             processing: true,
             serverSide: true,
+            autoWidth: false,
+            deferRender: true,
             ajax: {
                 url: '{{ route("admin.internship.students-data") }}',
                 type: 'POST',
@@ -2165,26 +2475,43 @@
                 }
             },
             columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'student_name', name: 'student_name' },
-                { data: 'email', name: 'email' },
-                { data: 'phone', name: 'phone' },
-                { data: 'university_name', name: 'university_name' },
-                { data: 'college_name', name: 'college_name' },
-                { data: 'degree_name', name: 'degree_name' },
-                { data: 'semester', name: 'semester' },
-                { data: 'enrollment_date', name: 'enrollment_date' },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'col-sr text-center' },
+                { data: 'student_name', name: 'student_name', className: 'col-name' },
+                { data: 'email', name: 'email', className: 'col-email' },
+                { data: 'phone', name: 'phone', className: 'col-phone' },
+                { data: 'university_name', name: 'university_name', className: 'col-uni' },
+                { data: 'college_name', name: 'college_name', className: 'col-college' },
+                { data: 'degree_name', name: 'degree_name', className: 'col-degree' },
+                { data: 'semester', name: 'semester', className: 'col-sem text-center' },
+                { data: 'enrollment_date', name: 'enrollment_date', className: 'col-date' },
+                { data: 'action', name: 'action', orderable: false, searchable: false, className: 'col-action text-center' }
             ],
             order: [[8, 'desc']],
             pageLength: 10,
-            scrollX: true
+            language: {
+                processing: 'Loading students...'
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                var total = api.page.info().recordsTotal || 0;
+                var label = total === 1 ? 'Student' : 'Students';
+                $('#enrolledStudentsCount').text('Total: ' + total + ' ' + label);
+                api.columns.adjust();
+            }
+        });
+
+        // Recalculate column widths when Students tab becomes visible
+        $('button[data-bs-target="#students"], #students-tab').on('shown.bs.tab', function () {
+            if (studentsTable) {
+                studentsTable.columns.adjust().draw(false);
+            }
         });
 
         // Initialize other tables
         $('#TasksTable').DataTable({
             order: [[3, 'desc']],
-            pageLength: 10
+            pageLength: 10,
+            autoWidth: false
         });
 
         // Debug: fetch payments once to log server response (helps diagnose empty table)
@@ -2308,10 +2635,34 @@
                 // Amounts
                 const total = parseFloat(p.total_amount) || 0;
                 const gst = parseFloat(p.gst_amount) || (p.payment_response_data && p.payment_response_data.gst_amount ? parseFloat(p.payment_response_data.gst_amount) : 0);
-                const base = total - gst;
+                const registrationFee = parseFloat(p.registration_fee);
+                const lateFee = parseFloat(p.late_registration_fee) || 0;
+                const base = !isNaN(registrationFee) ? registrationFee : Math.max(0, total - gst - lateFee);
                 document.getElementById('receiptBaseAmount').textContent = '₹' + base.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                if (document.getElementById('receiptLateAmount')) {
+                    if (lateFee > 0) {
+                        document.getElementById('receiptLateRow').style.display = '';
+                        document.getElementById('receiptLateAmount').textContent = '₹' + lateFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    } else if (document.getElementById('receiptLateRow')) {
+                        document.getElementById('receiptLateRow').style.display = 'none';
+                    }
+                }
                 document.getElementById('receiptGstAmount').textContent = '₹' + (gst).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 document.getElementById('receiptTotalAmount').textContent = '₹' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+                if (document.getElementById('paymentBaseFee')) {
+                    document.getElementById('paymentBaseFee').textContent = '₹' + base.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                if (document.getElementById('paymentLateFee')) {
+                    document.getElementById('paymentLateFee').textContent = '₹' + lateFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    document.getElementById('paymentLateFeeWrap').style.display = lateFee > 0 ? '' : 'none';
+                }
+                if (document.getElementById('paymentGST')) {
+                    document.getElementById('paymentGST').textContent = '₹' + gst.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                if (document.getElementById('paymentTotalPaid')) {
+                    document.getElementById('paymentTotalPaid').textContent = '₹' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
 
                 // HSN or code if available
                 if (p.payment_response_data && p.payment_response_data.hsn) {
@@ -2322,13 +2673,13 @@
                 document.getElementById('receiptGateway').textContent = (p.payment_response_data && p.payment_response_data.gateway) ? p.payment_response_data.gateway : '';
                 document.getElementById('receiptGatewayTxnId').textContent = (p.payment_response_data && (p.payment_response_data.gateway_txn_id || p.payment_response_data.razorpay_payment_id)) ? (p.payment_response_data.gateway_txn_id || p.payment_response_data.razorpay_payment_id) : '';
 
-                // Internship info if provided
-                if (p.internship && p.internship.internship_title) {
-                    document.getElementById('receiptInternshipTitle').textContent = p.internship.internship_title;
-                    const dur = (p.internship.start_date && p.internship.end_date) ? ('(' + new Date(p.internship.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' - ' + new Date(p.internship.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ')') : '';
-                    document.getElementById('receiptInternshipDuration').textContent = (p.internship.total_weeks ? p.internship.total_weeks + ' Weeks ' : '') + ' ' + dur;
-                    document.getElementById('receiptInternshipMode').textContent = p.internship.mode || '';
-                    if (p.internship.start_date) document.getElementById('receiptEnrollmentDate').textContent = new Date(p.internship.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                // Opportunity info if provided
+                if (p.opportunity && p.opportunity.internship_title) {
+                    document.getElementById('receiptOpportunityTitle').textContent = p.opportunity.internship_title;
+                    const dur = (p.opportunity.start_date && p.opportunity.end_date) ? ('(' + new Date(p.opportunity.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' - ' + new Date(p.opportunity.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ')') : '';
+                    document.getElementById('receiptOpportunityDuration').textContent = (p.opportunity.total_weeks ? p.opportunity.total_weeks + ' Weeks ' : '') + ' ' + dur;
+                    document.getElementById('receiptOpportunityMode').textContent = p.opportunity.mode || '';
+                    if (p.opportunity.start_date) document.getElementById('receiptEnrollmentDate').textContent = new Date(p.opportunity.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
 
                 // Status badge
@@ -2514,56 +2865,71 @@
 
     // Save Instructions
     window.saveInstructions = function() {
-        if (instructionsEditor) {
-            const content = instructionsEditor.getData();
-            
-            console.log('Saving instructions:', content);
-            
-            // Send to server
-            $.ajax({
-                url: '{{ route("admin.internship.updateInstructions", $internship->id) }}',
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: {
-                    general_instructions: content
-                },
-                success: function(response) {
-                    if (response.success) {
-                        document.getElementById('instructionsContent').innerHTML = content;
-                        const instructionsModal = bootstrap.Modal.getInstance(document.getElementById('instructionsModal'));
-                        if (instructionsModal) {
-                            instructionsModal.hide();
-                        }
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: response.message || 'Instructions updated successfully!',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: response.message || 'Failed to update instructions'
-                        });
+        if (!instructionsEditor) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Editor not ready',
+                text: 'Please wait for the editor to load, then try again.'
+            });
+            return;
+        }
+
+        const content = (instructionsEditor.getData() || '').trim();
+        if (!content || content === '<p></p>' || content === '<p><br></p>') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Empty content',
+                text: 'Please enter instructions content before saving.'
+            });
+            return;
+        }
+
+        $.ajax({
+            url: '{{ route("admin.internship.updateInstructions", $internship->id) }}',
+            method: 'POST',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            data: {
+                general_instructions: content
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    document.getElementById('instructionsContent').innerHTML = content;
+                    const instructionsModal = bootstrap.Modal.getInstance(document.getElementById('instructionsModal'));
+                    if (instructionsModal) {
+                        instructionsModal.hide();
                     }
-                },
-                error: function(xhr) {
-                    let errorMessage = 'Failed to update instructions';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message || 'Instructions updated successfully!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: errorMessage
+                        text: (response && response.message) ? response.message : 'Failed to update instructions'
                     });
                 }
-            });
-        }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to update instructions';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: errorMessage
+                });
+            }
+        });
     }
 
     // View Payment Details - Opens Receipt Modal Directly
@@ -3352,14 +3718,16 @@
    
 
     const completionInternshipId = {{ $internship->id }};
+    const completionOpportunityId = completionInternshipId;
     const csrfToken = '{{ csrf_token() }}';
     const internshipType = {{ $internship->internship_type }};
+    const opportunityType = internshipType;
     const completionAlerts = @json($completionAlerts);
     let marksLoaded = false;
 
-    // Complete Internship - SweetAlert on tab click
+    // Complete Program - SweetAlert on tab click
     $('#complete-tab').on('click', function(e) {
-        // Only show confirmation if internship is not yet completed AND industry-only (not waiting on college)
+        // Only show confirmation if opportunity is not yet completed AND industry-only (not waiting on college)
         @if(!$internship->complete_status && !($internship->company_complete_sts == 1 && $internship->college_complete_sts == 0))
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -3423,7 +3791,7 @@
                 method: 'POST',
                 data: {
                     _token: csrfToken,
-                    internship_id: completionInternshipId,
+                    internship_id: completionOpportunityId,
                     student_id: studentId,
                     criteria_id: criteriaId,
                     criteria_name: criteriaName,
@@ -3459,7 +3827,7 @@
                 method: 'POST',
                 data: {
                     _token: csrfToken,
-                    internship_id: completionInternshipId,
+                    internship_id: completionOpportunityId,
                     student_id: studentId,
                     feedback: feedback
                 },
@@ -3518,7 +3886,7 @@
 
     // ==================== CALCULATION LOGIC ====================
     function calculateMarks(row) {
-        // No numeric calculations for internship type 2 (only feedback required)
+        // No numeric calculations for opportunity type 2 (only feedback required)
         if (parseInt(internshipType) !== 1) return;
 
         const inputs = row.querySelectorAll('.industry-mark');
@@ -3568,33 +3936,85 @@
     // ==================== SHOW CONFIRM MODAL ====================
     window.showConfirmModal = function() {
         const rows = document.querySelectorAll('#completionTable tbody tr[data-student-id]');
-        let allFilled = true;
-        let errorMessages = [];
+
+        if (!rows.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Students',
+                text: 'No students are enrolled in this opportunity.'
+            });
+            return;
+        }
+
+        let noGradeStudents = [];
+        let missingMarksStudents = [];
+        let missingFeedbackStudents = [];
 
         rows.forEach(row => {
-            const studentName = row.querySelector('td:nth-child(2)').textContent.trim();
+            const nameEl = row.querySelector('.col-student') || row.querySelector('td:nth-child(2)');
+            const studentName = (nameEl ? nameEl.textContent : 'Student').trim();
             const feedback = row.querySelector('.feedback-textarea');
 
             if (parseInt(internshipType) === 1) {
+                const emptyGrade = row.querySelector('.industry-empty-state');
                 const inputs = row.querySelectorAll('.industry-mark');
-                inputs.forEach(input => {
-                    if (!input.value || parseFloat(input.value) === 0) {
-                        allFilled = false;
+
+                if (emptyGrade || inputs.length === 0) {
+                    noGradeStudents.push(studentName);
+                } else {
+                    let hasMissingMark = false;
+                    inputs.forEach(input => {
+                        const val = (input.value || '').toString().trim();
+                        if (val === '' || isNaN(parseFloat(val))) {
+                            hasMissingMark = true;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+                    if (hasMissingMark) {
+                        missingMarksStudents.push(studentName);
                     }
-                });
+                }
             }
 
             if (!feedback || !feedback.value.trim()) {
-                allFilled = false;
-                errorMessages.push(studentName);
+                missingFeedbackStudents.push(studentName);
+                if (feedback) feedback.classList.add('is-invalid');
+            } else if (feedback) {
+                feedback.classList.remove('is-invalid');
             }
         });
 
-        if (!allFilled) {
+        if (noGradeStudents.length) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Data',
-                text: completionAlerts.incompleteText
+                icon: 'error',
+                title: 'Grade Not Configured',
+                html: (completionAlerts.noGradeText || 'Grade is not configured.')
+                    + '<br><br><strong>Students:</strong><br>'
+                    + noGradeStudents.slice(0, 8).map(n => '• ' + n).join('<br>')
+            });
+            return;
+        }
+
+        if (missingMarksStudents.length) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Marks Required',
+                html: (completionAlerts.missingMarksText || 'Please enter industry marks.')
+                    + '<br><br><strong>Students:</strong><br>'
+                    + missingMarksStudents.slice(0, 8).map(n => '• ' + n).join('<br>')
+            });
+            return;
+        }
+
+        if (missingFeedbackStudents.length) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Feedback Required',
+                html: (completionAlerts.missingFeedbackText || 'Please enter feedback.')
+                    + '<br><br><strong>Students:</strong><br>'
+                    + missingFeedbackStudents.slice(0, 8).map(n => '• ' + n).join('<br>')
             });
             return;
         }
@@ -3630,14 +4050,14 @@
             method: 'POST',
             data: {
                 _token: csrfToken,
-                internship_id: completionInternshipId
+                internship_id: completionOpportunityId
             },
             success: function(res) {
                 if (res.success) {
                     // Clear any pending autosave timers (if present) and disable submit
                     try { Object.keys(saveTimer).forEach(k => clearTimeout(saveTimer[k])); } catch(e) {}
                     try { Object.keys(feedbackTimer).forEach(k => clearTimeout(feedbackTimer[k])); } catch(e) {}
-                    $('.btn-complete-internship-submit').prop('disabled', true).addClass('disabled');
+                    $('.btn-complete-opportunity-submit, .btn-complete-internship-submit').prop('disabled', true).addClass('disabled');
 
                     // Unbind and replace inputs with readonly displays
                     function escapeHtml(str) { return $('<div>').text(str).html(); }
@@ -3713,7 +4133,7 @@
 
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.table_to_sheet(clone);
-                XLSX.utils.book_append_sheet(wb, ws, 'Internship Report');
+                XLSX.utils.book_append_sheet(wb, ws, 'Opportunity Report');
                 XLSX.writeFile(wb, filename + '.xlsx');
             }
         });
@@ -3734,6 +4154,27 @@
             $('#paymentMethod').text(data.payment_mode || data.paymentMethod || 'N/A');
             $('#paymentPaidOn').text(data.paid_on ? new Date(data.paid_on).toLocaleString('en-GB') : (data.paymentDate || 'N/A'));
 
+            var registrationFee = parseFloat(data.registration_fee);
+            var lateFee = parseFloat(data.late_registration_fee) || 0;
+            var gst = parseFloat(data.gst_amount) || 0;
+            var total = parseFloat(data.total_amount) || 0;
+            if (isNaN(registrationFee)) {
+                registrationFee = Math.max(0, total - gst - lateFee);
+            }
+            if (document.getElementById('paymentBaseFee')) {
+                document.getElementById('paymentBaseFee').textContent = '₹' + registrationFee.toLocaleString('en-IN');
+            }
+            if (document.getElementById('paymentLateFee')) {
+                document.getElementById('paymentLateFee').textContent = '₹' + lateFee.toLocaleString('en-IN');
+                document.getElementById('paymentLateFeeWrap').style.display = lateFee > 0 ? '' : 'none';
+            }
+            if (document.getElementById('paymentGST')) {
+                document.getElementById('paymentGST').textContent = '₹' + gst.toLocaleString('en-IN');
+            }
+            if (document.getElementById('paymentTotalPaid')) {
+                document.getElementById('paymentTotalPaid').textContent = '₹' + total.toLocaleString('en-IN');
+            }
+
             var resp = data.payment_response_data || data.paymentResponse || data;
             try { $('#paymentGatewayResponse').text(JSON.stringify(resp, null, 2)); } catch(e) { $('#paymentGatewayResponse').text(String(resp)); }
 
@@ -3752,7 +4193,7 @@
     function markCollegePending(internshipId) {
         Swal.fire({
             title: 'Mark as Pending for College?',
-            text: 'This will flag the internship so the college team knows marks need to be entered.',
+            text: 'This will flag the opportunity so the college team knows marks need to be entered.',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#f26e2c',
@@ -3769,12 +4210,12 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Flagged!',
-                                text: res.message || 'Internship has been flagged for college marks.',
+                                text: res.message || 'Opportunity has been flagged for college marks.',
                                 timer: 2000,
                                 showConfirmButton: false
                             }).then(function() { location.reload(); });
                         } else {
-                            Swal.fire({ icon: 'warning', title: 'Cannot Flag', text: res.message || 'Unable to flag this internship.' });
+                            Swal.fire({ icon: 'warning', title: 'Cannot Flag', text: res.message || 'Unable to flag this opportunity.' });
                         }
                     },
                     error: function(xhr) {

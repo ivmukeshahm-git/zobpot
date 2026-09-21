@@ -173,6 +173,7 @@ class AuthController extends Controller
         // Step 8: Prepare insert data
         $data = $request->all();
         $data["password"] = Hash::make($request->password);
+        $data["profile_type"] = "Employee"; // ✅ Always force-set profile_type for candidate registration
         $data["state_id"] = $state_id;
         $data["city_id"] = $city_id;
         $data["zipcode"] = $zipcode_id;
@@ -198,14 +199,28 @@ class AuthController extends Controller
 
         if ($request->hasFile("file_nm")) {
             $file = $request->file("file_nm");
-            $fileName = $file->getClientOriginalName();
-            $resumePath = public_path("storage/resumes");
-
-            if (!file_exists($resumePath)) {
-                mkdir($resumePath, 0755, true);
+            $fileName = time() . "_" . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+            
+            // Ensure public/storage is a valid directory (remove legacy flat file if present)
+            $publicStorage = public_path("storage");
+            if (file_exists($publicStorage) && !is_dir($publicStorage)) {
+                @unlink($publicStorage);
             }
 
-            $file->move($resumePath, $fileName);
+            $resumePath = public_path("storage/resumes");
+            if (!file_exists($resumePath) || !is_dir($resumePath)) {
+                @mkdir($resumePath, 0777, true);
+            }
+
+            try {
+                $file->move($resumePath, $fileName);
+            } catch (\Exception $e) {
+                $fallbackPath = storage_path("app/public/resumes");
+                if (!file_exists($fallbackPath) || !is_dir($fallbackPath)) {
+                    @mkdir($fallbackPath, 0777, true);
+                }
+                $file->move($fallbackPath, $fileName);
+            }
 
             DB::table("tbl_resume")->insert([
                 "user_id" => $user_id,
@@ -370,6 +385,7 @@ class AuthController extends Controller
         // Step 8: Prepare insert data
         $data = $request->all();
         $data["password"] = Hash::make($request->password);
+        $data["profile_type"] = "Company"; // ✅ Always force-set profile_type for company registration
         $data["state_id"] = $state_id;
         $data["city_id"] = $city_id;
         $data["zipcode"] = $zipcode_id;
@@ -800,31 +816,53 @@ class AuthController extends Controller
 
             if (!$plan) {
                 return response()->json([
-                    "status" => false,
+                    "status"  => false,
                     "message" => "Invalid plan selected"
                 ], 400);
             }
 
-            // ✅ STEP 2: CHECK IF USER ALREADY USED FREE COMPANY PLAN
-            if ((float) $plan->plan_price == 0.0 && strtolower($plan->plan_for) == 'company') {
+            // ✅ STEP 2: Fetch user and validate plan_for matches profile_type
+            $user = DB::table("users")->where("id", $userId)->first();
+
+            if (!$user) {
+                return response()->json([
+                    "status"  => false,
+                    "message" => "User not found"
+                ], 404);
+            }
+
+            // Determine expected plan category based on user's profile_type
+            $expectedPlanFor = (strtolower($user->profile_type ?? '') === 'company') ? 'Company' : 'Employee';
+
+            // Block if plan_for doesn't match the user's profile type
+            if (!empty($plan->plan_for) && strtolower($plan->plan_for) !== strtolower($expectedPlanFor)) {
+                DB::rollBack();
+                return response()->json([
+                    "status"  => false,
+                    "message" => "This plan is not available for your profile type.",
+                ], 403);
+            }
+
+            // ✅ STEP 3: CHECK IF USER ALREADY USED A FREE PLAN OF THE SAME TYPE
+            if ((float) $plan->plan_price == 0.0) {
 
                 $alreadyUsedFree = DB::table("tbl_plan_history as h")
                     ->join("tbl_plan_pricing as p", "h.plan_id", "=", "p.plan_id")
                     ->where("h.user_id", $userId)
-                    ->where("p.plan_for", "Company")
+                    ->where("p.plan_for", $expectedPlanFor)
                     ->whereRaw("p.plan_price = 0")
                     ->exists();
 
                 if ($alreadyUsedFree) {
                     DB::rollBack();
                     return response()->json([
-                        "status" => false,
-                        "message" => "You have already used free plan"
+                        "status"  => false,
+                        "message" => "You have already used the free plan"
                     ], 200);
                 }
             }
 
-            // ✅ STEP 3: Date calculation
+            // ✅ STEP 4: Date calculation
             $purchaseDate = date("Y-m-d");
             $expireDate = $purchaseDate;
 
@@ -851,7 +889,7 @@ class AuthController extends Controller
             $durationText = $timeValue . $timeUnit;
             $status = ((float) $plan->plan_price == 0.0) ? 1 : 0;
 
-            // ✅ STEP 4: Insert Plan History
+            // ✅ STEP 5: Insert Plan History
             $planHistoryId = DB::table("tbl_plan_history")->insertGetId([
                 "plan_id" => $planId,
                 "user_id" => $userId,
@@ -863,15 +901,20 @@ class AuthController extends Controller
                 "updated_at" => now(),
             ]);
 
-            // ✅ STEP 5: FREE PLAN
+            // ✅ STEP 6: FREE PLAN — Activate immediately + reset usage
             if ((float) $plan->plan_price == 0.0) {
 
-                DB::table("users")
-                    ->where("id", $userId)
+                DB::table("tbl_plan_history")
+                    ->where("user_id", $userId)
+                    ->where("id", "!=", $planHistoryId)
+                    ->where("status", 1)
                     ->update([
-                        "active_plan_id" => $planId,
+                        "status" => 0,
                         "updated_at" => now(),
                     ]);
+
+                $userModel = \App\Models\User::find($userId);
+                \App\Models\PlanPricing::activatePlanForUser($userModel, $plan);
 
                 DB::commit();
 
@@ -883,7 +926,7 @@ class AuthController extends Controller
                 ], 200);
             }
 
-            // ✅ STEP 6: PAID PLAN → Create Razorpay Order
+            // ✅ STEP 7: PAID PLAN → Create Razorpay Order
             $basePrice = $plan->plan_price;
             $gstAmount = round($basePrice * 0.18, 2);
             $finalAmount = $basePrice + $gstAmount;
@@ -985,13 +1028,10 @@ class AuthController extends Controller
                             ]);
                     }
 
-                    // ───── Step 4: Update active_plan_id in users ─────
-                    DB::table("users")
-                        ->where("id", $request->user_id)
-                        ->update([
-                            "active_plan_id" => $newPlanHistory->plan_id,
-                            "updated_at" => now(),
-                        ]);
+                    // ───── Step 4: Update active_plan_id + reset usage counters ─────
+                    $userModel = \App\Models\User::find($request->user_id);
+                    $planModel = \App\Models\PlanPricing::find($newPlanHistory->plan_id);
+                    \App\Models\PlanPricing::activatePlanForUser($userModel, $planModel ?: $newPlanHistory->plan_id);
                 }
             } else {
                 $updateData["status"] = 2; // ❌ Payment failed
@@ -1064,35 +1104,129 @@ class AuthController extends Controller
                 ], 200);
             }
 
-            // ✅ Step 3: If PAID plan → allow unlimited
-            if ((float) $plan->plan_price > 0) {
+            // ✅ Step 3: Use plan service_limit + usage counters
+            $userModel = \App\Models\User::find($userId);
+            if (!$userModel || ($userModel->profile_type ?? '') !== 'Company') {
                 return response()->json([
-                    "status" => true,
-                    "message" => "You can post jobs",
-                    "job_limit" => "unlimited"
+                    "status" => false,
+                    "message" => "Only company accounts can post jobs"
                 ], 200);
             }
 
-            // ✅ Step 4: FREE plan → check job count
-            $jobCount = DB::table("tbl_job")
-                ->where("user_id", $userId)
-                ->count();
-
-            if ($jobCount == 0) {
+            if (!\App\Models\PlanPricing::companyCanPost($userModel, 'job')) {
                 return response()->json([
-                    "status" => true,
-                    "message" => "You can post one job",
-                    "job_limit" => 1,
-                    "jobs_used" => 0
+                    "status" => false,
+                    "message" => "Your current plan does not include Job service. Please upgrade your plan."
                 ], 200);
             }
 
-            // If 1 or more jobs found
+            $limitCheck = \App\Models\PlanPricing::checkServiceLimit($userModel, 'job', 'create');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    "status" => false,
+                    "message" => $limitCheck['message'],
+                    "job_limit" => $limitCheck['limit'],
+                    "jobs_used" => $limitCheck['used']
+                ], 200);
+            }
+
+            return response()->json([
+                "status" => true,
+                "message" => $limitCheck['limit'] === null
+                    ? "You can post jobs"
+                    : "You can post jobs (" . $limitCheck['remaining'] . " remaining)",
+                "job_limit" => $limitCheck['limit'] === null ? "unlimited" : $limitCheck['limit'],
+                "jobs_used" => $limitCheck['used'],
+                "jobs_remaining" => $limitCheck['remaining']
+            ], 200);
+
+        } catch (\Exception $e) {
+
             return response()->json([
                 "status" => false,
-                "message" => "You can post only one job. To upload more jobs upgrade your plan.",
-                "job_limit" => 1,
-                "jobs_used" => $jobCount
+                "message" => "Something went wrong: " . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function checkInternshipPostEligibility(Request $request)
+    {
+        $userId = $request->user_id;
+
+        if (!$userId) {
+            return response()->json([
+                "status" => false,
+                "message" => "User ID is required"
+            ], 400);
+        }
+
+        try {
+
+            // ✅ Step 1: Get user's active plan
+            $user = DB::table("users")
+                ->where("id", $userId)
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "User not found"
+                ], 200);
+            }
+
+            if (!$user->active_plan_id || $user->active_plan_id == 0) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "No active plan found. Please upgrade your plan."
+                ], 200);
+            }
+
+            // ✅ Step 2: Get plan details
+            $plan = DB::table("tbl_plan_pricing")
+                ->where("plan_id", $user->active_plan_id)
+                ->first();
+
+            if (!$plan) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Plan not found"
+                ], 200);
+            }
+
+            // ✅ Step 3: Use plan service_limit + usage counters
+            $userModel = \App\Models\User::find($userId);
+            if (!$userModel || ($userModel->profile_type ?? '') !== 'Company') {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Only company accounts can post internships"
+                ], 200);
+            }
+
+            if (!\App\Models\PlanPricing::companyCanPost($userModel, 'internship')) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Your current plan does not include Internship service. Please upgrade your plan."
+                ], 200);
+            }
+
+            $limitCheck = \App\Models\PlanPricing::checkServiceLimit($userModel, 'internship', 'create');
+            if (!$limitCheck['allowed']) {
+                return response()->json([
+                    "status" => false,
+                    "message" => $limitCheck['message'],
+                    "internship_limit" => $limitCheck['limit'],
+                    "internships_used" => $limitCheck['used']
+                ], 200);
+            }
+
+            return response()->json([
+                "status" => true,
+                "message" => $limitCheck['limit'] === null
+                    ? "You can post internships"
+                    : "You can post internships (" . $limitCheck['remaining'] . " remaining)",
+                "internship_limit" => $limitCheck['limit'] === null ? "unlimited" : $limitCheck['limit'],
+                "internships_used" => $limitCheck['used'],
+                "internships_remaining" => $limitCheck['remaining']
             ], 200);
 
         } catch (\Exception $e) {
@@ -1586,11 +1720,34 @@ class AuthController extends Controller
 
     public function editProfile(Request $request)
     {
+        $user = DB::table('users')
+            ->where('id', $request->user_id)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        if (empty($user->contact_no) && empty($request->contact_no)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Contact number is required.'
+            ], 422);
+        }
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'contact_no' => 'nullable|string|max:20',
+        ]);
+
         // Step 3: Handle state
         $state_id = DB::table("tbl_state")
             ->where("state_name", $request->state_name)
             ->value("state_id");
-
+ 
         if (!$state_id) {
             $state_id = DB::table("tbl_state")->insertGetId([
                 "state_name" => $request->state_name,
@@ -1598,13 +1755,13 @@ class AuthController extends Controller
                 "updated_at" => now(),
             ]);
         }
-
+ 
         // Step 4: Handle city
         $city_id = DB::table("tbl_city")
             ->where("city_nm", $request->city_name)
             ->where("state_id", $state_id)
             ->value("city_id");
-
+ 
         if (!$city_id) {
             $city_id = DB::table("tbl_city")->insertGetId([
                 "state_id" => $state_id,
@@ -1613,14 +1770,14 @@ class AuthController extends Controller
                 "updated_at" => now(),
             ]);
         }
-
+ 
         // Step 5: Handle area
         $area_id = DB::table("tbl_area")
             ->where("area_nm", $request->area_name)
             ->where("city_id", $city_id)
             ->where("state_id", $state_id)
             ->value("area_id");
-
+ 
         if (!$area_id) {
             $area_id = DB::table("tbl_area")->insertGetId([
                 "area_nm" => $request->area_name,
@@ -1630,9 +1787,10 @@ class AuthController extends Controller
                 "updated_at" => now(),
             ]);
         }
-
+ 
         // Step 6: Handle zipcode logic
         $zipcode_id = null;
+
         if (!empty($request->zipcode_id)) {
             $existingZip = DB::table("tbl_zipcode")
                 ->where("zipcode_id", $request->zipcode_id)
@@ -1642,14 +1800,14 @@ class AuthController extends Controller
                 $zipcode_id = $existingZip->zipcode_id;
             }
         }
-
+ 
         if (!$zipcode_id) {
             $zipcode_id = DB::table("tbl_zipcode")
                 ->where("zipcode", $request->zipcode)
                 ->where("city_id", $city_id)
                 ->where("state_id", $state_id)
                 ->value("zipcode_id");
-
+ 
             if (!$zipcode_id) {
                 $zipcode_id = DB::table("tbl_zipcode")->insertGetId([
                     "zipcode" => $request->zipcode,
@@ -1661,7 +1819,7 @@ class AuthController extends Controller
                 ]);
             }
         }
-
+ 
         // Step 7: Handle profile image upload
         $profileImgPath = null;
         if ($request->hasFile("profile_img")) {
@@ -1670,17 +1828,41 @@ class AuthController extends Controller
             $file->move(public_path("uploads/profile"), $fileName);
             $profileImgPath = $fileName;
         }
-
+ 
         // Step 7b: Handle cover image upload
         $coverImgPath = null;
+
         if ($request->hasFile("cover_img")) {
             $file = $request->file("cover_img");
-            $fileName =
-                time() . "_cover." . $file->getClientOriginalExtension();
+            $fileName = time() . "_cover." . $file->getClientOriginalExtension();
+
             $file->move(public_path("uploads/profile"), $fileName);
             $coverImgPath = $fileName;
         }
+ 
+        // Handle company signature image upload
 
+
+        $signatureImgPath = null;
+
+
+        if ($request->hasFile("company_signature")) {
+            $file = $request->file("company_signature");
+            $fileName = time() . "_signature." . $file->getClientOriginalExtension();
+            $file->move(public_path("uploads/profile"), $fileName);
+            $signatureImgPath = $fileName;
+        }
+ 
+        // Handle certificate logo image upload
+        $certLogoImgPath = null;
+
+        if ($request->hasFile("certificate_logo")) {
+            $file = $request->file("certificate_logo");
+            $fileName = time() . "_cert_logo." . $file->getClientOriginalExtension();
+            $file->move(public_path("uploads/profile"), $fileName);
+            $certLogoImgPath = $fileName;
+        }
+ 
         // Step 8: Prepare update data
         $updateData = [
             "designation" => $request->designation,
@@ -1702,28 +1884,38 @@ class AuthController extends Controller
             "personal_website" => $request->personal_website,
             "updated_at" => now(),
         ];
-
+ 
         // Only update profile_img if provided
         if ($profileImgPath !== null) {
             $updateData["profile_img"] = $profileImgPath;
         }
-
+ 
         // Only update cover_img if provided
         if ($coverImgPath !== null) {
             $updateData["cover_img"] = $coverImgPath;
         }
-
+ 
+        // Only update company_signature if provided
+        if ($signatureImgPath !== null) {
+            $updateData["company_signature"] = $signatureImgPath;
+        }
+ 
+        // Only update certificate_logo if provided
+        if ($certLogoImgPath !== null) {
+            $updateData["certificate_logo"] = $certLogoImgPath;
+        }
+ 
         // Step 9: Update user
         DB::table("users")
             ->where("id", $request->user_id)
             ->update($updateData);
-
+ 
         // Step 10: Return success response
         return response()->json([
             "status" => true,
             "message" => "Profile updated successfully.",
             "data" => $updateData,
-        ]);
+        ], 200);
     }
 
     public function editAboutSkill(Request $request)
@@ -2101,10 +2293,20 @@ class AuthController extends Controller
         // Step 6: Expired check
         if ($now > $endDate) {
 
-            // Update user active_plan_id
-            DB::table("users")
-                ->where("id", $userId)
-                ->update(["active_plan_id" => 0]);
+            // Update user active_plan_id and clear plan service + usage
+            $userModel = \App\Models\User::find($userId);
+            if ($userModel) {
+                \App\Models\PlanPricing::clearPlanForUser($userModel);
+            } else {
+                DB::table("users")
+                    ->where("id", $userId)
+                    ->update([
+                        "active_plan_id" => 0,
+                        "plan_service" => null,
+                        "plan_job_used" => 0,
+                        "plan_internship_used" => 0,
+                    ]);
+            }
 
             // Update plan history status
             DB::table("tbl_plan_history")

@@ -5,71 +5,108 @@
 </script>
 
 <style>
-    .nav-pills-custom .nav-link{
-        padding: 12px 12px;
+    .internship-create-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 14px;
+    }
+
+    .internship-tabs {
+        margin-bottom: 16px;
+    }
+
+    .internship-tabs .nav-pills-custom {
+        display: flex;
+        flex-wrap: nowrap !important;
+        align-items: center;
+        gap: 4px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 0;
+        scrollbar-width: thin;
+    }
+
+    .internship-tabs .nav-pills-custom::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .internship-tabs .nav-pills-custom .nav-item {
+        flex: 0 0 auto;
+    }
+
+    .internship-tabs .nav-pills-custom .nav-link {
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    .internship-tabs .nav-pills-custom .status-badge {
+        padding: 2px 8px;
+        font-size: 11px;
+        margin-left: 4px;
+        vertical-align: middle;
     }
 </style>
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Tab Navigation -->
-    
-    <div class="row mb-3">
-        <div class="col-lg-12" style="text-align:right;">
-            @can('Internship-Add')
-            <a href="{{ route('admin.internship.create') }}" class="btn btn-primary">
-                <i class="bx bx-plus"></i> Create New Internship
-            </a>
-            @endcan
-        </div>
+    <!-- Create Opportunity on top -->
+    <div class="internship-create-row">
+        @can('Internship-Add')
+        <a href="{{ route('admin.internship.create') }}" class="btn btn-primary">
+            <i class="bx bx-plus"></i> Create Internship
+        </a>
+        @endcan
     </div>
 
-    <div class="internship-tabs p-1">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <ul class="nav nav-pills nav-pills-custom mb-0" id="pills-tab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="pills-new-tab" data-bs-toggle="pill" data-bs-target="#pills-new" 
-                            type="button" role="tab" aria-controls="pills-new" aria-selected="true">
-                        <i class="bx bx-bell"></i> New Requests
-                        <span class="status-badge new" id="newCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-approved-tab" data-bs-toggle="pill" data-bs-target="#pills-approved" 
-                            type="button" role="tab" aria-controls="pills-approved" aria-selected="false">
-                        <i class="bx bx-check"></i> Approved Internships
-                        <span class="status-badge" style="background: #d1e7dd; color: #0f5132;" id="approvedCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-rejected-tab" data-bs-toggle="pill" data-bs-target="#pills-rejected" 
-                            type="button" role="tab" aria-controls="pills-rejected" aria-selected="false">
-                        <i class="bx bx-x-circle"></i> Rejected Internships
-                        <span class="status-badge" style="background: #f8d7da; color: #842029;" id="rejectedCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-processing-tab" data-bs-toggle="pill" data-bs-target="#pills-processing" 
-                            type="button" role="tab" aria-controls="pills-processing" aria-selected="false">
-                        <i class="bx bx-time"></i> Processing Internships
-                        <span class="status-badge processing" id="processingCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-complete-tab" data-bs-toggle="pill" data-bs-target="#pills-complete" 
-                            type="button" role="tab" aria-controls="pills-complete" aria-selected="false">
-                        <i class="bx bx-check-circle"></i> Completed Internships
-                        <span class="status-badge complete" id="completeCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-college-pending-tab" data-bs-toggle="pill" data-bs-target="#pills-college-pending" 
-                            type="button" role="tab" aria-controls="pills-college-pending" aria-selected="false">
-                        <i class="bx bx-time"></i> College Pending
-                        <span class="status-badge" style="background:#fff3cd;color:#856404;" id="collegePendingCount">0</span>
-                    </button>
-                </li>
-            </ul>
-           
-        </div>
+    <!-- Tabs full width on next line -->
+    <div class="internship-tabs">
+        <ul class="nav nav-pills nav-pills-custom mb-0" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-new-tab" data-bs-toggle="pill" data-bs-target="#pills-new" 
+                        type="button" role="tab" aria-controls="pills-new" aria-selected="true">
+                    <i class="bx bx-bell"></i> New Requests
+                    <span class="status-badge new" id="newCount">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-approved-tab" data-bs-toggle="pill" data-bs-target="#pills-approved" 
+                        type="button" role="tab" aria-controls="pills-approved" aria-selected="false">
+                    <i class="bx bx-check"></i> Approved Internships
+                    <span class="status-badge" style="background: #d1e7dd; color: #0f5132;" id="approvedCount">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-rejected-tab" data-bs-toggle="pill" data-bs-target="#pills-rejected" 
+                        type="button" role="tab" aria-controls="pills-rejected" aria-selected="false">
+                    <i class="bx bx-x-circle"></i> Rejected Internships
+                    <span class="status-badge" style="background: #f8d7da; color: #842029;" id="rejectedCount">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-processing-tab" data-bs-toggle="pill" data-bs-target="#pills-processing" 
+                        type="button" role="tab" aria-controls="pills-processing" aria-selected="false">
+                    <i class="bx bx-time"></i> Processing Internships
+                    <span class="status-badge processing" id="processingCount">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-complete-tab" data-bs-toggle="pill" data-bs-target="#pills-complete" 
+                        type="button" role="tab" aria-controls="pills-complete" aria-selected="false">
+                    <i class="bx bx-check-circle"></i> Completed Programs
+                    <span class="status-badge complete" id="completeCount">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-college-pending-tab" data-bs-toggle="pill" data-bs-target="#pills-college-pending" 
+                        type="button" role="tab" aria-controls="pills-college-pending" aria-selected="false">
+                    <i class="bx bx-time"></i> College Pending
+                    <span class="status-badge" style="background:#fff3cd;color:#856404;" id="collegePendingCount">0</span>
+                </button>
+            </li>
+        </ul>
     </div>
 
     <!-- Tab Content -->
@@ -105,7 +142,7 @@
             </div>
         </div>
 
-        <!-- Approved Internships Tab -->
+        <!-- Approved Opportunities Tab -->
         <div class="tab-pane fade" id="pills-approved" role="tabpanel" aria-labelledby="pills-approved-tab">
             <div class="card">
                 <div class="card-header p-4">
@@ -149,7 +186,7 @@
             </div>
         </div>
 
-        <!-- Rejected Internships Tab -->
+        <!-- Rejected Opportunities Tab -->
         <div class="tab-pane fade" id="pills-rejected" role="tabpanel" aria-labelledby="pills-rejected-tab">
             <div class="card">
                 <div class="card-header p-4">
@@ -180,7 +217,7 @@
             </div>
         </div>
 
-        <!-- Processing Internships Tab -->
+        <!-- Processing Opportunities Tab -->
         <div class="tab-pane fade" id="pills-processing" role="tabpanel" aria-labelledby="pills-processing-tab">
             <div class="card">
                 <div class="card-header p-4">
@@ -210,11 +247,11 @@
             </div>
         </div>
 
-        <!-- Completed Internships Tab -->
+        <!-- Completed Programs Tab -->
         <div class="tab-pane fade" id="pills-complete" role="tabpanel" aria-labelledby="pills-complete-tab">
             <div class="card">
                 <div class="card-header p-4">
-                    <h5 class="card-title mb-0"><i class="bx bx-check-circle"></i> Completed Internships</h5>
+                    <h5 class="card-title mb-0"><i class="bx bx-check-circle"></i> Completed Programs</h5>
                 </div>
                 <hr class="my-1">
                 <div class="card-body table-responsive p-4">
@@ -244,7 +281,7 @@
         <div class="tab-pane fade" id="pills-college-pending" role="tabpanel" aria-labelledby="pills-college-pending-tab">
             <div class="card">
                 <div class="card-header p-4">
-                    <h5 class="card-title mb-0"><i class="bx bx-time"></i> College Pending Internships</h5>
+                    <h5 class="card-title mb-0"><i class="bx bx-time"></i> College Pending Programs</h5>
                 </div>
                 <hr class="my-1">
                 <div class="card-body table-responsive p-4">
@@ -329,7 +366,7 @@
             pageLength: 10
         });
 
-        // Initialize DataTables for Approved Internships
+        // Initialize DataTables for Approved Opportunities
         const approvedTable = $('#ApprovedTable').DataTable({
             processing: true,
             serverSide: true,
@@ -362,20 +399,20 @@
         // Toggle select all
         $(document).on('change', '#selectAllApproved', function(){
             var checked = $(this).prop('checked');
-            $('.internship-checkbox').prop('checked', checked).trigger('change');
+            $('.opportunity-checkbox').prop('checked', checked).trigger('change');
         });
 
         // When any checkbox toggles, update count and button
-        $(document).on('change', '.internship-checkbox', function(){
-            var count = $('.internship-checkbox:checked').length;
+        $(document).on('change', '.opportunity-checkbox', function(){
+            var count = $('.opportunity-checkbox:checked').length;
             $('#approvedSelectedCount').text(count);
             $('#approvedAssignBar').toggle(count > 0);
             $('#approvedBtnAssign').prop('disabled', count === 0);
             // uncheck select-all if not all checked
-            if ($('.internship-checkbox').length > 0 && $('.internship-checkbox:checked').length !== $('.internship-checkbox').length) {
+            if ($('.opportunity-checkbox').length > 0 && $('.opportunity-checkbox:checked').length !== $('.opportunity-checkbox').length) {
                 $('#selectAllApproved').prop('checked', false);
             }
-            if ($('.internship-checkbox').length > 0 && $('.internship-checkbox:checked').length === $('.internship-checkbox').length) {
+            if ($('.opportunity-checkbox').length > 0 && $('.opportunity-checkbox:checked').length === $('.opportunity-checkbox').length) {
                 $('#selectAllApproved').prop('checked', true);
             }
         });
@@ -409,8 +446,8 @@
             var staffId = $('#assignStaffSelect').val();
             if (!staffId) { alert('Please select a staff member'); return; }
             var ids = [];
-            $('.internship-checkbox:checked').each(function(){ ids.push($(this).val()); });
-            if (ids.length === 0) { alert('No internships selected'); return; }
+            $('.opportunity-checkbox:checked').each(function(){ ids.push($(this).val()); });
+            if (ids.length === 0) { alert('No Internships selected'); return; }
             var $btn = $(this).prop('disabled', true).text('Assigning...');
             $.ajax({
                 url: '{{ route("admin.internship.assign-staff") }}',
@@ -432,7 +469,7 @@
         });
         @endcan
 
-        // Initialize DataTables for Rejected Internships
+        // Initialize DataTables for Rejected Opportunities
         const rejectedTable = $('#RejectedTable').DataTable({
             processing: true,
             serverSide: true,
@@ -459,7 +496,7 @@
             pageLength: 10
         });
 
-        // Initialize DataTables for Processing Internships with AJAX
+        // Initialize DataTables for Processing Opportunities with AJAX
         const processingTable = $('#ProcessingTable').DataTable({
             processing: true,
             serverSide: true,
@@ -485,7 +522,7 @@
             pageLength: 10
         });
 
-        // Initialize DataTables for College Pending Internships with AJAX
+        // Initialize DataTables for College Pending Programs with AJAX
         const collegePendingTable = $('#CollegePendingTable').DataTable({
             processing: true,
             serverSide: true,
@@ -510,7 +547,7 @@
             pageLength: 10
         });
 
-        // Initialize DataTables for Completed Internships with AJAX
+        // Initialize DataTables for Completed Programs with AJAX
         const completedTable = $('#CompletedTable').DataTable({
             processing: true,
             serverSide: true,
@@ -567,7 +604,7 @@
         });
     }
 
-    // Delete Internship with SweetAlert
+    // Remove Opportunity with SweetAlert
     function deleteInternship(internshipId) {
         Swal.fire({
             title: 'Are you sure?',
@@ -610,7 +647,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                text: response.message || 'Failed to delete internship'
+                                text: response.message || 'Failed to delete Internship'
                             });
                         }
                     },
@@ -622,7 +659,7 @@
                             error: error
                         });
                         
-                        let errorMessage = 'Failed to delete internship';
+                        let errorMessage = 'Failed to delete Internship';
                         
                         // Try to parse error response
                         if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -636,9 +673,9 @@
                                 if (xhr.status === 404) {
                                     errorMessage = 'Internship not found';
                                 } else if (xhr.status === 403) {
-                                    errorMessage = 'You do not have permission to delete this internship';
+                                    errorMessage = 'You do not have permission to delete this Internship';
                                 } else if (xhr.status === 500) {
-                                    errorMessage = 'Server error occurred while deleting internship';
+                                    errorMessage = 'Server error occurred while deleting Internship';
                                 } else if (xhr.status === 419) {
                                     errorMessage = 'Session expired. Please refresh the page and try again';
                                 } else {
@@ -664,10 +701,10 @@
 
  
 
-    // View Internship Details
+    // View Opportunity Details
     function viewInternshipDetails(internshipId) {
         // Implement view details functionality
-        alert('View details for internship ID: ' + internshipId);
+        alert('View details for Internship ID: ' + internshipId);
     }
 </script>
 
@@ -677,7 +714,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Assign Selected Internships to Staff</h5>
+                <h5 class="modal-title">Assign Selected Internship to Staff</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -685,7 +722,7 @@
                     <label class="form-label">Select Staff</label>
                     <select id="assignStaffSelect" class="form-select"></select>
                 </div>
-                <p class="text-muted">This will assign all current applications for the selected internships to the chosen staff member.</p>
+                <p class="text-muted">This will assign all current applications for the selected Internship to the chosen staff member.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

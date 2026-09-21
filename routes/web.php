@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AchievementController;
 use App\Http\Controllers\Admin\AdbannerController;
 use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\TipsController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\CandidateprofileController;
 use App\Http\Controllers\Admin\CandidateregisterlistController;
@@ -108,6 +109,8 @@ Route::post('get-majors-by-degree-and-college', [WebsiteController::class, 'getM
 Route::post('submit-college-info', [WebsiteController::class, 'submitCollegeInfo'])->name('submit.college.info');
 // Create internship application (called before initiating payment)
 Route::post('internship/application/create', [WebsiteController::class, 'createInternshipApplication'])->name('internship.application.create');
+Route::post('internship/razorpay/create-order', [WebsiteController::class, 'createInternshipRazorpayOrder'])->name('internship.razorpay.create-order');
+Route::post('internship/razorpay/verify', [WebsiteController::class, 'verifyInternshipRazorpayPayment'])->name('internship.razorpay.verify');
 
 
 Route::get('/my-internship-details/{slug}', [WebsiteController::class, 'my_internship_details'])->name('my-internship-details')->middleware('auth','role.user');
@@ -121,6 +124,17 @@ Route::get('/my-internship-certificate/{applicationId}/{type}/preview', [Website
     ->middleware('auth', 'role.user')
     ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
     ->name('my-internship-certificate.preview');
+
+// Company: download/preview student certificates from internship applications page
+Route::get('/company-internship-certificate/{applicationId}/{type}/download', [WebsiteController::class, 'downloadCompanyStudentCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('company-internship-certificate.download');
+
+Route::get('/company-internship-certificate/{applicationId}/{type}/preview', [WebsiteController::class, 'previewCompanyStudentCertificate'])
+    ->middleware('auth', 'role.user')
+    ->where(['applicationId' => '[0-9]+', 'type' => 'company|college'])
+    ->name('company-internship-certificate.preview');
 
 
 // Submit internship task (student submission)
@@ -246,6 +260,7 @@ Route::post('company-profile-about-action/{id}', [ProfileController::class, 'Com
 
 // Company Internship Management Routes
 Route::post('company/internship/store', [WebsiteController::class, 'companyInternshipStore'])->name('company.internship.store')->middleware('auth','role.user');
+Route::post('company/category-subcategory-request', [WebsiteController::class, 'submitCategorySubcategoryRequest'])->name('company.category-subcategory.request')->middleware('auth','role.user');
 Route::post('company/internship/update/{id}', [WebsiteController::class, 'companyInternshipUpdate'])->name('company.internship.update')->middleware('auth','role.user');
 Route::delete('company/internship/delete/{id}', [WebsiteController::class, 'companyInternshipDestroy'])->name('company.internship.destroy')->middleware('auth','role.user');
 Route::get('company/internship/edit/{id}', [WebsiteController::class, 'companyInternshipEdit'])->name('company.internship.edit')->middleware('auth','role.user');
@@ -258,6 +273,7 @@ Route::post('internship/website/save-feedback', [WebsiteController::class, 'save
 Route::get('internship/website/fetch-marks/{id}', [WebsiteController::class, 'fetchInternshipMarks'])->name('website.internship.fetch-marks')->middleware('auth','role.user');
 Route::post('internship/website/submit-completion', [WebsiteController::class, 'submitInternshipCompletion'])->name('website.internship.submit-completion')->middleware('auth','role.user');
 Route::get('internship/complete/{id}', [WebsiteController::class, 'internshipCompletePage'])->name('website.internship.complete')->middleware('auth','role.user');
+Route::post('internship/website/instructions/{id}', [WebsiteController::class, 'saveInstructions'])->name('website.internship.instructions.save')->middleware('auth','role.user');
 
 
 // Return JSON details for a single internship task
@@ -403,11 +419,23 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
     Route::resource('job-category', JobcategoryController::class)->middleware('canany:Category-Add,Category-Edit,Category-Delete');
     Route::post('category-action', [JobcategoryController::class, 'GetTableData'])
         ->name('job-category.gettabledata');
+    Route::post('job-category-requests-datatable', [JobcategoryController::class, 'getCategoryRequestsTableData'])
+        ->name('job-category.requests.gettabledata');
+    Route::post('job-category-requests/{id}/approve', [JobcategoryController::class, 'approveCategoryRequest'])
+        ->name('job-category.requests.approve');
+    Route::post('job-category-requests/{id}/reject', [JobcategoryController::class, 'rejectCategoryRequest'])
+        ->name('job-category.requests.reject');
 
 
     // Master Sub Category Addd
     Route::resource('job-sub-category', JobsubcategoryController::class)->middleware('canany:SubCategory-Add,SubCategory-Edit,SubCategory-Delete');
     Route::post('job-sub-category-datatable', [JobsubcategoryController::class, 'GetTableData'])->name('job-sub-category-datatable.gettabledata');
+    Route::post('job-sub-category-requests-datatable', [JobsubcategoryController::class, 'getSubcategoryRequestsTableData'])
+        ->name('job-sub-category.requests.gettabledata');
+    Route::post('job-sub-category-requests/{id}/approve', [JobsubcategoryController::class, 'approveSubcategoryRequest'])
+        ->name('job-sub-category.requests.approve');
+    Route::post('job-sub-category-requests/{id}/reject', [JobsubcategoryController::class, 'rejectSubcategoryRequest'])
+        ->name('job-sub-category.requests.reject');
 
     // Job Type Addd
     Route::resource('job-type', JobtypeController::class)->middleware('canany:JobType-Add,JobType-Edit,JobType-Delete');
@@ -548,6 +576,12 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
     Route::resource('blog', BlogController::class)->middleware('canany:Blog-Add,Blog-Edit,Blog-Delete');
     Route::post('blog-action', [BlogController::class, 'GetTableData'])
         ->name('blog.gettabledata');
+
+
+    // Interview Tips
+    Route::resource('interview-tips', TipsController::class)->middleware('canany:InterviewTips-Add,InterviewTips-Edit,InterviewTips-Delete');
+    Route::post('interview-tips-action', [TipsController::class, 'GetTableData'])
+        ->name('interview-tips.gettabledata');
 
 
     // Achievements
@@ -748,6 +782,13 @@ Route::group(['middleware' => ['admin.auth'], 'prefix' => 'admin', 'as' => 'admi
 
     // Certificate Management Routes
     Route::get('internship/certificates', [InternshipController::class, 'certificates'])->name('internship.certificates');
+
+    Route::get('internship/certificate-settings', [\App\Http\Controllers\Admin\CertificateSettingController::class, 'index'])
+        ->name('internship.certificate-settings')
+        ->middleware('canany:Internship-Add,Internship-Edit,Internship-View');
+    Route::post('internship/certificate-settings', [\App\Http\Controllers\Admin\CertificateSettingController::class, 'update'])
+        ->name('internship.certificate-settings.update')
+        ->middleware('canany:Internship-Add,Internship-Edit');
     
     Route::get('internship/certificates/students/{id}', [InternshipController::class, 'getCertificateStudents'])->name('internship.certificates.students');
     
